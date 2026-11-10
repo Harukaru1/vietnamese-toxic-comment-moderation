@@ -55,6 +55,22 @@ and *hate* ("insults a group or someone") overlapped.
 | Only emoji, a name, a URL, unintelligible text | clean | |
 | Quoting/reporting hate speech to criticize it | clean | "nó chửi 'bắc kỳ chó' là sai" |
 
+## Context-dependent comments (appearance, teasing)
+
+The model (and the annotator) sees one comment without its thread. Label **hate only when the
+comment itself shows intent to demean**: an animal/object comparison, mockery, an insult word, an
+intensifier on a flaw, or a target's family. A plain remark whose offensiveness depends on who says it
+to whom is labeled by its surface meaning (**clean**) and marked `uncertain=1`.
+
+| Comment | Label | Why |
+|---|---|---|
+| "béo như lợn", "mẹ bạn béo", "m béo vl", "xấu như ma" | hate | demeaning on its own |
+| "béo thế mà cũng đăng ảnh", "mập vậy ai thèm" | hate | clear mockery |
+| "bạn mập quá đấy", "dạo này béo lên nhỉ" | clean, `uncertain=1` | depends on context |
+| "mèo nhà mình béo quá 😍" | clean | no human target |
+
+A context-aware model (parent comment + reply as input) is listed as future work.
+
 ## When unsure
 
 - Between **offensive** and **hate**: ask *"Is there a target who is being put down?"*
