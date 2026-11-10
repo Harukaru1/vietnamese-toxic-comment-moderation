@@ -36,8 +36,14 @@ weak on implicit hate. Leakage (4.7%) and inconsistent profanity labels were the
    and `data/active/to_label.csv` (700 selected: uncertain / cue-but-predicted-clean / predicted toxic / random).
    Next: Claude labels them (guidelines v3), author spot-checks ~50, add to train, retrain v4 on Kaggle
    to fix implicit hate.
-3. YouTube moderation dashboard in the Streamlit app (needs the API key in Streamlit secrets).
-4. At the end, write for the author (in Vietnamese, to read and learn from): (a) a project report (process, results,
+3. Short texts / context (author's request): (a) after v4, app mode for a short paragraph: split into
+   sentences, classify each, text label = most severe sentence, highlight sentences by colour;
+   (b) optional experiment: context-aware model (parent comment [SEP] reply, or whole paragraph,
+   max_len 256) with YouTube reply threads; compare with (a). Guideline already has a
+   "context-dependent comments" rule (appearance remarks → clean + uncertain unless demeaning on their own).
+   Demo feedback from the author is in data/active/user_feedback.csv (add to v4 train).
+4. YouTube moderation dashboard in the Streamlit app (needs the API key in Streamlit secrets).
+5. At the end, write for the author (in Vietnamese, to read and learn from): (a) a project report (process, results,
    lessons); (b) a study guide explaining the theory, algorithms and code used (TF-IDF, LR/SVM, PhoBERT &
    fine-tuning, class weights, cleanlab/confident learning, bootstrap CI, Cohen's κ, active learning,
    deployment), pointing to the exact files in this repo.
