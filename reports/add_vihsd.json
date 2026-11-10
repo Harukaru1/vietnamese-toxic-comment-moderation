@@ -1,0 +1,11 @@
+{
+  "vihsd_rows_added_to_train": 22563,
+  "added_label_counts": {
+    "clean": 18923,
+    "hate": 2475,
+    "offensive": 1165
+  },
+  "vihsd_removed_as_duplicates_or_leakage": 3913,
+  "final_train": 50243,
+  "vihsd_test_benchmark": 6435
+}
