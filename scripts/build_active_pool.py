@@ -51,6 +51,12 @@ CUES = re.compile(
     r"con gái bây giờ|phụ nữ|nữ quyền|feminist|thiểu năng|não tôm|óc chó|óc lợn|ngu|súc vật|"
     r"thú vật|bọn|lũ|tụi|đám|chết đi|đáng chết|phơi xác|hoả thiêu|hỏa thiêu|xử bắn|giết",
     re.I)
+# Error patterns reported through the demo's feedback button (Nov 2026): body shaming / animal
+# comparisons, regional slurs on their own, and an intensifier aimed at a person ("m béo vl").
+FEEDBACK_PATTERNS = re.compile(
+    r"\b(béo|mập|lùn|xấu như)\b|như (con )?(lợn|heo|chó|khỉ)|parky|pake|\bcút\b|"
+    r"\b(m|mày|bạn|thằng|con|mi)\b.{0,30}\b(vl|vcl|vãi|vkl)\b",
+    re.I)
 
 
 def main() -> None:
@@ -62,6 +68,9 @@ def main() -> None:
     ap.add_argument("--n-voz", type=int, default=4000)
     ap.add_argument("--n-select", type=int, default=700)
     ap.add_argument("--published-after", default="2025-01-01T00:00:00Z")
+    ap.add_argument("--n-feedback", type=int, default=150, help="extra comments matching FEEDBACK_PATTERNS")
+    ap.add_argument("--select-only", action="store_true",
+                    help="reuse data/active/pool.csv (no API calls, no re-scoring) and only redo the selection")
     args = ap.parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -81,6 +90,17 @@ def main() -> None:
             return False
         return bool(VI_CHARS.search(text)) or any(w in teencode for w in words)
 
+    if args.select_only:
+        pool = pd.read_csv(args.out_dir / "pool.csv", encoding="utf-8-sig")
+        pool["norm"] = pool["text"].astype(str).map(clean_text)
+        pool = pool.drop(columns=["why"], errors="ignore")
+        n_videos = pool.loc[pool["source"] == "youtube", "video_id"].nunique()
+    else:
+        pool, n_videos = collect_and_score(args, keep)
+    select(pool, args, n_videos)
+
+
+def collect_and_score(args, keep) -> tuple[pd.DataFrame, int]:
     # --- YouTube ---------------------------------------------------------------------------
     test_ids = {v for vs in TEST_VIDEOS.values() for v in vs}
     yt = YouTubeClient()
@@ -123,7 +143,10 @@ def main() -> None:
         pool[f"p_{lab}"] = [p["scores"][lab] for p in preds]
     pool["p_max"] = pool[["p_clean", "p_offensive", "p_hate"]].max(axis=1)
     pool["cue"] = pool["text"].astype(str).str.contains(CUES)
+    return pool, len(vids)
 
+
+def select(pool: pd.DataFrame, args, n_videos: int) -> None:
     # --- select ----------------------------------------------------------------------------
     n = args.n_select
     rng = np.random.default_rng(0)
@@ -139,13 +162,15 @@ def main() -> None:
     take(pool[pool["cue"] & (pool["pred"] == "clean")].sample(frac=1, random_state=2).index, int(n * 0.25), "cue_pred_clean")
     take(pool[pool["pred"] != "clean"].sample(frac=1, random_state=3).index, int(n * 0.25), "pred_toxic")
     take(list(rng.permutation(pool.index)), n - len(picked), "random")
+    fb = pool[pool["text"].astype(str).str.contains(FEEDBACK_PATTERNS)].sample(frac=1, random_state=4)
+    take(fb.index, args.n_feedback, "feedback_pattern")
 
     pool.drop(columns="norm").to_csv(args.out_dir / "pool.csv", index=False, encoding="utf-8-sig")
     sel = pool.loc[picked].sample(frac=1, random_state=7).reset_index(drop=True)
     sel.insert(0, "id", [f"al{i:04d}" for i in range(len(sel))])
     cols = ["id", "source", "category", "video_id", "comment_id", "why", "pred", "p_max", "text"]
     sel.reindex(columns=cols).to_csv(args.out_dir / "to_label.csv", index=False, encoding="utf-8-sig")
-    print(json.dumps({"videos": len(vids), "pool": len(pool), "pool_by_source": pool["source"].value_counts().to_dict(),
+    print(json.dumps({"videos": n_videos, "pool": len(pool), "pool_by_source": pool["source"].value_counts().to_dict(),
                       "pool_pred": pool["pred"].value_counts().to_dict(), "selected": len(sel),
                       "selected_by_why": sel["why"].value_counts().to_dict(),
                       "selected_by_source": sel["source"].value_counts().to_dict()}, indent=1, ensure_ascii=False))

@@ -46,6 +46,10 @@ and *hate* ("insults a group or someone") overlapped.
 | Mild teasing among friends, no vulgarity | clean | "ông này lầy thật" |
 | Mild teasing with an intensifier, clearly friendly | clean | "ông này lầy vl" |
 | Wishing death/violence on someone | hate | "con này nên phơi xác" |
+| Mocking someone's body/appearance (body shaming), incl. their family | hate | "mẹ bạn béo", "béo như lợn" |
+| Intensifier **aimed at a person's flaw** | hate | "m béo vl", "thằng này ngu vl" (vs. "đẹp vl" = clean) |
+| Regional/ethnic slur on its own, even as a one-word comment | hate | "parky", "Đông Lào" |
+| Neutral or positive use of a regional term | clean | "mấy anh Bắc Kỳ đẹp trai lắm" |
 | Crude sexual content not aimed at a real target | offensive | |
 | Sexual content about a real person | hate | |
 | Only emoji, a name, a URL, unintelligible text | clean | |
