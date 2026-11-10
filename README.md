@@ -53,21 +53,38 @@ PhoBERT learn slang directly from the data.
 ## Project structure
 
 ```
-src/toxic_moderation/   preprocessing, data loading, shared evaluation
+src/toxic_moderation/   preprocessing, teencode dictionary (650+ entries), evaluation, predictor
+app/                    FastAPI service + Gradio demo (one app)
 scripts/                training / evaluation entry points
-resources/              Vietnamese teencode/slang dictionary (650+ entries)
 tests/                  unit tests (pytest)
 notebooks/              Kaggle GPU notebooks (PhoBERT)
+Dockerfile              CPU image for the API/demo (used by Hugging Face Spaces)
 ```
 
 ## Quickstart
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements.txt -r requirements-app.txt && pip install -e .
 pytest
 python scripts/train_baseline.py      # trains LR / SVM / RF, picks best on val, reports on test
 ```
+
+### Run the API + demo
+
+```bash
+uvicorn app.main:app --port 7860      # demo: http://localhost:7860  |  API docs: http://localhost:7860/docs
+```
+
+```bash
+curl -X POST localhost:7860/predict -H "Content-Type: application/json" \
+     -d '{"texts": ["Video rất hay và bổ ích", "Đá như này thì nghỉ mẹ đi cho rồi"]}'
+```
+
+The model (`HaruKaru/phobert-vi-toxic-comment`) is downloaded from the Hugging Face Hub on the
+first request. On CPU, a single comment takes ~40 ms.
+
+Docker: `docker build -t toxic-mod . && docker run -p 7860:7860 toxic-mod`
 
 ## Roadmap
 
@@ -75,6 +92,6 @@ python scripts/train_baseline.py      # trains LR / SVM / RF, picks best on val,
 - [x] TF-IDF baselines (Logistic Regression, Linear SVM, Random Forest)
 - [x] Fine-tune PhoBERT on Kaggle GPU, publish model to Hugging Face Hub
 - [ ] LLM zero/few-shot classification and comparison (quality, latency, cost)
-- [ ] FastAPI inference service + Docker
+- [x] FastAPI inference service + Docker
 - [ ] Gradio demo deployed on Hugging Face Spaces
 - [ ] CI with GitHub Actions

@@ -14,7 +14,7 @@ from pathlib import Path
 
 import emoji
 
-DEFAULT_DICT = Path(__file__).resolve().parents[2] / "resources" / "teencode_dictionary.json"
+DEFAULT_DICT = Path(__file__).resolve().parent / "teencode_dictionary.json"
 
 _URL = re.compile(r"https?://\S+|www\.\S+")
 _MENTION = re.compile(r"@\w+")

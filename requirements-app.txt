@@ -1,0 +1,7 @@
+# Runtime deps for the API/demo (CPU). torch is installed separately from the CPU index.
+transformers>=4.46,<6
+pyvi>=0.1.1
+emoji>=2.8
+fastapi>=0.110
+uvicorn[standard]>=0.29
+gradio>=5.0
