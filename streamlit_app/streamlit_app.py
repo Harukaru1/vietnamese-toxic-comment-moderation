@@ -28,8 +28,14 @@ st.set_page_config(page_title="Vietnamese Toxic Comment Moderation", page_icon="
 
 
 @st.cache_resource(show_spinner="Đang tải mô hình PhoBERT (lần đầu mất khoảng 1 phút)...")
-def load_predictor() -> Predictor:
-    return Predictor()
+def load_predictor() -> tuple[Predictor, str]:
+    predictor = Predictor()
+    try:  # show which model commit is loaded, so a stale cache is easy to spot
+        from huggingface_hub import model_info
+        sha = model_info(predictor.model_id, revision=predictor.revision).sha[:7]
+    except Exception:  # offline or rate-limited: the demo still works
+        sha = "unknown"
+    return predictor, sha
 
 
 st.title("🛡️ Vietnamese Toxic Comment Moderation")
@@ -39,7 +45,8 @@ st.markdown(
     "[Model (Hugging Face)](https://huggingface.co/HaruKaru/phobert-vi-toxic-comment)"
 )
 
-predictor = load_predictor()
+predictor, model_sha = load_predictor()
+st.caption(f"Model: `{predictor.model_id}` @ `{predictor.revision or 'main'}` (commit `{model_sha}`)")
 single, batch = st.tabs(["Một bình luận", "Nhiều bình luận"])
 
 with single:

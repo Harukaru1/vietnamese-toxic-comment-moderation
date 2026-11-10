@@ -18,6 +18,7 @@ class Predictor:
     def __init__(self, model_id: str = DEFAULT_MODEL_ID, teencode: bool = False,
                  max_len: int = 160, device: str | None = None, revision: str | None = DEFAULT_REVISION):
         # Must match the preprocessing used at training time (the published model: no teencode).
+        self.model_id, self.revision = model_id, revision
         self.teencode = load_teencode() if teencode else None
         self.max_len = max_len
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
