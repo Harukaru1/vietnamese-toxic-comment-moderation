@@ -33,9 +33,11 @@ All numbers below use the **leakage-free** splits (see *Data quality* below).
 | TF-IDF + Logistic Regression | cleaned + ViHSD | 0.797 | – | 0.661 | 0.667 |
 | PhoBERT v1 (class-weighted loss) | original | 0.780 | 0.853 | 0.608 | 0.643 |
 | PhoBERT v2-C (no class weights) | cleaned | **0.801** | 0.873 | 0.640 | 0.659 |
-| **[PhoBERT v2](https://huggingface.co/HaruKaru/phobert-vi-toxic-comment) (deployed)** | cleaned + ViHSD | **0.801** | **0.873** | 0.640 | **0.690** |
+| PhoBERT v2 (deployed until Nov 2026) | cleaned + ViHSD | **0.801** | **0.873** | 0.640 | **0.690** |
 
-The deployed model is selected on validation (v2 and v2-C tie at 0.830 val F1-macro; v2 is preferred
+The currently deployed model is **PhoBERT v3** (v2 + relabeled data, see
+[*Fixing the profanity labels*](#fixing-the-profanity-labels-guidelines-v3)); its test set uses the
+v3 labels, so it is reported separately below. v2 was selected on validation (v2 and v2-C tie at 0.830 val F1-macro; v2 is preferred
 because it generalizes better to another source). Key improvements over v1:
 
 - **Removing the class-weighted loss** fixed the over-prediction of *offensive*:
@@ -99,7 +101,7 @@ More data does not move the in-domain score (the difference is within noise), bu
 improves robustness to comments from another source, which matters for a public demo.
 
 
-## Real-world evaluation (2026 comments) – preliminary
+## Real-world evaluation (2026 comments)
 
 To check how the model behaves outside curated datasets, I built a fresh test set of
 **1,000 comments posted in 2025–2026**: 700 from 20 YouTube videos in 8 categories (news, society,
@@ -158,6 +160,25 @@ Quick check with TF-IDF + LR (same features, only the training labels differ):
 
 Changing 2% of the labels gives a consistent gain on both test sets. *Hate* on the 2026 set stays
 weak (F1 ≈ 0.36): implicit hate needs more real-world training data, not just cleaner labels.
+
+### PhoBERT v3 (deployed)
+
+PhoBERT v3 uses the same recipe as v2 (no class weights, 6 epochs, ViHSD added to train), trained on
+the v3 labels ([notebook](notebooks/train_phobert_v3_kaggle.ipynb); HF branches `v2` and `v3` keep
+both models).
+
+| Test set | v2 F1-macro | **v3 F1-macro** | v2 → v3 F1 offensive | v2 → v3 F1 hate |
+|---|---:|---:|---:|---:|
+| Our test (v3 labels, 3,563) | 0.796 | **0.815** | 0.629 → 0.679 | 0.838 → 0.839 |
+| **2026 real-world set (1,000)** | 0.594 | **0.679** | 0.346 → 0.581 | 0.471 → 0.484 |
+| ViHSD test (6,435, ViHSD labels) | **0.690** | 0.674 | 0.430 → 0.455 | 0.580 → 0.626 |
+
+- On the 2026 set, v3 gains **+0.085 F1-macro** (paired bootstrap 95% CI [+0.015, +0.153]); as a
+  binary toxic filter, precision rises 0.71 → **0.82** and recall 0.50 → **0.59**.
+- The small drop on ViHSD test is expected and accepted: ViHSD labels intensifier profanity
+  ("đẹp vl") as *offensive*, which guideline v3 deliberately labels *clean*.
+- *Hate* on real-world comments is still the weak point (F1 0.48, recall 0.38): consistent labels
+  fixed *offensive*, but implicit hate needs more real-world training examples.
 
 ### Ablation: does teencode normalization help? (original splits)
 
