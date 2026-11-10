@@ -37,7 +37,10 @@ weak on implicit hate. Leakage (4.7%) and inconsistent profanity labels were the
    Next: Claude labels them (guidelines v3), author spot-checks ~50, add to train, retrain v4 on Kaggle
    to fix implicit hate.
 3. YouTube moderation dashboard in the Streamlit app (needs the API key in Streamlit secrets).
-4. Write up the project summary.
+4. At the end, write for the author (in Vietnamese, to read and learn from): (a) a project report (process, results,
+   lessons); (b) a study guide explaining the theory, algorithms and code used (TF-IDF, LR/SVM, PhoBERT &
+   fine-tuning, class weights, cleanlab/confident learning, bootstrap CI, Cohen's κ, active learning,
+   deployment), pointing to the exact files in this repo.
 
 ## Conventions
 - Local env: `source /home/user/.venv/bin/activate` (package installed with `pip install -e .`).
