@@ -1,5 +1,5 @@
 # Data is NOT public (collected via Google API + ViHSD research-only license)
-data/
+data/*
 !data/README.md
 models/
 *.joblib
