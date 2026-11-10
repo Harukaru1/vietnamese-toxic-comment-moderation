@@ -11,17 +11,19 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from .preprocess import clean_text, load_teencode
 
 DEFAULT_MODEL_ID = os.getenv("MODEL_ID", "HaruKaru/phobert-vi-toxic-comment")
+DEFAULT_REVISION = os.getenv("MODEL_REVISION") or None  # e.g. a branch such as "v3"
 
 
 class Predictor:
     def __init__(self, model_id: str = DEFAULT_MODEL_ID, teencode: bool = False,
-                 max_len: int = 160, device: str | None = None):
+                 max_len: int = 160, device: str | None = None, revision: str | None = DEFAULT_REVISION):
         # Must match the preprocessing used at training time (the published model: no teencode).
         self.teencode = load_teencode() if teencode else None
         self.max_len = max_len
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        self.tokenizer = AutoTokenizer.from_pretrained(model_id)
-        self.model = AutoModelForSequenceClassification.from_pretrained(model_id).to(self.device).eval()
+        self.tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
+        self.model = AutoModelForSequenceClassification.from_pretrained(model_id, revision=revision)
+        self.model = self.model.to(self.device).eval()
         self.labels = [self.model.config.id2label[i] for i in range(self.model.config.num_labels)]
 
     def preprocess(self, text: str) -> str:

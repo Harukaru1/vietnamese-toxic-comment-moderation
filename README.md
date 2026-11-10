@@ -140,6 +140,25 @@ comments. Error analysis shows two causes:
    nicknames for countries ("Đông Lào", "Thái Lọ"), insults without swear words, and threats
    ("Nên đem số 22 đi hoả thiêu").
 
+### Fixing the profanity labels (guidelines v3)
+
+Comments matching simple profanity patterns were re-reviewed under guidelines v3: intensifier-only
+comments labeled *offensive*/*hate*, and comments with curse words labeled *clean*. **1,179 comments**
+(993 train, 88 val, 98 test) were reviewed and **772 labels changed** (e.g. 168 train comments
+offensive → clean, 335 clean → offensive). The patch stores only row indices and labels
+([`relabels/guidelines_v3.csv`](relabels/guidelines_v3.csv)) and is applied with
+`scripts/apply_relabels.py`.
+
+Quick check with TF-IDF + LR (same features, only the training labels differ):
+
+| Training labels | v3 test F1-macro | v3 test F1 offensive | 2026 set F1-macro | 2026 set F1 offensive |
+|---|---:|---:|---:|---:|
+| original | 0.785 | 0.632 | 0.537 | 0.308 |
+| **guidelines v3** | **0.797** | **0.663** | **0.559** | **0.364** |
+
+Changing 2% of the labels gives a consistent gain on both test sets. *Hate* on the 2026 set stays
+weak (F1 ≈ 0.36): implicit hate needs more real-world training data, not just cleaner labels.
+
 ### Ablation: does teencode normalization help? (original splits)
 
 | Model | Teencode dictionary | Val F1-macro | Test F1-macro | Test F1 offensive |
@@ -206,7 +225,9 @@ Single-comment mode and batch mode (paste lines or upload a CSV, download the la
 - [x] Fine-tune PhoBERT on Kaggle GPU, publish model to Hugging Face Hub
 - [x] Real-world 2026 test set (YouTube API + VOZ), LLM-assisted annotation
 - [x] Inter-annotator agreement on a blind 100-comment subset (κ = 0.72)
-- [ ] Fix the profanity-label inconsistency and implicit-hate weakness
+- [x] Fix the profanity-label inconsistency (guidelines v3, 1,179 comments re-reviewed)
+- [ ] Train PhoBERT v3 on the re-labeled data and compare with v2 on the 2026 set
+- [ ] More real-world training data for implicit hate (active learning)
 - [ ] YouTube moderation dashboard in the Streamlit app
 - [ ] LLM zero/few-shot classification and comparison (quality, latency, cost)
 - [x] FastAPI inference service + Docker

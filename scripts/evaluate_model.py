@@ -23,17 +23,18 @@ def main() -> None:
     ap.add_argument("--model", default=DEFAULT_MODEL_ID)
     ap.add_argument("--data-dir", type=Path, required=True)
     ap.add_argument("--split", default="test")
+    ap.add_argument("--revision", default=None, help="model branch/tag/commit, e.g. v3")
     ap.add_argument("--teencode", action="store_true")
     ap.add_argument("--name", default="phobert")
     ap.add_argument("--tag", default="")
     args = ap.parse_args()
 
     df = load_split(args.split, args.data_dir)
-    preds = Predictor(args.model, teencode=args.teencode).predict(df["text"].tolist(), batch_size=64)
+    preds = Predictor(args.model, teencode=args.teencode, revision=args.revision).predict(df["text"].tolist(), batch_size=64)
     m = evaluate(df["label"], [p["label"] for p in preds])
     print(m["report"])
     out = ROOT / "reports" / f"{args.name}_eval{args.tag}.json"
-    out.write_text(json.dumps({"model": args.model, "data_dir": str(args.data_dir), "split": args.split,
+    out.write_text(json.dumps({"model": args.model, "revision": args.revision, "data_dir": str(args.data_dir), "split": args.split,
                                **{k: v for k, v in m.items() if k != "report"}}, indent=2))
     print("Saved", out)
 
