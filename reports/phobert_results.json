@@ -1,0 +1,46 @@
+{
+  "model": "vinai/phobert-base-v2",
+  "teencode": false,
+  "config": {
+    "model": "vinai/phobert-base-v2",
+    "data_dir": "data/raw",
+    "output_dir": "models/phobert_A",
+    "teencode": "False",
+    "max_len": "160",
+    "epochs": "4",
+    "lr": "2e-05",
+    "batch_size": "32",
+    "no_class_weights": "False",
+    "max_train_samples": "None",
+    "push_to_hub": "None",
+    "no_push": "True",
+    "seed": "42"
+  },
+  "val_f1_macro": 0.8428,
+  "test": {
+    "accuracy": 0.8558,
+    "f1_macro": 0.801,
+    "f1_per_class": {
+      "clean": 0.9027,
+      "offensive": 0.6619,
+      "hate": 0.8385
+    },
+    "confusion_matrix": [
+      [
+        1948,
+        114,
+        166
+      ],
+      [
+        45,
+        275,
+        37
+      ],
+      [
+        95,
+        85,
+        994
+      ]
+    ]
+  }
+}

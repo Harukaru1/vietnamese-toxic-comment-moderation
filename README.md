@@ -19,24 +19,36 @@ The data is not published (see [`data/README.md`](data/README.md)).
 
 ## Results (test set)
 
-| Model | F1-macro | Accuracy | F1 offensive |
-|---|---:|---:|---:|
-| TF-IDF (word + char n-grams) + Logistic Regression | 0.812 | 0.862 | 0.695 |
-| PhoBERT fine-tuned | _todo_ | | |
-| LLM zero/few-shot | _todo_ | | |
+Each model family is selected on the **validation** set; the test set is used once for reporting.
+
+| Model | Val F1-macro | Test F1-macro | Test accuracy | Test F1 offensive |
+|---|---:|---:|---:|---:|
+| TF-IDF (word + char n-grams) + Logistic Regression | 0.829 | **0.812** | **0.862** | **0.695** |
+| [PhoBERT-base-v2 fine-tuned](https://huggingface.co/HaruKaru/phobert-vi-toxic-comment) | **0.843** | 0.801 | 0.856 | 0.662 |
+| LLM zero/few-shot | | _todo_ | | |
 
 The hardest class is **offensive**: it is the smallest class and is often confused with *hate*.
 
-### Ablation: does teencode normalization help TF-IDF?
+### Findings so far
 
-| Preprocessing | Best model (by val) | Val F1-macro | Test F1-macro | Test F1 offensive |
+- **PhoBERT is best on validation but does not beat TF-IDF on test.** Its val→test drop
+  (0.843 → 0.801) is much larger than TF-IDF's (0.829 → 0.812).
+- **PhoBERT over-predicts *offensive*:** recall 0.77 but precision only 0.58 (199 clean/hate
+  comments predicted as offensive). The class-weighted loss pushes too hard toward the minority class.
+- Next experiments: PhoBERT without class weights, and a TF-IDF + PhoBERT ensemble.
+
+### Ablation: does teencode normalization help?
+
+| Model | Teencode dictionary | Val F1-macro | Test F1-macro | Test F1 offensive |
 |---|---|---:|---:|---:|
-| with teencode dictionary | Logistic Regression | 0.829 | 0.812 | 0.695 |
-| without teencode dictionary | Linear SVM | 0.823 | 0.822 | 0.718 |
+| TF-IDF + Logistic Regression | yes | 0.829 | 0.812 | 0.695 |
+| TF-IDF + Linear SVM | no | 0.823 | 0.822 | 0.718 |
+| PhoBERT | yes | 0.828 | 0.798 | 0.659 |
+| PhoBERT | no | 0.843 | 0.801 | 0.662 |
 
-Result: no clear gain for TF-IDF. Character n-grams already capture most spelling
-variants, and the gain seen on val did not carry over to test. Next step: check whether
-normalization helps PhoBERT, whose subword vocabulary is trained on standard Vietnamese.
+Result: **no measurable gain** for either model family. Character n-grams (TF-IDF) and
+subword tokens (PhoBERT) already handle most spelling variants, and fine-tuning lets
+PhoBERT learn slang directly from the data.
 
 ## Project structure
 
@@ -61,7 +73,7 @@ python scripts/train_baseline.py      # trains LR / SVM / RF, picks best on val,
 
 - [x] Clean project structure, preprocessing with teencode normalization, tests
 - [x] TF-IDF baselines (Logistic Regression, Linear SVM, Random Forest)
-- [ ] Fine-tune PhoBERT on Kaggle GPU, publish model to Hugging Face Hub
+- [x] Fine-tune PhoBERT on Kaggle GPU, publish model to Hugging Face Hub
 - [ ] LLM zero/few-shot classification and comparison (quality, latency, cost)
 - [ ] FastAPI inference service + Docker
 - [ ] Gradio demo deployed on Hugging Face Spaces
