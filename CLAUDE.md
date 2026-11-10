@@ -32,7 +32,9 @@ weak on implicit hate. Leakage (4.7%) and inconsistent profanity labels were the
 
 ## Next steps
 1. DONE: PhoBERT v3 is on HF `main` (v2 kept on branch `v2`); 2026 set F1 0.594 → 0.679, see README.
-2. Active learning: pick uncertain YouTube/VOZ comments (not in the 2026 test set), label them, retrain
+2. Active learning (IN PROGRESS): `scripts/build_active_pool.py` built `data/active/pool.csv` (9.5k: 39 new YouTube videos + VOZ)
+   and `data/active/to_label.csv` (700 selected: uncertain / cue-but-predicted-clean / predicted toxic / random).
+   Next: Claude labels them (guidelines v3), author spot-checks ~50, add to train, retrain v4 on Kaggle
    to fix implicit hate.
 3. YouTube moderation dashboard in the Streamlit app (needs the API key in Streamlit secrets).
 4. Write up the project summary.
