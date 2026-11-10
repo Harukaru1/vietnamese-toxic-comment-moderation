@@ -99,6 +99,42 @@ More data does not move the in-domain score (the difference is within noise), bu
 improves robustness to comments from another source, which matters for a public demo.
 
 
+## Real-world evaluation (2026 comments) – preliminary
+
+To check how the model behaves outside curated datasets, I built a fresh test set of
+**1,000 comments posted in 2025–2026**: 700 from 20 YouTube videos in 8 categories (news, society,
+football, showbiz, gaming, music, tech, film) collected with the official YouTube Data API, and 300
+from the VOZ forum ([VOZ-HSD](https://huggingface.co/datasets/tarudesu/VOZ-HSD)).
+Comments that appear in the training data were removed. See `scripts/build_realworld_set.py`.
+
+**Annotation.** Labels follow [annotation guidelines v2](docs/annotation_guidelines.md) (ViHSD
+convention). All 1,000 comments were pre-annotated by an LLM (Claude); a random 100-comment subset
+is being annotated blind by the author to measure inter-annotator agreement (Cohen's κ, *pending*).
+
+| Source | clean | offensive | hate |
+|---|---:|---:|---:|
+| YouTube (700) | 94.9% | 2.0% | 3.1% |
+| VOZ (300) | 72.7% | 14.3% | 13.0% |
+
+**PhoBERT v2 on the 2026 set** (vs. LLM labels, κ pending):
+
+| Subset | F1-macro | Accuracy | F1 offensive | F1 hate | Toxic recall (binary) |
+|---|---:|---:|---:|---:|---:|
+| all (1,000) | 0.567 | 0.902 | 0.279 | 0.471 | 0.41 |
+| YouTube (700) | 0.581 | 0.950 | 0.348 | 0.421 | |
+| VOZ (300) | 0.547 | 0.790 | 0.250 | 0.500 | |
+
+F1-macro drops from 0.80 (in-domain test) to **0.57**, and the model misses most toxic comments
+(binary precision 0.76, recall 0.41). Error analysis shows two causes:
+
+1. **Inconsistent labels for profanity used as an intensifier in the training data.** The same
+   token gets every label: comments containing `vl` are 52% *clean* / 25% *offensive* / 23% *hate*
+   in train; `má` 39 / 19 / 43; `éo` 26 / 22 / 52. The model therefore treats "cười vl" or
+   "Má nó đẹp" as clean. This is the root cause of the weak *offensive* class throughout the project.
+2. **Implicit hate without profanity**: gender stereotypes ("incel thiếu hơi gái"), derogatory
+   nicknames for countries ("Đông Lào", "Thái Lọ"), insults without swear words, and threats
+   ("Nên đem số 22 đi hoả thiêu").
+
 ### Ablation: does teencode normalization help? (original splits)
 
 | Model | Teencode dictionary | Val F1-macro | Test F1-macro | Test F1 offensive |
@@ -163,6 +199,10 @@ Single-comment mode and batch mode (paste lines or upload a CSV, download the la
 - [x] Clean project structure, preprocessing with teencode normalization, tests
 - [x] TF-IDF baselines (Logistic Regression, Linear SVM, Random Forest)
 - [x] Fine-tune PhoBERT on Kaggle GPU, publish model to Hugging Face Hub
+- [x] Real-world 2026 test set (YouTube API + VOZ), LLM-assisted annotation
+- [ ] Inter-annotator agreement (Cohen's κ) on a blind 100-comment subset
+- [ ] Fix the profanity-label inconsistency and implicit-hate weakness
+- [ ] YouTube moderation dashboard in the Streamlit app
 - [ ] LLM zero/few-shot classification and comparison (quality, latency, cost)
 - [x] FastAPI inference service + Docker
 - [x] Streamlit demo (single + batch/CSV moderation)
