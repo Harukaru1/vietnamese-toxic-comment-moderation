@@ -27,6 +27,17 @@ The data is not published (see [`data/README.md`](data/README.md)).
 
 The hardest class is **offensive**: it is the smallest class and is often confused with *hate*.
 
+### Ablation: does teencode normalization help TF-IDF?
+
+| Preprocessing | Best model (by val) | Val F1-macro | Test F1-macro | Test F1 offensive |
+|---|---|---:|---:|---:|
+| with teencode dictionary | Logistic Regression | 0.828 | 0.810 | 0.690 |
+| without teencode dictionary | Linear SVM | 0.822 | 0.822 | 0.718 |
+
+Result: no clear gain for TF-IDF. Character n-grams already capture most spelling
+variants, and the gain seen on val did not carry over to test. Next step: check whether
+normalization helps PhoBERT, whose subword vocabulary is trained on standard Vietnamese.
+
 ## Project structure
 
 ```

@@ -1,0 +1,44 @@
+{
+  "teencode": false,
+  "val": {
+    "logreg": {
+      "val_f1_macro": 0.8184,
+      "val_accuracy": 0.8694
+    },
+    "linear_svm": {
+      "val_f1_macro": 0.8224,
+      "val_accuracy": 0.8752
+    },
+    "random_forest": {
+      "val_f1_macro": 0.7531,
+      "val_accuracy": 0.8207
+    }
+  },
+  "best": "linear_svm",
+  "test": {
+    "accuracy": 0.8699,
+    "f1_macro": 0.8216,
+    "f1_per_class": {
+      "clean": 0.9106,
+      "offensive": 0.7181,
+      "hate": 0.8361
+    },
+    "confusion_matrix": [
+      [
+        2041,
+        33,
+        154
+      ],
+      [
+        69,
+        242,
+        46
+      ],
+      [
+        145,
+        42,
+        987
+      ]
+    ]
+  }
+}
