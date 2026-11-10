@@ -123,8 +123,8 @@ with single:
         ss.text, ss.current = "", None
 
     c1, c2, _ = st.columns([1.3, 1, 3])
-    check = c1.button("🔍 Kiểm tra", type="primary", use_container_width=True)
-    c2.button("🧹 Xoá", on_click=clear, use_container_width=True)
+    check = c1.button("🔍 Kiểm tra", type="primary", width="stretch")
+    c2.button("🧹 Xoá", on_click=clear, width="stretch")
 
     if check and not ss.text.strip():
         st.warning("Bạn nhập một bình luận trước nhé.")
@@ -147,8 +147,10 @@ with single:
 
         st.markdown("**Kết quả này có đúng không?**")
         fb = st.feedback("thumbs", key=f"fb_{cur['id']}")
+        cur["feedback"] = None if fb is None else ("đúng" if fb == 1 else "sai")
+        if fb != 0:
+            cur["correct"] = None  # a thumbs-up (or no vote) clears an earlier correction
         if fb is not None:
-            cur["feedback"] = "đúng" if fb == 1 else "sai"
             if fb == 1:
                 st.success("Cảm ơn bạn đã xác nhận! 🙌")
             else:
@@ -206,7 +208,7 @@ with batch:
             view = df[df["confidence"] < REVIEW_BELOW]
         st.dataframe(
             view.assign(label=view["label"].map(lambda lab: f'{INFO[lab]["icon"]} {INFO[lab]["name"]}')),
-            use_container_width=True, hide_index=True,
+            width="stretch", hide_index=True,
             column_order=["text", "label", "confidence"],
             column_config={
                 "text": st.column_config.TextColumn("Bình luận", width="large"),
@@ -229,17 +231,17 @@ with history:
         c2.metric("Có góp ý", int(n_fb))
         c3.metric("Bạn báo sai", int(n_wrong))
         st.dataframe(
-            h.assign(label=h["label"].map(lambda lab: f'{INFO[lab]["icon"]} {INFO[lab]["name"]}'),
-                     correct=h["correct"].map(lambda lab: INFO[lab]["name"] if lab else "")),
-            use_container_width=True, hide_index=True,
+            h.assign(feedback=h["feedback"].fillna(""), label=h["label"].map(lambda lab: f'{INFO[lab]["icon"]} {INFO[lab]["name"]}'),
+                     correct=h["correct"].map(lambda lab: INFO[lab]["name"] if lab in INFO else "")),
+            width="stretch", hide_index=True,
             column_order=["time", "text", "label", "feedback", "correct"],
             column_config={"time": "Lúc", "text": st.column_config.TextColumn("Bình luận", width="large"),
                            "label": "Mô hình đoán", "feedback": "Góp ý", "correct": "Nhãn đúng (theo bạn)"})
         out = h.assign(model_label=h["label"])[["time", "text", "model_label", "feedback", "correct"]]
         c1, c2 = st.columns(2)
         c1.download_button("⬇️ Tải lịch sử & góp ý (CSV)", out.to_csv(index=False).encode("utf-8-sig"),
-                           file_name="feedback.csv", mime="text/csv", use_container_width=True)
-        if c2.button("🗑️ Xoá lịch sử", use_container_width=True):
+                           file_name="feedback.csv", mime="text/csv", width="stretch")
+        if c2.button("🗑️ Xoá lịch sử", width="stretch"):
             ss.history, ss.current = [], None
             st.rerun()
         st.caption("Lịch sử chỉ lưu trong trình duyệt của bạn ở phiên này; không gửi đi đâu cả.")
