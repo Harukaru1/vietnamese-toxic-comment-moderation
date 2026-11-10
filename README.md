@@ -5,6 +5,10 @@ classic ML, a fine-tuned transformer (PhoBERT) and an LLM on the same test set.
 
 > 🚧 Work in progress. Roadmap below.
 
+**Live demo:** _coming soon (Streamlit Community Cloud)_ · **Model:** [HaruKaru/phobert-vi-toxic-comment](https://huggingface.co/HaruKaru/phobert-vi-toxic-comment)
+
+<p align="center"><img src="docs/demo_single.png" width="600" alt="Demo: classifying a single comment"></p>
+
 ## Dataset
 
 ~37.6k Vietnamese comments (built for my graduation thesis at UIT), 3 classes:
@@ -54,7 +58,8 @@ PhoBERT learn slang directly from the data.
 
 ```
 src/toxic_moderation/   preprocessing, teencode dictionary (650+ entries), evaluation, predictor
-app/                    FastAPI service + Gradio demo (one app)
+app/                    FastAPI service + Gradio UI (one app, Docker)
+streamlit_app/          Streamlit demo (deployed on Streamlit Community Cloud)
 scripts/                training / evaluation entry points
 tests/                  unit tests (pytest)
 notebooks/              Kaggle GPU notebooks (PhoBERT)
@@ -86,6 +91,15 @@ first request. On CPU, a single comment takes ~40 ms.
 
 Docker: `docker build -t toxic-mod . && docker run -p 7860:7860 toxic-mod`
 
+### Run the Streamlit demo
+
+```bash
+pip install streamlit
+streamlit run streamlit_app/streamlit_app.py
+```
+
+Single-comment mode and batch mode (paste lines or upload a CSV, download the labeled results).
+
 ## Roadmap
 
 - [x] Clean project structure, preprocessing with teencode normalization, tests
@@ -93,5 +107,6 @@ Docker: `docker build -t toxic-mod . && docker run -p 7860:7860 toxic-mod`
 - [x] Fine-tune PhoBERT on Kaggle GPU, publish model to Hugging Face Hub
 - [ ] LLM zero/few-shot classification and comparison (quality, latency, cost)
 - [x] FastAPI inference service + Docker
-- [ ] Gradio demo deployed on Hugging Face Spaces
+- [x] Streamlit demo (single + batch/CSV moderation)
+- [ ] Deploy demo on Streamlit Community Cloud
 - [x] CI with GitHub Actions (tests on every push, auto-deploy to Hugging Face Spaces)
