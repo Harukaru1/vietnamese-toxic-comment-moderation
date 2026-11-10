@@ -1,0 +1,16 @@
+{
+  "delta_f1_macro_v3_minus_v2": 0.0854,
+  "ci95": [
+    0.0154,
+    0.1527
+  ],
+  "p_v3_not_better": 0.0065,
+  "v2": {
+    "toxic_precision": 0.714,
+    "toxic_recall": 0.495
+  },
+  "v3": {
+    "toxic_precision": 0.818,
+    "toxic_recall": 0.593
+  }
+}
