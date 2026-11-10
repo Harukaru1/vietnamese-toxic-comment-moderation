@@ -1,6 +1,11 @@
-# Annotation guidelines v2 (clean / offensive / hate)
+# Annotation guidelines v3 (clean / offensive / hate)
 
-Version 2 follows the **UIT-ViHSD** convention (Luu et al., 2021), which also underlies most of
+**v3 (current):** profanity used only as an *intensifier or exclamation* is **clean** (decided after
+the blind human annotation showed the author consistently labels "đẹp vl", "Đù anh Huấn" as clean,
+and 52% of training comments containing "vl" were already labeled clean).
+*Offensive* is now reserved for crude language that expresses anger, contempt or vulgarity.
+
+Version 2 followed the **UIT-ViHSD** convention (Luu et al., 2021), which also underlies most of
 the training data (ViHSD itself and the thesis pseudo-labels, produced by a ViHSD-trained model).
 It replaces the thesis definitions, where *offensive* ("attacks an issue, organization or person")
 and *hate* ("insults a group or someone") overlapped.
@@ -9,29 +14,37 @@ and *hate* ("insults a group or someone") overlapped.
 
 | Label | Definition | Key question |
 |---|---|---|
-| **clean** | No offensive or vulgar language. Criticism, complaints, sarcasm and negative opinions are **clean** as long as they are expressed without insults or profanity. | Is there any vulgar word or insult? → No |
-| **offensive** | Contains vulgar/profane words or crude language, but **does not attack a specific target** (person, group, organization). Profanity used as an intensifier, exclamation or joke. | Is the vulgar language aimed at someone? → No |
+| **clean** | No insult and no crude language. Criticism, complaints, sarcasm and negative opinions are clean when expressed without insults. **Profanity used only as an intensifier or exclamation is clean** ("đẹp vl", "hay vãi", "thổi giá vcl", "Đù", "Đậu má, 1m91"). | Is the only "bad word" an intensifier/exclamation? → clean |
+| **offensive** | Crude or vulgar language that **expresses anger, frustration, contempt or vulgarity**, but **does not attack a specific target** (person, group, organization). Typical: curse phrases ("cc gì", "đéo", "mẹ nó", "dek có gì", "bỏ mẹ"), crude sexual content. | Is crude language used to vent or be vulgar, with no one targeted? → offensive |
 | **hate** | **Attacks, insults, demeans or threatens a target**: an individual (including the person being replied to), a group (region, ethnicity, gender, religion, political group, fans…) or an organization. With or without profanity. | Is someone being insulted or demeaned? → Yes |
 
 ## Decision procedure
 
 1. Does the comment insult, demean, threaten or dehumanize a **person, group or organization**
    (name-calling, slurs, wishing harm, comparing to animals)? → **hate**
-2. Otherwise, does it contain **vulgar/profane words** or crude sexual language? → **offensive**
-3. Otherwise → **clean**
+2. Otherwise, does it use **curse phrases to vent anger/contempt** (đéo, đm, cc gì, mẹ nó, dek, bỏ mẹ…)
+   or **crude sexual content**? → **offensive**
+3. Otherwise → **clean** (including profanity used only as an intensifier or exclamation)
+
+| Profanity type | Examples | Label (no target) |
+|---|---|---|
+| Intensifier after an adjective/verb | vl, vcl, vkl, vãi, vãi lồn, vler | clean |
+| Exclamation | đù, má, đậu má, vãi | clean |
+| Curse phrase / venting | đéo, éo, đm, cc gì, mẹ nó, bỏ mẹ, dek, cmn, địt | offensive |
+| Any of the above aimed at a person/group | "thằng này ngu vl", "đm mày" | hate |
 
 ## Edge cases
 
 | Case | Label | Example |
 |---|---|---|
-| Profanity as praise/intensifier | offensive | "đm hay vãi", "đẹp vcl" |
-| Profanity as an exclamation of frustration, no target | offensive | "địt mẹ lại mất điện" |
+| Profanity as praise/intensifier | clean | "hay vãi", "đẹp vcl", "nhanh vl" |
+| Curse phrase venting frustration, no target | offensive | "địt mẹ lại mất điện", "sút cc gì hiền vậy" |
 | Polite but harsh criticism of a policy/organization | clean | "chính sách này làm dở quá" |
 | Criticism of an organization **with insults** | hate | "công ty lừa đảo, bọn chó" |
 | Insulting the person being replied to ("mày ngu") | hate | "mày im mẹ mồm đi", "não ngắn" |
 | Regional/ethnic slurs (bắc kỳ chó, 3 que, tàu khựa, bò đỏ…) | hate | even without profanity |
 | Mild teasing among friends, no vulgarity | clean | "ông này lầy thật" |
-| Mild teasing with vulgarity, clearly friendly | offensive | "thằng lol này lầy vl" |
+| Mild teasing with an intensifier, clearly friendly | clean | "ông này lầy vl" |
 | Wishing death/violence on someone | hate | "con này nên phơi xác" |
 | Crude sexual content not aimed at a real target | offensive | |
 | Sexual content about a real person | hate | |
@@ -42,7 +55,8 @@ and *hate* ("insults a group or someone") overlapped.
 
 - Between **offensive** and **hate**: ask *"Is there a target who is being put down?"*
   If yes → hate.
-- Between **clean** and **offensive**: ask *"Would this be bleeped on TV?"* If yes → offensive.
+- Between **clean** and **offensive**: ask *"Is the bad word just making something stronger (clean), or is the
+  writer venting/cursing (offensive)?"*
 - Mark genuinely ambiguous items with `uncertain=1`; they are reviewed together afterwards.
 
 ## Annotation protocol for the 2026 test set

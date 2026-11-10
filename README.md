@@ -107,28 +107,30 @@ football, showbiz, gaming, music, tech, film) collected with the official YouTub
 from the VOZ forum ([VOZ-HSD](https://huggingface.co/datasets/tarudesu/VOZ-HSD)).
 Comments that appear in the training data were removed. See `scripts/build_realworld_set.py`.
 
-**Annotation.** Labels follow [annotation guidelines v2](docs/annotation_guidelines.md) (ViHSD
-convention). All 1,000 comments were pre-annotated by an LLM (Claude); a random 100-comment subset
+**Annotation.** Labels follow [annotation guidelines v3](docs/annotation_guidelines.md). All 1,000 comments were pre-annotated by an LLM (Claude); a random 100-comment subset
 was annotated blind by the author: on the 94 comments the author could label, raw agreement is
 **95.7%** and **Cohen's κ = 0.72** (3-class; 0.78 binary toxic/clean), i.e. substantial agreement.
 3 of the 4 disagreements are profanity used as an intensifier ("Đù anh Huấn", "thổi giá vcl"),
-which the author labeled *clean* and the guideline labels *offensive*; see below.
+which the author labeled *clean* while guideline v2 said *offensive*. The guideline was therefore
+revised (**v3**: profanity used only as an intensifier/exclamation is *clean*; *offensive* = crude
+language used to vent or curse, with no target). After re-labeling under v3, agreement on the same
+subset is κ = 0.91 — optimistic, since the rule was changed after seeing the disagreements; the
+independent estimate remains κ = 0.72.
 
-| Source | clean | offensive | hate |
+| Source (v3 labels) | clean | offensive | hate |
 |---|---:|---:|---:|
-| YouTube (700) | 94.9% | 2.0% | 3.1% |
-| VOZ (300) | 72.7% | 14.3% | 13.0% |
+| YouTube (700) | 96.4% | 0.4% | 3.1% |
+| VOZ (300) | 78.0% | 9.0% | 13.0% |
 
-**PhoBERT v2 on the 2026 set** (LLM labels, human-verified sample κ = 0.72):
+**PhoBERT v2 on the 2026 set:**
 
-| Subset | F1-macro | Accuracy | F1 offensive | F1 hate | Toxic recall (binary) |
+| Labels | F1-macro | Accuracy | F1 offensive | F1 hate | Toxic precision / recall (binary) |
 |---|---:|---:|---:|---:|---:|
-| all (1,000) | 0.567 | 0.902 | 0.279 | 0.471 | 0.41 |
-| YouTube (700) | 0.581 | 0.950 | 0.348 | 0.421 | |
-| VOZ (300) | 0.547 | 0.790 | 0.250 | 0.500 | |
+| guideline v2 | 0.567 | 0.902 | 0.279 | 0.471 | 0.76 / 0.41 |
+| guideline v3 | 0.594 | 0.924 | 0.346 | 0.471 | 0.71 / 0.50 |
 
-F1-macro drops from 0.80 (in-domain test) to **0.57**, and the model misses most toxic comments
-(binary precision 0.76, recall 0.41). Error analysis shows two causes:
+F1-macro drops from 0.80 (in-domain test) to **0.59**, and the model misses half of the toxic
+comments. Error analysis shows two causes:
 
 1. **Inconsistent labels for profanity used as an intensifier in the training data.** The same
    token gets every label: comments containing `vl` are 52% *clean* / 25% *offensive* / 23% *hate*
