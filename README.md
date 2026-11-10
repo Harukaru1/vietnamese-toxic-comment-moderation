@@ -94,4 +94,4 @@ Docker: `docker build -t toxic-mod . && docker run -p 7860:7860 toxic-mod`
 - [ ] LLM zero/few-shot classification and comparison (quality, latency, cost)
 - [x] FastAPI inference service + Docker
 - [ ] Gradio demo deployed on Hugging Face Spaces
-- [ ] CI with GitHub Actions
+- [x] CI with GitHub Actions (tests on every push, auto-deploy to Hugging Face Spaces)
