@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:   # manual trigger (Actions tab -> Run workflow) deploys the Space
 
 jobs:
   test:
@@ -21,7 +22,8 @@ jobs:
 
   deploy-space:
     needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Deploy only on manual trigger: Docker/Gradio Spaces on free cpu-basic now need a HF PRO plan.
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     env:
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
