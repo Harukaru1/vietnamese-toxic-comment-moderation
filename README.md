@@ -21,27 +21,57 @@ classic ML, a fine-tuned transformer (PhoBERT) and an LLM on the same test set.
 
 The data is not published (see [`data/README.md`](data/README.md)).
 
-## Results (test set)
+## Results (de-duplicated test set)
 
 Each model family is selected on the **validation** set; the test set is used once for reporting.
+All numbers below use the **leakage-free** splits (see *Data quality* below).
 
-| Model | Val F1-macro | Test F1-macro | Test accuracy | Test F1 offensive |
-|---|---:|---:|---:|---:|
-| TF-IDF (word + char n-grams) + Logistic Regression | 0.829 | **0.812** | **0.862** | **0.695** |
-| [PhoBERT-base-v2 fine-tuned](https://huggingface.co/HaruKaru/phobert-vi-toxic-comment) | **0.843** | 0.801 | 0.856 | 0.662 |
-| LLM zero/few-shot | | _todo_ | | |
+| Model | Training data | Test F1-macro | Test accuracy | Test F1 offensive |
+|---|---|---:|---:|---:|
+| TF-IDF (word + char n-grams) + Logistic Regression | de-duplicated | 0.793 | 0.861 | 0.648 |
+| TF-IDF (word + char n-grams) + Linear SVM | de-duplicated + label errors pruned | **0.799** | **0.865** | **0.662** |
+| [PhoBERT-base-v2](https://huggingface.co/HaruKaru/phobert-vi-toxic-comment) v1 (class-weighted) | original | 0.780 | 0.853 | 0.608 |
+| PhoBERT v2 (no class weights) | de-duplicated / + pruned | _running_ | | |
+| LLM zero/few-shot | – | _todo_ | | |
 
-The hardest class is **offensive**: it is the smallest class and is often confused with *hate*.
+The hardest class is **offensive**: it is the smallest class (8% of comments) and overlaps with *hate*.
+With 281 offensive comments in the test set, differences below ~0.015 F1-macro are within
+the bootstrap 95% confidence interval and should not be over-interpreted.
 
-### Findings so far
+## Data quality: leakage and label noise
 
-- **PhoBERT is best on validation but does not beat TF-IDF on test.** Its val→test drop
-  (0.843 → 0.801) is much larger than TF-IDF's (0.829 → 0.812).
-- **PhoBERT over-predicts *offensive*:** recall 0.77 but precision only 0.58 (199 clean/hate
-  comments predicted as offensive). The class-weighted loss pushes too hard toward the minority class.
-- Next experiments: PhoBERT without class weights, and a TF-IDF + PhoBERT ensemble.
+**1. Train → test leakage.** 178 test comments (4.7%) and 211 validation comments (5.6%) also
+appear verbatim in the training set, mostly toxic comments that were posted repeatedly.
+11 texts appear with *conflicting* labels. Removing them shows the original scores were inflated:
 
-### Ablation: does teencode normalization help?
+| TF-IDF + LR | Test F1-macro | Test F1 offensive |
+|---|---:|---:|
+| original splits (with leakage) | 0.820 | 0.710 |
+| leakage-free splits | 0.793 | 0.647 |
+
+**2. Label noise (confident learning).** Out-of-fold probabilities from 5-fold cross-validation
+were passed to [cleanlab](https://github.com/cleanlab/cleanlab), which flagged **2,076 comments
+(5.5%)** as likely mislabeled; the *offensive* class has the highest rate (11.6%).
+A manual review of 120 flagged training comments (20 per confusion type) against the
+annotation guidelines found:
+
+| Review outcome | Share |
+|---|---:|
+| clearly mislabeled | 34% |
+| ambiguous under the guidelines | 30% |
+| label was correct | 36% |
+
+The ambiguous cases come from an overlap in the guidelines: both *offensive* ("attacks an
+issue, organization or person") and *hate* ("heavy language insulting or discriminating against
+a group or someone") cover insults aimed at a person, and profanity without a target
+(e.g. "đm hay vãi", which is actually praise) is labeled inconsistently.
+
+**3. Effect.** Pruning the flagged comments from **train only** (val/test untouched) improves
+TF-IDF on both validation (+0.008) and test (+0.007 F1-macro, +0.013 F1 offensive).
+
+Reproduce: `scripts/find_label_issues.py` → `scripts/make_clean_splits.py [--prune]`.
+
+### Ablation: does teencode normalization help? (original splits)
 
 | Model | Teencode dictionary | Val F1-macro | Test F1-macro | Test F1 offensive |
 |---|---|---:|---:|---:|
@@ -109,4 +139,6 @@ Single-comment mode and batch mode (paste lines or upload a CSV, download the la
 - [x] FastAPI inference service + Docker
 - [x] Streamlit demo (single + batch/CSV moderation)
 - [x] Deploy demo on Streamlit Community Cloud
-- [x] CI with GitHub Actions (tests on every push, auto-deploy to Hugging Face Spaces)
+- [x] CI with GitHub Actions (tests on every push; manual deploy to Hugging Face Spaces)
+- [x] Data quality audit: leakage removal + confident learning label-noise detection
+- [ ] Retrain PhoBERT on cleaned data

@@ -79,6 +79,7 @@ def main() -> None:
     ap.add_argument("--push-to-hub", default=None, help="e.g. HaruKaru/phobert-vi-toxic-comment")
     ap.add_argument("--no-push", action="store_true")
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--tag", default="", help="suffix for the results file, e.g. _clean")
     args = ap.parse_args()
     set_seed(args.seed)
 
@@ -172,7 +173,7 @@ def main() -> None:
         "test": {k: v for k, v in test.items() if k != "report"},
     }
     (ROOT / "reports").mkdir(exist_ok=True)
-    out = ROOT / "reports" / f"phobert_results{'_teencode' if args.teencode else ''}.json"
+    out = ROOT / "reports" / f"phobert_results{'_teencode' if args.teencode else ''}{args.tag}.json"
     out.write_text(json.dumps(results, indent=2, ensure_ascii=False))
     print("Saved", out)
 

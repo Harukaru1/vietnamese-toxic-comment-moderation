@@ -1,0 +1,29 @@
+{
+  "n_total": 37586,
+  "n_flagged": 2076,
+  "flagged_rate": 0.0552,
+  "flagged_by_split": {
+    "train": 1652,
+    "val": 227,
+    "test": 197
+  },
+  "flagged_by_given_label": {
+    "clean": 967,
+    "offensive": 415,
+    "hate": 694
+  },
+  "flagged_rate_by_given_label": {
+    "clean": 0.0434,
+    "offensive": 0.1162,
+    "hate": 0.0591
+  },
+  "given_to_suggested": {
+    "clean->hate": 603,
+    "clean->offensive": 364,
+    "hate->clean": 349,
+    "hate->offensive": 345,
+    "offensive->clean": 270,
+    "offensive->hate": 145
+  },
+  "oof_accuracy": 0.8684
+}

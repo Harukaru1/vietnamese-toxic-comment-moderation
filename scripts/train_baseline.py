@@ -12,9 +12,8 @@ from pathlib import Path
 
 import joblib
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import FeatureUnion, Pipeline
+from sklearn.pipeline import Pipeline
 from sklearn.svm import LinearSVC
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,16 +21,8 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from toxic_moderation.data import load_split  # noqa: E402
 from toxic_moderation.evaluate import evaluate  # noqa: E402
+from toxic_moderation.features import build_tfidf  # noqa: E402
 from toxic_moderation.preprocess import clean_text, load_teencode  # noqa: E402
-
-
-def features() -> FeatureUnion:
-    # Word n-grams capture phrases; char n-grams are robust to misspellings/teencode.
-    return FeatureUnion([
-        ("word", TfidfVectorizer(ngram_range=(1, 2), min_df=2, max_features=100_000, sublinear_tf=True)),
-        ("char", TfidfVectorizer(analyzer="char_wb", ngram_range=(2, 5), min_df=3,
-                                 max_features=200_000, sublinear_tf=True)),
-    ])
 
 
 MODELS = {
@@ -45,16 +36,18 @@ MODELS = {
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-teencode", action="store_true")
+    ap.add_argument("--data-dir", type=Path, default=None, help="default: data/raw")
+    ap.add_argument("--tag", default="", help="suffix for output files, e.g. _dedup")
     args = ap.parse_args()
 
     teencode = None if args.no_teencode else load_teencode()
-    splits = {s: load_split(s) for s in ("train", "val", "test")}
+    splits = {s: load_split(s, args.data_dir) if args.data_dir else load_split(s) for s in ("train", "val", "test")}
     X = {s: [clean_text(t, teencode) for t in df["text"]] for s, df in splits.items()}
     y = {s: df["label"].tolist() for s, df in splits.items()}
 
     results, best_name, best_pipe, best_f1 = {}, None, None, -1.0
     for name, clf in MODELS.items():
-        pipe = Pipeline([("features", features()), ("clf", clf)])
+        pipe = Pipeline([("features", build_tfidf()), ("clf", clf)])
         pipe.fit(X["train"], y["train"])
         val = evaluate(y["val"], pipe.predict(X["val"]))
         results[name] = {"val_f1_macro": val["f1_macro"], "val_accuracy": val["accuracy"]}
@@ -68,10 +61,11 @@ def main() -> None:
 
     (ROOT / "models").mkdir(exist_ok=True)
     (ROOT / "reports").mkdir(exist_ok=True)
-    joblib.dump(best_pipe, ROOT / "models" / "tfidf_best.joblib")
+    joblib.dump(best_pipe, ROOT / "models" / f"tfidf_best{args.tag}.joblib")
     out = {"teencode": teencode is not None, "val": results, "best": best_name,
-           "test": {k: v for k, v in test.items() if k != "report"}}
-    suffix = "" if teencode else "_no_teencode"
+           "test": {k: v for k, v in test.items() if k != "report"},
+           "data_dir": str(args.data_dir or "data/raw")}
+    suffix = ("" if teencode else "_no_teencode") + args.tag
     (ROOT / "reports" / f"baseline_results{suffix}.json").write_text(json.dumps(out, indent=2, ensure_ascii=False))
 
 

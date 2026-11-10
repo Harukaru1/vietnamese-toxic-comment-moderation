@@ -1,0 +1,32 @@
+{
+  "original": {
+    "train": 30068,
+    "val": 3759,
+    "test": 3759
+  },
+  "train_conflicting_texts_dropped": 8,
+  "val_leaked_rows_dropped": 211,
+  "test_leaked_rows_dropped": 178,
+  "final": {
+    "train": 29306,
+    "val": 3540,
+    "test": 3563
+  },
+  "final_label_counts": {
+    "train": {
+      "clean": 17810,
+      "hate": 8965,
+      "offensive": 2531
+    },
+    "val": {
+      "clean": 2224,
+      "hate": 1054,
+      "offensive": 262
+    },
+    "test": {
+      "clean": 2228,
+      "hate": 1054,
+      "offensive": 281
+    }
+  }
+}
