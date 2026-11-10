@@ -1,0 +1,76 @@
+{
+  "model": "vinai/phobert-base-v2",
+  "teencode": false,
+  "config": {
+    "model": "vinai/phobert-base-v2",
+    "data_dir": "data/clean",
+    "output_dir": "models/C",
+    "teencode": "False",
+    "max_len": "160",
+    "epochs": "6.0",
+    "lr": "2e-05",
+    "batch_size": "32",
+    "no_class_weights": "True",
+    "max_train_samples": "None",
+    "push_to_hub": "None",
+    "no_push": "True",
+    "seed": "42",
+    "tag": "_clean_nocw"
+  },
+  "val_f1_macro": 0.8297,
+  "test": {
+    "accuracy": 0.8729,
+    "f1_macro": 0.8011,
+    "f1_per_class": {
+      "clean": 0.9163,
+      "offensive": 0.6399,
+      "hate": 0.8472
+    },
+    "confusion_matrix": [
+      [
+        1998,
+        69,
+        161
+      ],
+      [
+        49,
+        183,
+        49
+      ],
+      [
+        86,
+        39,
+        929
+      ]
+    ]
+  },
+  "vihsd_test": {
+    "model": "models/C/best",
+    "data_dir": "data/vihsd_test",
+    "split": "test",
+    "accuracy": 0.8578,
+    "f1_macro": 0.6588,
+    "f1_per_class": {
+      "clean": 0.9311,
+      "offensive": 0.4541,
+      "hate": 0.5913
+    },
+    "confusion_matrix": [
+      [
+        4898,
+        262,
+        159
+      ],
+      [
+        125,
+        240,
+        71
+      ],
+      [
+        179,
+        119,
+        382
+      ]
+    ]
+  }
+}

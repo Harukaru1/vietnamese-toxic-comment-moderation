@@ -26,13 +26,24 @@ The data is not published (see [`data/README.md`](data/README.md)).
 Each model family is selected on the **validation** set; the test set is used once for reporting.
 All numbers below use the **leakage-free** splits (see *Data quality* below).
 
-| Model | Training data | Test F1-macro | Test accuracy | Test F1 offensive |
-|---|---|---:|---:|---:|
-| TF-IDF (word + char n-grams) + Logistic Regression | de-duplicated | 0.793 | 0.861 | 0.648 |
-| TF-IDF (word + char n-grams) + Linear SVM | de-duplicated + label errors pruned | **0.799** | **0.865** | **0.662** |
-| [PhoBERT-base-v2](https://huggingface.co/HaruKaru/phobert-vi-toxic-comment) v1 (class-weighted) | original | 0.780 | 0.853 | 0.608 |
-| PhoBERT v2 (no class weights) | de-duplicated / + pruned | _running_ | | |
-| LLM zero/few-shot | – | _todo_ | | |
+| Model | Training data | Test F1-macro | Test accuracy | Test F1 offensive | ViHSD test F1-macro |
+|---|---|---:|---:|---:|---:|
+| TF-IDF + Logistic Regression | de-duplicated | 0.793 | 0.861 | 0.648 | – |
+| TF-IDF + Linear SVM | cleaned (leakage + label errors removed) | 0.799 | 0.865 | **0.662** | 0.616 |
+| TF-IDF + Logistic Regression | cleaned + ViHSD | 0.797 | – | 0.661 | 0.667 |
+| PhoBERT v1 (class-weighted loss) | original | 0.780 | 0.853 | 0.608 | 0.643 |
+| PhoBERT v2-C (no class weights) | cleaned | **0.801** | 0.873 | 0.640 | 0.659 |
+| **[PhoBERT v2](https://huggingface.co/HaruKaru/phobert-vi-toxic-comment) (deployed)** | cleaned + ViHSD | **0.801** | **0.873** | 0.640 | **0.690** |
+
+The deployed model is selected on validation (v2 and v2-C tie at 0.830 val F1-macro; v2 is preferred
+because it generalizes better to another source). Key improvements over v1:
+
+- **Removing the class-weighted loss** fixed the over-prediction of *offensive*:
+  precision 0.52 → 0.62, test F1-macro 0.780 → 0.801.
+- **Adding ViHSD** leaves the in-domain score unchanged but improves the out-of-domain
+  ViHSD test from 0.659 to **0.690** (my thesis model: 0.60 on the same test set).
+- On in-domain data, PhoBERT and a well-tuned TF-IDF model are statistically tied; PhoBERT's
+  advantage shows up on unseen sources.
 
 The hardest class is **offensive**: it is the smallest class (8% of comments) and overlaps with *hate*.
 With 281 offensive comments in the test set, differences below ~0.015 F1-macro are within
@@ -159,4 +170,4 @@ Single-comment mode and batch mode (paste lines or upload a CSV, download the la
 - [x] CI with GitHub Actions (tests on every push; manual deploy to Hugging Face Spaces)
 - [x] Data quality audit: leakage removal + confident learning label-noise detection
 - [x] Add UIT-ViHSD as extra training data + out-of-domain benchmark
-- [ ] Retrain PhoBERT on cleaned data (+ ViHSD)
+- [x] Retrain PhoBERT on cleaned data (+ ViHSD) → v2 deployed

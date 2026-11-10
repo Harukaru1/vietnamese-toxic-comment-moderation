@@ -1,0 +1,29 @@
+{
+  "model": "HaruKaru/phobert-vi-toxic-comment",
+  "data_dir": "data/clean",
+  "split": "test",
+  "accuracy": 0.8734,
+  "f1_macro": 0.8005,
+  "f1_per_class": {
+    "clean": 0.9203,
+    "offensive": 0.6403,
+    "hate": 0.841
+  },
+  "confusion_matrix": [
+    [
+      2016,
+      59,
+      153
+    ],
+    [
+      48,
+      186,
+      47
+    ],
+    [
+      89,
+      55,
+      910
+    ]
+  ]
+}
