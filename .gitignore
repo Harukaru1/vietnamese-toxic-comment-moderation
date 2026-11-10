@@ -1,0 +1,15 @@
+# Data is NOT public (collected via Google API + ViHSD research-only license)
+data/
+!data/README.md
+models/
+*.joblib
+*.pt
+*.safetensors
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+.env
