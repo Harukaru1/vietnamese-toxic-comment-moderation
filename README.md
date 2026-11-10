@@ -252,7 +252,7 @@ Single-comment mode and batch mode (paste lines or upload a CSV, download the la
 - [ ] YouTube moderation dashboard in the Streamlit app
 - [ ] LLM zero/few-shot classification and comparison (quality, latency, cost)
 - [x] FastAPI inference service + Docker
-- [x] Streamlit demo (single + batch/CSV moderation)
+- [x] Streamlit demo (single + batch/CSV moderation, example chips, confidence-aware result card, "needs review" filter, 👍/👎 feedback with label correction and CSV export)
 - [x] Deploy demo on Streamlit Community Cloud
 - [x] CI with GitHub Actions (tests on every push; manual deploy to Hugging Face Spaces)
 - [x] Data quality audit: leakage removal + confident learning label-noise detection
