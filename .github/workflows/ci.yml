@@ -16,7 +16,7 @@ jobs:
           python-version: "3.11"
           cache: pip
       # Lightweight deps only: the API tests use a fake predictor, so torch is not needed.
-      - run: pip install pandas scikit-learn joblib emoji pytest httpx fastapi gradio
+      - run: pip install pandas scikit-learn joblib emoji requests pytest httpx fastapi gradio
       - run: pip install --no-deps -e .
       - run: pytest -q
 
