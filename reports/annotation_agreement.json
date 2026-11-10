@@ -1,0 +1,25 @@
+{
+  "n_submitted": 100,
+  "n_unlabeled_by_human": 6,
+  "n": 94,
+  "raw_agreement": 0.957,
+  "cohen_kappa_3class": 0.717,
+  "cohen_kappa_binary_toxic": 0.783,
+  "confusion_rows_human_cols_llm": [
+    [
+      85,
+      3,
+      0
+    ],
+    [
+      0,
+      1,
+      1
+    ],
+    [
+      0,
+      0,
+      4
+    ]
+  ]
+}

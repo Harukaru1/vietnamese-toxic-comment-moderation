@@ -17,14 +17,19 @@ LABELS = ["clean", "offensive", "hate"]
 
 
 def main() -> None:
-    human = pd.read_excel(sys.argv[1], sheet_name="annotate")
+    path = sys.argv[1]
+    human = (pd.read_csv(path, encoding="utf-8-sig") if path.endswith(".csv")
+             else pd.read_excel(path, sheet_name="annotate"))
     human["label"] = human["label"].astype(str).str.strip().str.lower()
+    n_total = len(human)
     human = human[human["label"].isin(LABELS)]
     llm = pd.read_csv(ROOT / "data" / "realworld" / "claude_labels.csv")
     d = human.merge(llm, on="id", suffixes=("_human", "_llm"))
     d_bin = d.assign(h=d["label_human"] != "clean", l=d["label_llm"] != "clean")
 
     res = {
+        "n_submitted": n_total,
+        "n_unlabeled_by_human": n_total - len(human),
         "n": len(d),
         "raw_agreement": round(float((d["label_human"] == d["label_llm"]).mean()), 3),
         "cohen_kappa_3class": round(cohen_kappa_score(d["label_human"], d["label_llm"], labels=LABELS), 3),

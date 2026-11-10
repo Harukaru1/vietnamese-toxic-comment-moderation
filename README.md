@@ -109,14 +109,17 @@ Comments that appear in the training data were removed. See `scripts/build_realw
 
 **Annotation.** Labels follow [annotation guidelines v2](docs/annotation_guidelines.md) (ViHSD
 convention). All 1,000 comments were pre-annotated by an LLM (Claude); a random 100-comment subset
-is being annotated blind by the author to measure inter-annotator agreement (Cohen's κ, *pending*).
+was annotated blind by the author: on the 94 comments the author could label, raw agreement is
+**95.7%** and **Cohen's κ = 0.72** (3-class; 0.78 binary toxic/clean), i.e. substantial agreement.
+3 of the 4 disagreements are profanity used as an intensifier ("Đù anh Huấn", "thổi giá vcl"),
+which the author labeled *clean* and the guideline labels *offensive*; see below.
 
 | Source | clean | offensive | hate |
 |---|---:|---:|---:|
 | YouTube (700) | 94.9% | 2.0% | 3.1% |
 | VOZ (300) | 72.7% | 14.3% | 13.0% |
 
-**PhoBERT v2 on the 2026 set** (vs. LLM labels, κ pending):
+**PhoBERT v2 on the 2026 set** (LLM labels, human-verified sample κ = 0.72):
 
 | Subset | F1-macro | Accuracy | F1 offensive | F1 hate | Toxic recall (binary) |
 |---|---:|---:|---:|---:|---:|
@@ -200,7 +203,7 @@ Single-comment mode and batch mode (paste lines or upload a CSV, download the la
 - [x] TF-IDF baselines (Logistic Regression, Linear SVM, Random Forest)
 - [x] Fine-tune PhoBERT on Kaggle GPU, publish model to Hugging Face Hub
 - [x] Real-world 2026 test set (YouTube API + VOZ), LLM-assisted annotation
-- [ ] Inter-annotator agreement (Cohen's κ) on a blind 100-comment subset
+- [x] Inter-annotator agreement on a blind 100-comment subset (κ = 0.72)
 - [ ] Fix the profanity-label inconsistency and implicit-hate weakness
 - [ ] YouTube moderation dashboard in the Streamlit app
 - [ ] LLM zero/few-shot classification and comparison (quality, latency, cost)
