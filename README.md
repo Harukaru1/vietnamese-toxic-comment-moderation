@@ -71,6 +71,23 @@ TF-IDF on both validation (+0.008) and test (+0.007 F1-macro, +0.013 F1 offensiv
 
 Reproduce: `scripts/find_label_issues.py` → `scripts/make_clean_splits.py [--prune]`.
 
+## More data: adding UIT-ViHSD
+
+[UIT-ViHSD](https://huggingface.co/datasets/ura-hcmut/UIT-ViHSD) (Luu et al., 2021; CC BY-NC-SA 4.0)
+uses the same clean / offensive / hate scheme. Its train + dev sets (22.5k comments after removing
+anything that overlaps our splits or the ViHSD test set) were added to **our train only**; the
+ViHSD test set (6.4k) is kept aside as an **out-of-domain benchmark**.
+
+| Model | Training data | Our test F1-macro | ViHSD test F1-macro |
+|---|---|---:|---:|
+| TF-IDF + LR | ours (cleaned) | 0.801 | 0.603 |
+| TF-IDF + LR | ours (cleaned) + ViHSD | 0.797 | **0.667** |
+| PhoBERT v1 | ours (original) | 0.780 | 0.643 |
+
+More data does not move the in-domain score (the difference is within noise), but it clearly
+improves robustness to comments from another source, which matters for a public demo.
+
+
 ### Ablation: does teencode normalization help? (original splits)
 
 | Model | Teencode dictionary | Val F1-macro | Test F1-macro | Test F1 offensive |
@@ -141,4 +158,5 @@ Single-comment mode and batch mode (paste lines or upload a CSV, download the la
 - [x] Deploy demo on Streamlit Community Cloud
 - [x] CI with GitHub Actions (tests on every push; manual deploy to Hugging Face Spaces)
 - [x] Data quality audit: leakage removal + confident learning label-noise detection
-- [ ] Retrain PhoBERT on cleaned data
+- [x] Add UIT-ViHSD as extra training data + out-of-domain benchmark
+- [ ] Retrain PhoBERT on cleaned data (+ ViHSD)
