@@ -5,7 +5,7 @@ classic ML, a fine-tuned transformer (PhoBERT) and an LLM on the same test set.
 
 > 🚧 Work in progress. Roadmap below.
 
-**Live demo:** _coming soon (Streamlit Community Cloud)_ · **Model:** [HaruKaru/phobert-vi-toxic-comment](https://huggingface.co/HaruKaru/phobert-vi-toxic-comment)
+**Live demo:** [vi-toxic-moderation.streamlit.app](https://vi-toxic-moderation.streamlit.app/) · **Model:** [HaruKaru/phobert-vi-toxic-comment](https://huggingface.co/HaruKaru/phobert-vi-toxic-comment)
 
 <p align="center"><img src="docs/demo_single.png" width="600" alt="Demo: classifying a single comment"></p>
 
@@ -108,5 +108,5 @@ Single-comment mode and batch mode (paste lines or upload a CSV, download the la
 - [ ] LLM zero/few-shot classification and comparison (quality, latency, cost)
 - [x] FastAPI inference service + Docker
 - [x] Streamlit demo (single + batch/CSV moderation)
-- [ ] Deploy demo on Streamlit Community Cloud
+- [x] Deploy demo on Streamlit Community Cloud
 - [x] CI with GitHub Actions (tests on every push, auto-deploy to Hugging Face Spaces)
