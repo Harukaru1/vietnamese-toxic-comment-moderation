@@ -59,6 +59,8 @@ and *hate* ("insults a group or someone") overlapped.
 | Intensifier **aimed at a person's flaw** | hate | "m béo vl", "thằng này ngu vl" (vs. "đẹp vl" = clean) |
 | Regional/ethnic slur on its own, even as a one-word comment | hate | "parky", "Đông Lào" |
 | Neutral or positive use of a regional term | clean | "mấy anh Bắc Kỳ đẹp trai lắm" |
+| Animal **idiom that criticizes behaviour**, not the person | clean | "làm mấy trò con bò", "nhảy dựng lên", "cày như trâu" |
+| **Comparing the person** to an animal | hate | "sủa lên khác gì mấy con chó", "ngu như bò" |
 | Slur word used in its **literal** sense (label by meaning, not by keyword) | clean | "mình có 3 que kem", "uống bò đỏ cho tỉnh ngủ" |
 | Slur word where the sentence alone does not show which sense is meant | clean, `uncertain=1` | "bạn có 3 que không?" |
 | Insulting one specific person's looks or thinking, no slur or threat (v3.1, confirmed) | hate | "tư duy của bạn chán vãi c", "xấu toàn diện thế này" |

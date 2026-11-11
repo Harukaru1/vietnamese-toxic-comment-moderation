@@ -251,7 +251,7 @@ with paragraph:
         st.warning("Bạn nhập một đoạn văn trước nhé.")
     elif run_para:
         sents = split_sentences(para_text)
-        ss.para_result = dict(sents=sents, preds=predictor.predict(sents))
+        ss.para_result = dict(sents=sents, preds=predictor.predict(sents), fixed={})
     res = ss.get("para_result")
     if res:
         sents, preds = res["sents"], res["preds"]
@@ -285,6 +285,34 @@ with paragraph:
                                "Độ chắc chắn": st.column_config.ProgressColumn(format="percent", min_value=0, max_value=1)})
         st.caption("Mô hình vẫn đọc từng câu riêng lẻ, nên có thể bỏ sót ý xúc phạm trải qua nhiều câu "
                    "hoặc câu chỉ xúc phạm khi biết ngữ cảnh.")
+
+        st.markdown("**Có câu nào bị gán sai không?**")
+        idx = st.selectbox(
+            "Chọn câu bị gán sai", range(len(sents)), index=None, placeholder="Chọn câu mô hình gán sai...",
+            format_func=lambda k: f'{INFO[preds[k]["label"]]["icon"]} {sents[k][:90]}{"…" if len(sents[k]) > 90 else ""}',
+            label_visibility="collapsed", key="para_pick")
+        if idx is not None:
+            fix = st.segmented_control(
+                "Theo bạn, nhãn đúng của câu này là gì?", [lab for lab in LABELS if lab != preds[idx]["label"]],
+                format_func=lambda lab: f'{INFO[lab]["icon"]} {INFO[lab]["name"]}', key=f"para_fix_{idx}")
+            if fix and res["fixed"].get(idx) != fix:
+                res["fixed"][idx] = fix
+                item = dict(id=len(ss.history), time=datetime.now().strftime("%H:%M:%S"), text=sents[idx],
+                            label=preds[idx]["label"], scores=preds[idx]["scores"], feedback="sai", correct=fix)
+                ss.history.append(item)   # also shows up in the history tab / CSV download
+                if store.enabled and ss.share_ok:
+                    try:
+                        store.add(make_record(session=ss.session_id, item=item["id"], text=item["text"],
+                                              model_label=item["label"], scores=item["scores"], feedback="sai",
+                                              correct=fix, model_revision=predictor.revision or "main",
+                                              model_sha=model_sha))
+                    except Exception as e:  # never break the demo because of logging
+                        print("feedback not saved:", e)
+            if res["fixed"].get(idx):
+                st.success(f'Đã ghi lại: câu này nên là **{INFO[res["fixed"][idx]]["name"]}**. Cảm ơn bạn!')
+        if store.enabled:
+            st.caption("Góp ý được lưu ẩn danh để cải thiện mô hình"
+                       + ("." if ss.share_ok else " (bạn đang tắt lưu góp ý ở tab Một bình luận nên sẽ không gửi đi)."))
 
 # ---------------------------------------------------------------- batch
 with batch:
