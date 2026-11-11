@@ -160,8 +160,8 @@ shaming and an intensifier aimed at a person ("m lùn vl") are still missed
 (`reports/probe_v1_v3_vs_v4.json`).
 
 The likely reason is the old training data: ~2.4k new rows cannot outvote ~50k rows that label the
-same patterns inconsistently (for example, comments with "béo", *fat*, are 58% clean and 36% hate in
-train). The next step is therefore to re-label those patterns in the existing data under guideline
+same patterns inconsistently (for example, of 14 train comments with "mày/m … vl", *you … so*, 8 are
+hate and 6 clean; a manual check is still needed to tell real inconsistency from context). The next step is therefore to re-label those patterns in the existing data under guideline
 v3.1, not to add more new comments. v3 stays deployed; v4 is kept on the `v4` branch for reference.
 
 The demo now closes the loop on its own: each 👍/👎 (and the label the user says is correct) is
