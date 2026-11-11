@@ -36,6 +36,9 @@ EXAMPLES = {
     "Xúc phạm": "Bọn này ngu như chó, cút hết về nước đi",
 }
 MAX_BATCH = 200
+# Shown in the sidebar; update together with the model on the Hub (see README "Results").
+MODEL_CARD = {"version": "PhoBERT v3", "f1_indomain": 0.815, "f1_2026": 0.679, "precision_toxic_2026": 0.82}
+GITHUB = "https://github.com/Harukaru1/vietnamese-toxic-comment-moderation"
 REVIEW_BELOW = 0.6  # below this confidence, suggest a human look
 
 st.set_page_config(page_title="Kiểm tra bình luận tiếng Việt", page_icon="🛡️", layout="centered")
@@ -93,12 +96,27 @@ with st.sidebar:
                     unsafe_allow_html=True)
         st.caption(i["hint"])
     st.divider()
-    st.markdown(
-        "Mô hình **PhoBERT** được fine-tune trên khoảng 50 nghìn bình luận tiếng Việt, "
-        "và được kiểm tra lại trên bình luận YouTube và diễn đàn năm 2026.\n\n"
-        "[Mã nguồn (GitHub)](https://github.com/Harukaru1/vietnamese-toxic-comment-moderation) · "
-        "[Mô hình (Hugging Face)](https://huggingface.co/HaruKaru/phobert-vi-toxic-comment)")
-    st.caption(f"Model `{predictor.model_id}` @ `{predictor.revision or 'main'}` · commit `{model_sha}`")
+    st.subheader("Về mô hình")
+    st.markdown(f"**{MODEL_CARD['version']}**, fine-tune trên khoảng 52 nghìn bình luận tiếng Việt "
+                "và được kiểm tra lại trên 1.000 bình luận YouTube và diễn đàn năm 2026.")
+    m1, m2 = st.columns(2)
+    m1.metric("F1 tập test", f"{MODEL_CARD['f1_indomain']:.3f}", help="F1-macro trên tập test nội bộ (3 nhãn).")
+    m2.metric("F1 thực tế 2026", f"{MODEL_CARD['f1_2026']:.3f}",
+              help="F1-macro trên bình luận YouTube/VOZ năm 2026, dữ liệu mô hình chưa từng thấy.")
+    st.caption(f"Khi báo một bình luận là độc hại, mô hình đúng khoảng "
+               f"{MODEL_CARD['precision_toxic_2026']:.0%} số lần (trên dữ liệu 2026).")
+    with st.expander("Mô hình còn hạn chế gì?"):
+        st.markdown(
+            "- Chỉ đọc **từng bình luận riêng lẻ**, không thấy ngữ cảnh: \"bạn mập quá đấy\" có thể là "
+            "trêu đùa hoặc chê bai.\n"
+            "- Dễ bỏ sót **thù ghét ngầm** không có từ chửi (mỉa mai, biệt danh miệt thị mới).\n"
+            "- Ranh giới *công kích* / *thù ghét* vốn chủ quan; con người cũng không luôn đồng ý.\n\n"
+            "Góp ý 👍/👎 chỉ lưu trong trình duyệt của bạn; tải về ở tab **Lịch sử & góp ý** "
+            "nếu muốn gửi cho tác giả để cải thiện mô hình.")
+    st.markdown(f"[Mã nguồn & báo cáo (GitHub)]({GITHUB}) · "
+                "[Mô hình (Hugging Face)](https://huggingface.co/HaruKaru/phobert-vi-toxic-comment) · "
+                f"[Hướng dẫn gán nhãn]({GITHUB}/blob/main/docs/annotation_guidelines.md)")
+    st.caption(f"`{predictor.model_id}` @ `{predictor.revision or 'main'}` · commit `{model_sha}`")
 
 # ---------------------------------------------------------------- header
 st.title("🛡️ Kiểm tra bình luận tiếng Việt")
