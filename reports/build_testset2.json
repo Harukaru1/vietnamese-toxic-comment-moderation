@@ -1,28 +1,31 @@
 {
- "videos": 29,
- "pool": 4685,
+ "videos": 57,
+ "pool": 12023,
  "pool_pred": {
-  "clean": 4450,
-  "hate": 154,
-  "offensive": 81
+  "clean": 11069,
+  "hate": 630,
+  "offensive": 324
  },
  "selected": 2000,
  "selected_by_why": {
-  "random": 1594,
-  "pred_toxic": 202,
-  "cue_pred_clean": 192,
-  "pattern": 12
+  "random": 955,
+  "pred_toxic": 600,
+  "cue_pred_clean": 400,
+  "pattern": 45
  },
  "selected_pred": {
-  "clean": 1765,
-  "hate": 154,
-  "offensive": 81
+  "clean": 1332,
+  "hate": 439,
+  "offensive": 229
  },
  "selected_by_category": {
-  "music": 597,
-  "life": 485,
-  "esports": 383,
-  "review": 379,
-  "talk": 156
+  "drama": 575,
+  "music": 368,
+  "news": 294,
+  "life": 255,
+  "sport": 240,
+  "esports": 125,
+  "review": 90,
+  "talk": 53
  }
 }
