@@ -63,7 +63,7 @@ weak on implicit hate. Leakage (4.7%) and inconsistent profanity labels were the
    word) + scripts/fix_bad_token.py ("bad" was "đéo" in ~1,700 thesis rows, 69% hate; found by the author)
    + active batch x3 -> data/clean_vihsd_v5; notebook notebooks/train_phobert_v5_kaggle.ipynb -> HF branch v5.
    Evaluate like v4: realworld_eval_v4, clean_vihsd_v5 test (v3 baseline: reports/phobert_v3_eval_clean_vihsd_v5_test.json),
-   vihsd_test, probe set (data/probe/probe_v1.csv), bootstrap_compare.py --a v3 --b v5.
+   vihsd_test, probe set (data/probe/probe_v2.csv: v1 + 11 family-body / insult / slur-question / plain-criticism cases), bootstrap_compare.py --a v3 --b v5.
 3. Short texts / context (author's request): (a) after v4, app mode for a short paragraph: split into
    sentences, classify each, text label = most severe sentence, highlight sentences by colour;
    (b) optional experiment: context-aware model (parent comment [SEP] reply, or whole paragraph,
