@@ -32,10 +32,18 @@ weak on implicit hate. Leakage (4.7%) and inconsistent profanity labels were the
 
 ## Next steps
 1. DONE: PhoBERT v3 is on HF `main` (v2 kept on branch `v2`); 2026 set F1 0.594 → 0.679, see README.
-2. Active learning (IN PROGRESS): `scripts/build_active_pool.py` built `data/active/pool.csv` (9.5k: 39 new YouTube videos + VOZ)
-   and `data/active/to_label.csv` (700 selected: uncertain / cue-but-predicted-clean / predicted toxic / random).
-   Next: Claude labels them (guidelines v3), author spot-checks ~50, add to train, retrain v4 on Kaggle
-   to fix implicit hate.
+2. Active learning v4 (WAITING FOR KAGGLE): 817 comments labeled (data/active/to_label_final.csv; author
+   blind-checked 50: kappa 0.47 independent -> guideline v3.1 "behaviour criticism without insults = clean",
+   0.835 after; 9 ambiguous dropped) + 15 author demo-feedback rows -> data/active/active_labeled_v4.csv
+   (Kaggle copy: data/active/kaggle_upload/active_labeled_v4.csv, 821 rows, private dataset).
+   scripts/add_active_labels.py (repeat x3, train only) -> data/clean_vihsd_v4; notebook
+   notebooks/train_phobert_v4_kaggle.ipynb pushes HF branch `v4`. The 2026 test set was re-labeled under
+   v3.1 (13 hate->clean): data/realworld/realworld_2026_v4.csv, eval dir data/realworld_eval_v4
+   (baseline: v2 0.556, v3 0.647 F1-macro). When the author pastes v4 results: save
+   reports/phobert_results_v4.json, run evaluate_model.py --revision v4 on data/realworld_eval_v4,
+   data/clean_vihsd_v4 (test) and data/vihsd_test; paired bootstrap v3 vs v4 (see
+   reports/realworld_2026_v2_vs_v3_bootstrap.json method); update README results table (v4 row) and
+   MODEL_CARD in streamlit_app.py if v4 is promoted to `main`.
 3. Short texts / context (author's request): (a) after v4, app mode for a short paragraph: split into
    sentences, classify each, text label = most severe sentence, highlight sentences by colour;
    (b) optional experiment: context-aware model (parent comment [SEP] reply, or whole paragraph,
