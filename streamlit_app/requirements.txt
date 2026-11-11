@@ -6,3 +6,4 @@ pyvi>=0.1.1
 emoji>=2.8
 pandas>=2.0
 streamlit>=1.40
+huggingface_hub>=0.25

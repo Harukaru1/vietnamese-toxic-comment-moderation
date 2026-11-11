@@ -5,7 +5,9 @@ Run locally:  streamlit run streamlit_app/streamlit_app.py
 
 from __future__ import annotations
 
+import os
 import sys
+import uuid
 from datetime import datetime
 from pathlib import Path
 
@@ -14,6 +16,7 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
+from toxic_moderation.feedback_store import FeedbackStore, make_record  # noqa: E402
 from toxic_moderation.predictor import Predictor  # noqa: E402
 
 LABELS = ["clean", "offensive", "hate"]
@@ -64,6 +67,23 @@ def load_predictor() -> tuple[Predictor, str]:
     return predictor, sha
 
 
+def secret(name: str) -> str | None:
+    try:  # Streamlit Cloud: App settings -> Secrets; locally: .streamlit/secrets.toml or env var
+        return st.secrets.get(name) or os.environ.get(name)
+    except Exception:  # no secrets file at all
+        return os.environ.get(name)
+
+
+@st.cache_resource
+def load_feedback_store() -> FeedbackStore:
+    """One store per app process; disabled (local-only) when no HF token is configured."""
+    try:
+        return FeedbackStore(repo_id=secret("FEEDBACK_REPO") or "HaruKaru/vi_toxic_feedback", token=secret("HF_TOKEN"))
+    except Exception as e:  # bad token / HF down: keep the demo usable
+        print("feedback store disabled:", e)
+        return FeedbackStore()
+
+
 def confidence_words(p: float) -> str:
     if p >= 0.9:
         return "Mô hình khá chắc chắn"
@@ -84,8 +104,11 @@ ss = st.session_state
 ss.setdefault("text", "")
 ss.setdefault("history", [])   # every single-comment check in this browser session
 ss.setdefault("current", None)
+ss.setdefault("session_id", uuid.uuid4().hex[:12])  # random, only to keep a user's last vote per item
+ss.setdefault("share_ok", True)
 
 predictor, model_sha = load_predictor()
+store = load_feedback_store()
 
 # ---------------------------------------------------------------- sidebar
 with st.sidebar:
@@ -111,8 +134,10 @@ with st.sidebar:
             "trêu đùa hoặc chê bai.\n"
             "- Dễ bỏ sót **thù ghét ngầm** không có từ chửi (mỉa mai, biệt danh miệt thị mới).\n"
             "- Ranh giới *công kích* / *thù ghét* vốn chủ quan; con người cũng không luôn đồng ý.\n\n"
-            "Góp ý 👍/👎 chỉ lưu trong trình duyệt của bạn; tải về ở tab **Lịch sử & góp ý** "
-            "nếu muốn gửi cho tác giả để cải thiện mô hình.")
+            + ("Góp ý 👍/👎 (kèm câu bình luận) được lưu **ẩn danh** để tác giả rà soát và huấn luyện lại "
+               "mô hình; bạn có thể tắt ở mục góp ý." if store.enabled else
+               "Góp ý 👍/👎 chỉ lưu trong trình duyệt của bạn; tải về ở tab **Lịch sử & góp ý** "
+               "nếu muốn gửi cho tác giả để cải thiện mô hình."))
     st.markdown(f"[Mã nguồn & báo cáo (GitHub)]({GITHUB}) · "
                 "[Mô hình (Hugging Face)](https://huggingface.co/HaruKaru/phobert-vi-toxic-comment) · "
                 f"[Hướng dẫn gán nhãn]({GITHUB}/blob/main/docs/annotation_guidelines.md)")
@@ -177,8 +202,24 @@ with single:
                     format_func=lambda lab: f'{INFO[lab]["icon"]} {INFO[lab]["name"]}', key=f"fix_{cur['id']}")
                 if correct:
                     cur["correct"] = correct
-                    st.success("Đã ghi lại. Bạn có thể tải các góp ý ở tab **Lịch sử & góp ý** "
+                    st.success("Đã ghi lại, cảm ơn bạn! Góp ý này sẽ giúp mô hình học lại chỗ sai."
+                               if store.enabled and ss.share_ok else
+                               "Đã ghi lại. Bạn có thể tải các góp ý ở tab **Lịch sử & góp ý** "
                                "để dùng khi huấn luyện lại mô hình.")
+        if store.enabled:
+            st.toggle("Cho phép lưu góp ý ẩn danh để cải thiện mô hình", key="share_ok",
+                      help="Chỉ lưu câu bình luận, nhãn mô hình đoán và góp ý của bạn. "
+                           "Không lưu tên, IP hay thông tin cá nhân nào.")
+            state = (cur["feedback"], cur["correct"])
+            if ss.share_ok and state != cur.get("logged", (None, None)):
+                try:
+                    store.add(make_record(session=ss.session_id, item=cur["id"], text=cur["text"],
+                                          model_label=cur["label"], scores=cur["scores"], feedback=cur["feedback"],
+                                          correct=cur["correct"], model_revision=predictor.revision or "main",
+                                          model_sha=model_sha))
+                    cur["logged"] = state
+                except Exception as e:  # never break the demo because of logging
+                    print("feedback not saved:", e)
 
 # ---------------------------------------------------------------- batch
 with batch:
@@ -262,7 +303,9 @@ with history:
         if c2.button("🗑️ Xoá lịch sử", width="stretch"):
             ss.history, ss.current = [], None
             st.rerun()
-        st.caption("Lịch sử chỉ lưu trong trình duyệt của bạn ở phiên này; không gửi đi đâu cả.")
+        st.caption("Lịch sử này chỉ nằm trong trình duyệt của bạn ở phiên này. "
+                   + ("Riêng các góp ý 👍/👎 được lưu ẩn danh để cải thiện mô hình (nếu bạn bật cho phép)."
+                      if store.enabled else "Không có gì được gửi đi."))
 
 st.divider()
 st.caption("⚠️ Mô hình phục vụ nghiên cứu và có thể sai, nhất là ranh giới giữa *công kích* và *thù ghét*, "

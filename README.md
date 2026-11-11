@@ -150,6 +150,13 @@ a random slice, and comments matching **error patterns reported through the demo
 button** (body shaming, an intensifier aimed at a person such as "m béo vl", lone regional slurs).
 The labeled batch is added to train only (`scripts/add_active_labels.py`).
 
+The demo now closes the loop on its own: each 👍/👎 (and the label the user says is correct) is
+saved **anonymously** (comment text, model scores, vote, model commit; no name or IP, and users can
+opt out) to a private Hugging Face dataset through `huggingface_hub.CommitScheduler`
+(`src/toxic_moderation/feedback_store.py`). `scripts/export_feedback.py` downloads it, keeps each
+user's final vote and groups votes per comment for review under the guideline before any of it is
+used for training.
+
 <details>
 <summary><b>Ablation: teencode normalization</b> (no measurable gain)</summary>
 
@@ -241,7 +248,7 @@ PhoBERT training runs on Kaggle with the notebooks in `notebooks/`.
 - [x] Data audit: leakage removal, confident-learning label noise, UIT-ViHSD
 - [x] 2026 real-world test set with LLM-assisted annotation and blind human checks
 - [x] Guideline v3 and re-labeling; PhoBERT v3 deployed
-- [x] Streamlit demo with feedback collection; FastAPI + Docker; CI
+- [x] Streamlit demo with anonymous shared feedback (private HF dataset); FastAPI + Docker; CI
 - [ ] PhoBERT v4 with the active-learning batch (training)
 - [ ] Short-text mode: split a paragraph into sentences and highlight the toxic ones
 - [ ] Context-aware model (parent comment + reply)
