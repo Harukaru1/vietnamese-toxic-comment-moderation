@@ -11,6 +11,17 @@ Code, commits and README in English.
   GitHub Actions CI runs pytest (HF Space deploy is manual only: free Docker Spaces return HTTP 402).
 - README has all results; read it first.
 
+## Thesis context (author's report, read Nov 2026; do not copy names/text into the repo)
+- Thesis data = VFYR-2025 (~39k FB/YouTube/Reddit comments, Jan-May 2025) + ~20k ViHSD; labels from
+  ViHateT5 + PhoBERT-ViHSD auto-labels, human review ONLY where the two models disagreed (model kappa 0.65).
+  Shared model errors were never reviewed -> explains the inconsistent profanity/intensifier labels we found.
+- Thesis claimed macro F1 0.83-0.89 and offensive F1 0.52 -> 0.77 with mT5 paraphrase augmentation; our
+  leakage-free re-run gives ~0.80 (README section 1). Do not quote thesis numbers as current results.
+- Thesis pipeline removed stopwords before PhoBERT; ours does not (keep it that way: negations matter).
+- Thesis future work that matches our roadmap: context-aware model, sarcasm, continued pretraining of
+  PhoBERT on unlabeled social-media text (domain-adaptive pretraining; candidate for later).
+- Final report (step 5) should include a "thesis -> this project: what changed and why" section.
+
 ## Data pipeline (data/ is git-ignored and private)
 `data/raw/{train,val,test}.csv` (thesis data) → `scripts/find_label_issues.py` (cleanlab) →
 `scripts/make_clean_splits.py --prune` (`data/clean/`) → `scripts/add_vihsd.py`
