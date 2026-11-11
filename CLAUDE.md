@@ -55,6 +55,11 @@ weak on implicit hate. Leakage (4.7%) and inconsistent profanity labels were the
    `HaruKaru/vi_toxic_feedback` (data/*.jsonl, append-only, last vote per session+item wins). Needs
    Streamlit secrets HF_TOKEN (fine-grained, write to that dataset only) + optional FEEDBACK_REPO; without
    them it is disabled. Export for review: scripts/export_feedback.py -> data/active/demo_feedback.csv.
+3c. LATER (author: after the model is more mature): spoonerism / "nói lái" decoder, e.g. "mẹo mày bé" ->
+   "mẹ mày béo" (keep initial + tone, swap rhymes; or swap initials). Plan: syllable parser, candidates for
+   syllable pairs within 2-3 positions, keep only candidates matching a toxic-phrase lexicon, re-score the
+   decoded text, show "possible spoonerism" + needs-review (never auto-hate); small test set of harmful vs
+   playful spoonerisms; guideline rule "label by decoded meaning".
 4. YouTube moderation dashboard in the Streamlit app (needs the API key in Streamlit secrets).
 5. At the end, write for the author (in Vietnamese, to read and learn from): (a) a project report (process, results,
    lessons); (b) a study guide explaining the theory, algorithms and code used (TF-IDF, LR/SVM, PhoBERT &
