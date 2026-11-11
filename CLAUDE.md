@@ -50,7 +50,7 @@ weak on implicit hate. Leakage (4.7%) and inconsistent profanity labels were the
    max_len 256) with YouTube reply threads; compare with (a). Guideline already has a
    "context-dependent comments" rule (appearance remarks → clean + uncertain unless demeaning on their own).
    Demo feedback from the author is in data/active/user_feedback.csv (add to v4 train).
-3b. Shared demo feedback (done in code): streamlit app logs every vote anonymously via
+3b. Shared demo feedback (LIVE, verified Nov 2026): streamlit app logs every vote anonymously via
    src/toxic_moderation/feedback_store.py (CommitScheduler, every 2 min) to private HF dataset
    `HaruKaru/vi_toxic_feedback` (data/*.jsonl, append-only, last vote per session+item wins). Needs
    Streamlit secrets HF_TOKEN (fine-grained, write to that dataset only) + optional FEEDBACK_REPO; without
