@@ -68,15 +68,15 @@ weak on implicit hate. Leakage (4.7%) and inconsistent profanity labels were the
    + active batch x3 -> data/clean_vihsd_v5; notebook notebooks/train_phobert_v5_kaggle.ipynb -> HF branch v5.
    Evaluate like v4: realworld_eval_v4, clean_vihsd_v5 test (v3 baseline: reports/phobert_v3_eval_clean_vihsd_v5_test.json),
    vihsd_test, probe set (data/probe/probe_v2.csv, now 53 rows incl. slur-literal and animal idiom vs comparison: v1 + 11 family-body / insult / slur-question / plain-criticism cases), bootstrap_compare.py --a v3 --b v5.
-2c. TEST SET 2 (IN PROGRESS, author chose "stop retraining, build features, grow the test set"):
-   scripts/build_testset_pool.py collected 12,023 new YouTube comments (57 videos from 2026, none used in train or
-   test set 1; v3 predicts 954 toxic) and selected 2,000 to label -> data/testset2/to_label.csv (id t0000..;
-   strata in column `why`: random 955, pred_toxic 600, cue_pred_clean 400, pattern 45; v3 pred: 1,332 clean /
-   439 hate / 229 offensive). NEXT (after the author's usage limit resets): label all 2,000 under guideline v3.1
-   (same batch workflow as relabel_v31: print id|text in chunks of ~160, write `id label [u]` lines to
-   data/testset2/labels.txt, do NOT show the model's prediction while labeling), author blind-checks 50-100,
-   then build data/testset2_eval/test.csv and evaluate v2-v5 with bootstrap. Report metrics on the whole set AND
-   on the random stratum only (the whole set is enriched with toxic comments, so its class mix is not natural).
+2c. TEST SET 2 (LABELED Nov 2026, author blind check pending): 2,000 new YouTube comments (57 videos from 2026) labeled
+   by Claude under guideline v3.1 without seeing predictions: clean 1,705 / hate 253 / offensive 42, 517 uncertain.
+   Labels (ids only) in labels/testset2_v1.csv; private files data/testset2/{to_label.csv,labels.txt,testset2_labeled.csv},
+   eval dirs data/testset2_eval (all) and data/testset2_eval_random (955 random rows: 43 hate, 5 offensive).
+   First results (reports/testset2*_bootstrap.json): whole set v5-v3 F1 +0.014 CI [-0.004,0.031]; toxic precision only
+   0.33 (v3) / 0.35 (v5), recall 0.75; random stratum delta -0.011 CI [-0.071,0.039], recall 0.48. Main finding: many
+   false alarms (v3 flagged 447 clean comments among the selected 2,000). NEXT: author labels
+   data/testset2/blindcheck_100.xlsx (ids in blindcheck_ids.csv: 40 toxic, 30 clean-uncertain, 30 clean) -> kappa with
+   scripts/agreement.py, fix disagreements, then evaluate v2-v5 (evaluate_model.py) and add a README section.
 3. Short texts / context (author's request): (a) DONE Nov 2026: "Đoạn văn" tab in the app, src/toxic_moderation/segment.py
    (split_sentences + summarize; label = most severe sentence with conf >= 0.6, lower -> needs review). Original plan: app mode for a short paragraph: split into
    sentences, classify each, text label = most severe sentence, highlight sentences by colour;
