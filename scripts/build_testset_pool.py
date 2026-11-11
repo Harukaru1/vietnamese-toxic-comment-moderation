@@ -42,6 +42,10 @@ QUERIES = {
     "review": ["review quán ăn", "đánh giá điện thoại", "review phim chiếu rạp"],
     "life": ["va chạm giao thông", "chủ trọ người thuê", "học sinh giáo viên tranh cãi"],
     "talk": ["talkshow hôn nhân", "phỏng vấn đường phố", "tranh luận gen z"],
+    # heated topics (different videos from the training batch), to get enough toxic comments
+    "drama": ["bóc phốt tiktoker", "fan war kpop", "livestream bán hàng bị phốt", "drama streamer mới nhất"],
+    "sport": ["VAR trọng tài tranh cãi", "U23 Việt Nam thua", "fan bóng đá cãi nhau"],
+    "news": ["vụ án gây phẫn nộ", "xung đột hàng xóm", "tài xế đánh nhau"],
 }
 PATTERNS = re.compile(
     FEEDBACK_PATTERNS.pattern + r"|trò con bò|như (trâu|bò|chó|lợn|heo|khỉ)|\bbò đỏ\b|\b(3|ba) que\b|"
@@ -51,10 +55,10 @@ PATTERNS = re.compile(
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out-dir", type=Path, default=ROOT / "data" / "testset2")
-    ap.add_argument("--videos-per-query", type=int, default=3)
+    ap.add_argument("--videos-per-query", type=int, default=4)
     ap.add_argument("--min-comments", type=int, default=150)
-    ap.add_argument("--per-video", type=int, default=200)
-    ap.add_argument("--n-select", type=int, default=1000)
+    ap.add_argument("--per-video", type=int, default=300)
+    ap.add_argument("--n-select", type=int, default=2000)
     ap.add_argument("--published-after", default="2026-01-01T00:00:00Z")
     ap.add_argument("--select-only", action="store_true", help="reuse pool.csv and only redo the selection")
     args = ap.parse_args()
@@ -128,9 +132,9 @@ def select(pool: pd.DataFrame, args) -> None:
         picked.extend(idx)
         pool.loc[idx, "why"] = why
 
-    take(list(rng.permutation(pool.index)), int(n * 0.40), "random")
+    take(list(rng.permutation(pool.index)), int(n * 0.35), "random")
     take(pool[pool["pred"] != "clean"].sample(frac=1, random_state=1).index, int(n * 0.30), "pred_toxic")
-    take(pool[pool["cue"] & (pool["pred"] == "clean")].sample(frac=1, random_state=2).index, int(n * 0.15), "cue_pred_clean")
+    take(pool[pool["cue"] & (pool["pred"] == "clean")].sample(frac=1, random_state=2).index, int(n * 0.20), "cue_pred_clean")
     take(pool[pool["pattern"]].sample(frac=1, random_state=3).index, n - len(picked), "pattern")
     take(list(rng.permutation(pool.index)), n - len(picked), "random")   # top up if a stratum ran short
 

@@ -1,0 +1,28 @@
+{
+ "videos": 29,
+ "pool": 4685,
+ "pool_pred": {
+  "clean": 4450,
+  "hate": 154,
+  "offensive": 81
+ },
+ "selected": 2000,
+ "selected_by_why": {
+  "random": 1594,
+  "pred_toxic": 202,
+  "cue_pred_clean": 192,
+  "pattern": 12
+ },
+ "selected_pred": {
+  "clean": 1765,
+  "hate": 154,
+  "offensive": 81
+ },
+ "selected_by_category": {
+  "music": 597,
+  "life": 485,
+  "esports": 383,
+  "review": 379,
+  "talk": 156
+ }
+}
