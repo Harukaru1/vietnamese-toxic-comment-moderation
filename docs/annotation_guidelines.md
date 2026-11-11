@@ -1,4 +1,10 @@
-# Annotation guidelines v3 (clean / offensive / hate)
+# Annotation guidelines v3.1 (clean / offensive / hate)
+
+**v3.1 (Nov 2026, after the second blind check on the active-learning batch):** criticism of a
+person's or group's **behaviour or character**, without profanity, slurs, dehumanizing words or
+mockery of appearance, is **clean** ("Thằng này ích kỷ, lười", "Toàn là diễn viên. Phét lác",
+"những thành phần này phải tẩy chay"). Talking down to the person being replied to
+("hùa câm mồm") stays **hate**; cursing to vent with no target ("đm phá bóng vl") stays **offensive**.
 
 **v3 (current):** profanity used only as an *intensifier or exclamation* is **clean** (decided after
 the blind human annotation showed the author consistently labels "đẹp vl", "Đù anh Huấn" as clean,
@@ -40,6 +46,9 @@ and *hate* ("insults a group or someone") overlapped.
 | Profanity as praise/intensifier | clean | "hay vãi", "đẹp vcl", "nhanh vl" |
 | Curse phrase venting frustration, no target | offensive | "địt mẹ lại mất điện", "sút cc gì hiền vậy" |
 | Polite but harsh criticism of a policy/organization | clean | "chính sách này làm dở quá" |
+| Harsh criticism of a person's behaviour/character, no profanity or slur (v3.1) | clean | "thằng hề rất rẻ tiền", "trí thức rởm" |
+| Fan nickname for a team/player | clean | "Mờ Ngu", "Xã đần" |
+| Wishing legal punishment for criminals | clean | "tử hình hết bọn côn đồ" |
 | Criticism of an organization **with insults** | hate | "công ty lừa đảo, bọn chó" |
 | Insulting the person being replied to ("mày ngu") | hate | "mày im mẹ mồm đi", "não ngắn" |
 | Regional/ethnic slurs (bắc kỳ chó, 3 que, tàu khựa, bò đỏ…) | hate | even without profanity |

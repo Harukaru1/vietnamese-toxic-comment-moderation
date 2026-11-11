@@ -1,0 +1,12 @@
+{
+  "active_rows": 823,
+  "dropped_overlap_or_duplicate": 2,
+  "added_unique": 821,
+  "repeat": 3,
+  "added_label_counts": {
+    "clean": 479,
+    "hate": 245,
+    "offensive": 97
+  },
+  "final_train": 52706
+}

@@ -1,0 +1,13 @@
+{
+  "batch": "active learning v4 (817 YouTube/VOZ comments, LLM pre-annotated)",
+  "blind_subset": 50,
+  "author_labeled": 41,
+  "author_left_blank_as_ambiguous": 9,
+  "independent": {"raw_agreement": 0.659, "cohen_kappa": 0.473},
+  "after_guideline_v3_1": {"raw_agreement": 0.902, "cohen_kappa": 0.835, "note": "optimistic: rules settled after seeing the disagreements"},
+  "main_disagreement": "LLM labeled behaviour/character criticism without profanity as hate; author as clean -> guideline v3.1",
+  "labels_changed_after_review": 38,
+  "dropped_ambiguous": 9,
+  "final_batch": {"clean": 479, "hate": 247, "offensive": 97, "incl_author_demo_feedback": 15},
+  "test_2026_relabeled_under_v3_1": {"hate_to_clean": 13, "label_counts": {"clean": 922, "hate": 48, "offensive": 30}}
+}
