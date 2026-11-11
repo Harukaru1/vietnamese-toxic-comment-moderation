@@ -4,6 +4,7 @@
 [![Live demo](https://img.shields.io/badge/demo-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://vi-toxic-moderation.streamlit.app/)
 [![Model](https://img.shields.io/badge/model-Hugging%20Face-FFD21E?logo=huggingface&logoColor=black)](https://huggingface.co/HaruKaru/phobert-vi-toxic-comment)
 ![Python](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 A 3-class classifier for Vietnamese social-media comments (**clean / offensive / hate**), taken from
 a graduation-thesis prototype to a deployed, evaluated system. Most of the work went into the
@@ -249,6 +250,7 @@ PhoBERT training runs on Kaggle with the notebooks in `notebooks/`.
 
 ## Data and licences
 
+The **code** is released under the [MIT License](LICENSE). The licence does not cover any data.
 No comment text is published in this repository. The thesis data is private; UIT-ViHSD is
 CC BY-NC-SA 4.0 and VOZ-HSD is for research use; YouTube comments are collected through the
 official API and are not redistributed (author names are never stored). Only code, aggregate

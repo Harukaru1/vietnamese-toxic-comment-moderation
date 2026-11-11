@@ -7,6 +7,7 @@ name = "toxic-moderation"
 version = "0.1.0"
 description = "Vietnamese toxic comment moderation (clean / offensive / hate)"
 requires-python = ">=3.10"
+license = { text = "MIT" }
 dependencies = ["pandas>=2.0", "scikit-learn>=1.4", "joblib>=1.3", "emoji>=2.8", "requests>=2.31"]
 
 [tool.setuptools.packages.find]
