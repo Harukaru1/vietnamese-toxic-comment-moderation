@@ -16,6 +16,9 @@ active learning and user feedback from the demo.
 
 <p align="center"><img src="docs/demo_single.png" width="720" alt="Streamlit demo: a comment classified as offensive, with per-class confidence"></p>
 
+<p align="center"><img src="docs/demo_paragraph.png" width="720" alt="Short-paragraph mode: each sentence is classified and the toxic ones are highlighted"></p>
+<p align="center"><em>Short-paragraph mode: the paragraph takes the label of its most severe sentence the model is confident about; low-confidence hits only raise a "needs review" flag.</em></p>
+
 ## Highlights
 
 - **Real-world evaluation, not just a held-out split.** On a new set of 1,000 comments from 2026
@@ -299,7 +302,7 @@ PhoBERT training runs on Kaggle with the notebooks in `notebooks/`.
 - [x] PhoBERT v4 with an active-learning batch (no gain: documented as a negative result)
 - [x] Re-label inconsistent patterns + `bad`→`đéo` fix (v5: better on probes, more false alarms; not deployed)
 - [ ] Larger real-world test set from anonymous demo feedback (current one cannot resolve small gains)
-- [ ] Short-text mode: split a paragraph into sentences and highlight the toxic ones
+- [x] Short-paragraph mode: sentences are classified one by one and highlighted (`src/toxic_moderation/segment.py`)
 - [ ] Context-aware model (parent comment + reply)
 - [ ] YouTube moderation dashboard (analyse all comments of a video)
 - [ ] LLM zero/few-shot comparison (quality, latency, cost)

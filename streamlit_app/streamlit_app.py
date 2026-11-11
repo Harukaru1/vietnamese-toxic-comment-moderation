@@ -5,6 +5,7 @@ Run locally:  streamlit run streamlit_app/streamlit_app.py
 
 from __future__ import annotations
 
+import html
 import os
 import sys
 import uuid
@@ -18,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from toxic_moderation.feedback_store import FeedbackStore, make_record  # noqa: E402
 from toxic_moderation.predictor import Predictor  # noqa: E402
+from toxic_moderation.segment import split_sentences, summarize  # noqa: E402
 
 LABELS = ["clean", "offensive", "hate"]
 INFO = {
@@ -39,6 +41,11 @@ EXAMPLES = {
     "Xúc phạm": "Bọn này ngu như chó, cút hết về nước đi",
 }
 MAX_BATCH = 200
+MAX_PARAGRAPH_CHARS = 3000
+PARAGRAPH_EXAMPLE = ("Hôm qua mình xem trận chung kết, công nhận đội bạn đá hay vl. Hàng thủ chơi rất chắc, "
+                     "thủ môn bắt quá đỉnh. Nhưng mà đm trọng tài thổi kiểu gì không hiểu nổi. "
+                     "Còn thằng số 7 thì ngu như bò, đá như thế thì cút về quê đi. "
+                     "Nói chung trận đấu vẫn đáng xem, mong mùa sau còn hay hơn.")
 # Shown in the sidebar; update together with the model on the Hub (see README "Results").
 MODEL_CARD = {"version": "PhoBERT v3", "f1_indomain": 0.815, "f1_2026": 0.679, "precision_toxic_2026": 0.82}
 GITHUB = "https://github.com/Harukaru1/vietnamese-toxic-comment-moderation"
@@ -51,6 +58,10 @@ st.markdown("""
               border-radius: 10px; padding: 14px 18px; margin: 8px 0 14px 0;}
 .result-card .title {font-size: 1.35rem; font-weight: 700; color: var(--c); margin-bottom: 4px;}
 .result-card .sub {opacity: .85;}
+.sent {padding: 2px 4px; border-radius: 5px; line-height: 2.0;
+       background: color-mix(in srgb, var(--c) var(--a), transparent); border-bottom: 2px solid var(--c);}
+.sent.unsure {border-bottom-style: dashed;}
+.para-box {border: 1px solid color-mix(in srgb, currentColor 15%, transparent); border-radius: 10px; padding: 14px 16px;}
 .label-chip {display:inline-block; padding: 1px 9px; border-radius: 999px; font-size: .85rem;
              background: color-mix(in srgb, var(--c) 15%, transparent); color: var(--c); font-weight: 600;}
 </style>""", unsafe_allow_html=True)
@@ -148,7 +159,7 @@ st.title("🛡️ Kiểm tra bình luận tiếng Việt")
 st.markdown("Dán một bình luận vào ô bên dưới. Mô hình sẽ cho bạn biết nó **bình thường**, "
             "**công kích** hay **thù ghét**, kèm mức độ chắc chắn.")
 
-single, batch, history = st.tabs(["💬 Một bình luận", "📋 Nhiều bình luận", "🕘 Lịch sử & góp ý"])
+single, paragraph, batch, history = st.tabs(["💬 Một bình luận", "📝 Đoạn văn", "📋 Nhiều bình luận", "🕘 Lịch sử & góp ý"])
 
 # ---------------------------------------------------------------- single comment
 with single:
@@ -220,6 +231,60 @@ with single:
                     cur["logged"] = state
                 except Exception as e:  # never break the demo because of logging
                     print("feedback not saved:", e)
+
+# ---------------------------------------------------------------- short paragraph
+with paragraph:
+    st.markdown("Dán một **đoạn văn ngắn** (bài đăng, bình luận dài, đánh giá sản phẩm). Mô hình xét **từng câu** "
+                "và tô màu những câu có vấn đề, thay vì chỉ cho một nhãn chung.")
+    ss.setdefault("para_text", "")
+
+    def use_para_example() -> None:
+        ss.para_text = PARAGRAPH_EXAMPLE
+
+    para_text = st.text_area("Đoạn văn", key="para_text", height=170, max_chars=MAX_PARAGRAPH_CHARS,
+                             placeholder="Ví dụ: một bài đăng vài câu, mỗi câu kết thúc bằng dấu chấm hoặc xuống dòng...")
+    c1, c2 = st.columns([1, 1])
+    run_para = c1.button("🔍 Phân tích đoạn văn", type="primary", width="stretch")
+    c2.button("✨ Dùng ví dụ mẫu", on_click=use_para_example, width="stretch")
+
+    if run_para and not para_text.strip():
+        st.warning("Bạn nhập một đoạn văn trước nhé.")
+    elif run_para:
+        sents = split_sentences(para_text)
+        ss.para_result = dict(sents=sents, preds=predictor.predict(sents))
+    res = ss.get("para_result")
+    if res:
+        sents, preds = res["sents"], res["preds"]
+        summary = summarize(preds, min_conf=REVIEW_BELOW)
+        n_toxic = summary["counts"]["offensive"] + summary["counts"]["hate"]
+        i = INFO[summary["label"]]
+        detail = (f"{n_toxic} trên {len(sents)} câu có vấn đề." if n_toxic else f"Cả {len(sents)} câu đều ổn.")
+        if summary["needs_review"]:
+            detail += " Có câu mô hình chưa chắc (gạch chân nét đứt), nên có người xem lại."
+        st.markdown(f'<div class="result-card" style="--c:{i["color"]}"><div class="title">{i["icon"]} {i["name"]}</div>'
+                    f'<div>Nhãn của đoạn văn lấy theo câu nặng nhất mà mô hình đủ chắc chắn.</div>'
+                    f'<div class="sub">{detail}</div></div>', unsafe_allow_html=True)
+        spans = []
+        for sent, pr in zip(sents, preds):
+            conf = pr["scores"][pr["label"]]
+            info = INFO[pr["label"]]
+            alpha = "0%" if pr["label"] == "clean" else f"{int(10 + 25 * conf)}%"
+            cls = "sent unsure" if (pr["label"] != "clean" and conf < REVIEW_BELOW) else "sent"
+            style = f'--c:{info["color"]};--a:{alpha};' + ("border-bottom-color:transparent;" if pr["label"] == "clean" else "")
+            spans.append(f'<span class="{cls}" style="{style}" title="{info["name"]} ({conf:.0%})">{html.escape(sent)}</span>')
+        st.markdown('<div class="para-box">' + " ".join(spans) + "</div>", unsafe_allow_html=True)
+        st.caption(" · ".join(f'{INFO[lab]["icon"]} {INFO[lab]["name"]}: {summary["counts"][lab]} câu' for lab in LABELS)
+                   + " · Rê chuột vào từng câu để xem độ chắc chắn.")
+        with st.expander("Xem chi tiết từng câu"):
+            st.dataframe(
+                pd.DataFrame({"Câu": sents,
+                              "Nhãn": [f'{INFO[pr["label"]]["icon"]} {INFO[pr["label"]]["name"]}' for pr in preds],
+                              "Độ chắc chắn": [pr["scores"][pr["label"]] for pr in preds]}),
+                width="stretch", hide_index=True,
+                column_config={"Câu": st.column_config.TextColumn(width="large"),
+                               "Độ chắc chắn": st.column_config.ProgressColumn(format="percent", min_value=0, max_value=1)})
+        st.caption("Mô hình vẫn đọc từng câu riêng lẻ, nên có thể bỏ sót ý xúc phạm trải qua nhiều câu "
+                   "hoặc câu chỉ xúc phạm khi biết ngữ cảnh.")
 
 # ---------------------------------------------------------------- batch
 with batch:
