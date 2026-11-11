@@ -58,6 +58,12 @@ weak on implicit hate. Leakage (4.7%) and inconsistent profanity labels were the
    data/clean_vihsd_v4 (test) and data/vihsd_test; paired bootstrap v3 vs v4 (see
    reports/realworld_2026_v2_vs_v3_bootstrap.json method); update README results table (v4 row) and
    MODEL_CARD in streamlit_app.py if v4 is promoted to `main`.
+2b. v5 (WAITING FOR KAGGLE): relabels/guidelines_v31.csv (790 rows reviewed, 163 changed; author blind 50:
+   kappa 0.42 -> 0.59 after rules: insult at one person = hate; group generalization = hate only with a demeaning
+   word) + scripts/fix_bad_token.py ("bad" was "đéo" in ~1,700 thesis rows, 69% hate; found by the author)
+   + active batch x3 -> data/clean_vihsd_v5; notebook notebooks/train_phobert_v5_kaggle.ipynb -> HF branch v5.
+   Evaluate like v4: realworld_eval_v4, clean_vihsd_v5 test (v3 baseline: reports/phobert_v3_eval_clean_vihsd_v5_test.json),
+   vihsd_test, probe set (data/probe/probe_v1.csv), bootstrap_compare.py --a v3 --b v5.
 3. Short texts / context (author's request): (a) after v4, app mode for a short paragraph: split into
    sentences, classify each, text label = most severe sentence, highlight sentences by colour;
    (b) optional experiment: context-aware model (parent comment [SEP] reply, or whole paragraph,

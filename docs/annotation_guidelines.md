@@ -59,6 +59,11 @@ and *hate* ("insults a group or someone") overlapped.
 | Intensifier **aimed at a person's flaw** | hate | "m béo vl", "thằng này ngu vl" (vs. "đẹp vl" = clean) |
 | Regional/ethnic slur on its own, even as a one-word comment | hate | "parky", "Đông Lào" |
 | Neutral or positive use of a regional term | clean | "mấy anh Bắc Kỳ đẹp trai lắm" |
+| Insulting one specific person's looks or thinking, no slur or threat (v3.1, confirmed) | hate | "tư duy của bạn chán vãi c", "xấu toàn diện thế này" |
+| Teasing a celebrity's looks with a laugh, no demeaning words | clean, `uncertain=1` | "chị đẹp thế mà cưới a này xấu vl :)))" |
+| Negative generalization about a country/group **with a demeaning word** (bọn, lũ, như lon, bọn tàu, xứ lừa…) | hate | "vn như lon về mọi mặt", "logic bọn nó là…" |
+| Negative opinion about a country/government/group in plain words | clean | "kinh tế nước này yếu", "chính quyền làm chưa tốt" |
+| Criticizing what a specific set of people did ("bọn lừa đảo", "bọn côn đồ đánh người") | clean | behaviour of wrongdoers, not a group identity |
 | Crude sexual content not aimed at a real target | offensive | |
 | Sexual content about a real person | hate | |
 | Only emoji, a name, a URL, unintelligible text | clean | |

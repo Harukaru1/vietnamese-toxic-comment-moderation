@@ -1,0 +1,26 @@
+{
+  "train": {
+    "rows_changed": 1368,
+    "label_counts_changed": {
+      "hate": 966,
+      "clean": 314,
+      "offensive": 88
+    }
+  },
+  "val": {
+    "rows_changed": 173,
+    "label_counts_changed": {
+      "hate": 114,
+      "clean": 48,
+      "offensive": 11
+    }
+  },
+  "test": {
+    "rows_changed": 172,
+    "label_counts_changed": {
+      "hate": 117,
+      "clean": 47,
+      "offensive": 8
+    }
+  }
+}

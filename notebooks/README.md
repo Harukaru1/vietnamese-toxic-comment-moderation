@@ -11,5 +11,6 @@ pushes the model to its own branch of
 | `train_phobert_v2_clean_kaggle.ipynb` | v2 | leakage removed, cleanlab-pruned, + UIT-ViHSD |
 | `train_phobert_v3_kaggle.ipynb` | v3 (deployed) | v2 data re-labeled with guideline v3 |
 | `train_phobert_v4_kaggle.ipynb` | v4 | v3 data + active-learning batch |
+| `train_phobert_v5_kaggle.ipynb` | v5 | v4 + guideline v3.1 relabels (790 rows) + `bad`→`đéo` text fix |
 
 Kaggle setup: GPU T4 x2, Internet on, secret `HF_TOKEN`; inputs are private Kaggle datasets.
