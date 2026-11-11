@@ -43,7 +43,10 @@ weak on implicit hate. Leakage (4.7%) and inconsistent profanity labels were the
 
 ## Next steps
 1. DONE: PhoBERT v3 is on HF `main` (v2 kept on branch `v2`); 2026 set F1 0.594 → 0.679, see README.
-2. Active learning v4 (WAITING FOR KAGGLE): 817 comments labeled (data/active/to_label_final.csv; author
+2. DONE, NEGATIVE: v4 = v3 within noise (2026 0.641 vs 0.647, CI [-0.068,0.051]; in-domain 0.804; ViHSD 0.683;
+   probe set data/probe/probe_v1.csv 24 vs 23 of 33). Not promoted; v3 stays on main. Cause: old train labels
+   inconsistent on the same patterns. NEXT: targeted re-label of train under v3.1 (body shaming, intensifier at
+   person, cút, appearance) as a relabels/ patch, then v5. History of v4: 817 comments labeled (data/active/to_label_final.csv; author
    blind-checked 50: kappa 0.47 independent -> guideline v3.1 "behaviour criticism without insults = clean",
    0.835 after; 9 ambiguous dropped) + 15 author demo-feedback rows -> data/active/active_labeled_v4.csv
    (Kaggle copy: data/active/kaggle_upload/active_labeled_v4.csv, 821 rows, private dataset).

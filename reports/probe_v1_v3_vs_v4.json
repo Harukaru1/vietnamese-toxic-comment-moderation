@@ -1,0 +1,59 @@
+{
+ "note": "33 hand-written probe sentences (private, data/probe/), none in train; labels follow guideline v3.1",
+ "by_pattern": {
+  "intensifier_praise": {
+   "n": 6,
+   "v3_correct": 6,
+   "v4_correct": 6
+  },
+  "intensifier_at_person": {
+   "n": 5,
+   "v3_correct": 2,
+   "v4_correct": 2
+  },
+  "body_shaming": {
+   "n": 4,
+   "v3_correct": 0,
+   "v4_correct": 0
+  },
+  "cut_at_person": {
+   "n": 3,
+   "v3_correct": 2,
+   "v4_correct": 2
+  },
+  "regional_slur": {
+   "n": 3,
+   "v3_correct": 2,
+   "v4_correct": 3
+  },
+  "venting": {
+   "n": 4,
+   "v3_correct": 3,
+   "v4_correct": 3
+  },
+  "behaviour_criticism": {
+   "n": 4,
+   "v3_correct": 4,
+   "v4_correct": 4
+  },
+  "appearance_neutral": {
+   "n": 2,
+   "v3_correct": 2,
+   "v4_correct": 2
+  },
+  "regional_neutral": {
+   "n": 2,
+   "v3_correct": 2,
+   "v4_correct": 2
+  }
+ },
+ "total": {
+  "n": 33,
+  "v3_correct": 23,
+  "v4_correct": 24
+ },
+ "toxic_vs_clean_correct": {
+  "v3": 26,
+  "v4": 27
+ }
+}

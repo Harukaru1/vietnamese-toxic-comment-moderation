@@ -1,0 +1,19 @@
+{
+  "delta_f1_macro_v4_minus_v3": -0.0064,
+  "ci95": [
+    -0.0678,
+    0.0506
+  ],
+  "p_v4_not_better": 0.597,
+  "n_bootstrap": 2000,
+  "data_dir": "data/realworld_eval_v4",
+  "v3": {
+    "toxic_precision": 0.682,
+    "toxic_recall": 0.577
+  },
+  "v4": {
+    "toxic_precision": 0.553,
+    "toxic_recall": 0.603
+  },
+  "n_changed_predictions": 34
+}
