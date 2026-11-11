@@ -60,7 +60,7 @@ def main() -> None:
     rep = {f"delta_f1_macro_{args.b}_minus_{args.a}": round(f1(preds[args.b], full) - f1(preds[args.a], full), 4),
            "ci95": [round(float(np.percentile(deltas, 2.5)), 4), round(float(np.percentile(deltas, 97.5)), 4)],
            f"p_{args.b}_not_better": round(float((deltas <= 0).mean()), 4),
-           "n_bootstrap": args.n, "data_dir": str(args.data_dir.relative_to(ROOT)),
+           "n_bootstrap": args.n, "data_dir": str(args.data_dir.resolve().relative_to(ROOT)),
            args.a: toxic_pr(y, preds[args.a]), args.b: toxic_pr(y, preds[args.b]),
            "n_changed_predictions": int((preds[args.a] != preds[args.b]).sum())}
     args.out.write_text(json.dumps(rep, indent=2))
