@@ -44,10 +44,12 @@ the out-of-time, out-of-platform benchmark; ViHSD is a public dataset from anoth
 | PhoBERT v2 | 0.801 | 0.594² | **0.690** | + leakage removal, label-noise pruning, UIT-ViHSD |
 | **PhoBERT v3** (deployed) | **0.815**¹ | **0.679**² | 0.674 | + guideline v3, 772 labels fixed |
 | PhoBERT v4 | 0.804 | 0.641³ | 0.683 | + 821 active-learning comments; **not deployed** (no gain, see §5) |
+| PhoBERT v5 | 0.781⁴ | 0.635³ | 0.673 | + 163 labels fixed (guideline v3.1), `bad`→`đéo` text fix; **not deployed** (see §6) |
 
 ¹ On the v3-labeled test split (v2 scores 0.796 on the same split).
 ² Guideline v3 labels. After the v3.1 clarification (13 *hate* → *clean*), v2 scores 0.556 and v3 0.647.
-³ Guideline v3.1 labels; compare with v3's 0.647 (paired bootstrap Δ −0.006, 95% CI [−0.068, +0.051]).
+³ Guideline v3.1 labels; compare with v3's 0.647 (paired bootstrap v4 Δ −0.006, 95% CI [−0.068, +0.051]; v5 Δ −0.012, CI [−0.067, +0.041]).
+⁴ On the v5 test split (19 labels changed, `bad`→`đéo`); v3 scores 0.799 on the same split.
 All PhoBERT models are `vinai/phobert-base-v2`, fine-tuned on a Kaggle T4. Model selection always
 uses the validation split; each test set is used once per model.
 
@@ -164,6 +166,37 @@ same patterns inconsistently (for example, of 14 train comments with "mày/m …
 hate and 6 clean; a manual check is still needed to tell real inconsistency from context). The next step is therefore to re-label those patterns in the existing data under guideline
 v3.1, not to add more new comments. v3 stays deployed; v4 is kept on the `v4` branch for reference.
 
+### 6. Fixing old labels and a text artifact (v5: targeted gains, but more false alarms)
+
+Two fixes to the existing data (`relabels/guidelines_v31.csv`, `scripts/fix_bad_token.py`):
+
+- **Re-labeling.** 790 short comments matching the reported error patterns were reviewed under
+  guideline v3.1; 163 labels changed. The author blind-labeled 50 of them: κ 0.42 with the new labels
+  vs 0.21 with the original ones, 0.59 after two rules were clarified in the guideline.
+- **A text artifact found by the author during that check.** In ~1,700 thesis comments the swear
+  word "đéo" had been replaced by the English word "bad" ("có sai bad đâu"). 69% of those rows are
+  *hate*, and real comments never contain it (0 of 1,000 in the 2026 set), so the model had learned
+  a token it will never see. The script maps it back.
+
+Result: v5 is better exactly where it was aimed and no better overall.
+
+| | v3 | v4 | v5 |
+|---|---:|---:|---:|
+| Probe set (48 hand-written sentences, none in train) | 36 | 39 | **43** |
+| 2026 set, F1-macro | **0.647** | 0.641 | 0.635 |
+| 2026 set, toxic precision / recall | **0.68** / 0.58 | 0.55 / 0.60 | 0.57 / 0.58 |
+
+On the 2026 set v5 changes 29 predictions: 8 fixed, 19 broken. The fixes are real insults that v3
+under-rated; the breaks are mostly neutral comments that mention politics, regions or groups, now
+flagged as hate with low confidence (0.5–0.65). The re-labeled rows and the active batch are rich in
+political/regional hate, and the model generalized "mentions a group" → hate. For a moderation tool
+false alarms on innocent comments cost more than these gains, so **v3 stays deployed**.
+
+A second lesson is about measurement: the 2026 set has only 48 hate and 30 offensive comments, so
+its 95% CI is about ±0.06 and cannot resolve differences of 0.01–0.03 between versions. The next
+step is a larger real-world test set (the demo's anonymous feedback is the source), not another
+training round.
+
 The demo now closes the loop on its own: each 👍/👎 (and the label the user says is correct) is
 saved **anonymously** (comment text, model scores, vote, model commit; no name or IP, and users can
 opt out) to a private Hugging Face dataset through `huggingface_hub.CommitScheduler`
@@ -264,7 +297,8 @@ PhoBERT training runs on Kaggle with the notebooks in `notebooks/`.
 - [x] Guideline v3 and re-labeling; PhoBERT v3 deployed
 - [x] Streamlit demo with anonymous shared feedback (private HF dataset); FastAPI + Docker; CI
 - [x] PhoBERT v4 with an active-learning batch (no gain: documented as a negative result)
-- [ ] Re-label inconsistent patterns (body shaming, insults with intensifiers) in the existing train data
+- [x] Re-label inconsistent patterns + `bad`→`đéo` fix (v5: better on probes, more false alarms; not deployed)
+- [ ] Larger real-world test set from anonymous demo feedback (current one cannot resolve small gains)
 - [ ] Short-text mode: split a paragraph into sentences and highlight the toxic ones
 - [ ] Context-aware model (parent comment + reply)
 - [ ] YouTube moderation dashboard (analyse all comments of a video)

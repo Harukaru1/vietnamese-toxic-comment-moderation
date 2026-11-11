@@ -58,7 +58,11 @@ weak on implicit hate. Leakage (4.7%) and inconsistent profanity labels were the
    data/clean_vihsd_v4 (test) and data/vihsd_test; paired bootstrap v3 vs v4 (see
    reports/realworld_2026_v2_vs_v3_bootstrap.json method); update README results table (v4 row) and
    MODEL_CARD in streamlit_app.py if v4 is promoted to `main`.
-2b. v5 (WAITING FOR KAGGLE): relabels/guidelines_v31.csv (790 rows reviewed, 163 changed; author blind 50:
+2b. v5 DONE, NOT PROMOTED (v3 stays on main): in-domain 0.781 (v3 0.799 same split), 2026 0.635 (CI [-0.067,0.041]),
+   ViHSD 0.673, probe_v2 43/48 (v3 36); on 2026 it fixed 8 / broke 19 (neutral political/regional comments -> hate,
+   low confidence). 2026 set too small (48 hate, 30 offensive) to resolve small gains. Proposed to author (awaiting
+   answer): stop retraining, build features (short-paragraph mode, dashboard), grow the test set from demo feedback.
+   Details of v5: relabels/guidelines_v31.csv (790 rows reviewed, 163 changed; author blind 50:
    kappa 0.42 -> 0.59 after rules: insult at one person = hate; group generalization = hate only with a demeaning
    word) + scripts/fix_bad_token.py ("bad" was "đéo" in ~1,700 thesis rows, 69% hate; found by the author)
    + active batch x3 -> data/clean_vihsd_v5; notebook notebooks/train_phobert_v5_kaggle.ipynb -> HF branch v5.
