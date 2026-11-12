@@ -1,0 +1,21 @@
+{
+  "classifier": "v7",
+  "llm": "gemini-flash-lite-latest",
+  "n_author_labeled": 155,
+  "classifier_only": {
+    "n": 111,
+    "author_says_toxic": 0.459,
+    "share_of_true_toxic_kept": 1.0
+  },
+  "llm_confirms": {
+    "n": 62,
+    "author_says_toxic": 0.694,
+    "share_of_true_toxic_kept": 0.843
+  },
+  "reference_labels_confirm": {
+    "n": 68,
+    "author_says_toxic": 0.75,
+    "share_of_true_toxic_kept": 1.0
+  },
+  "llm_vs_author_3class_agreement": 0.676
+}

@@ -20,7 +20,8 @@ import time
 import requests
 
 API = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-DEFAULT_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
+# The lite model answered reliably on the free tier when the larger flash models returned 503.
+DEFAULT_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-lite-latest")
 LABELS = ("clean", "offensive", "hate")
 
 GUIDELINE = """Bạn là người kiểm duyệt bình luận tiếng Việt trên mạng xã hội. Gán cho mỗi bình luận một nhãn:
