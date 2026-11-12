@@ -48,7 +48,8 @@ PARAGRAPH_EXAMPLE = ("Hôm qua mình xem trận chung kết, công nhận đội
                      "Còn thằng số 7 thì ngu như bò, đá như thế thì cút về quê đi. "
                      "Nói chung trận đấu vẫn đáng xem, mong mùa sau còn hay hơn.")
 # Shown in the sidebar; update together with the model on the Hub (see README "Results").
-MODEL_CARD = {"version": "PhoBERT v3", "f1_indomain": 0.815, "f1_2026": 0.679, "precision_toxic_2026": 0.82}
+MODEL_CARD = {"version": "PhoBERT v6", "precision_toxic": 0.45, "recall_toxic": 0.50}
+MODEL_REVISION = os.getenv("MODEL_REVISION") or "v6"  # Hub branch served by this demo; set to "v3" to roll back
 GITHUB = "https://github.com/Harukaru1/vietnamese-toxic-comment-moderation"
 REVIEW_BELOW = 0.6  # below this confidence, suggest a human look
 
@@ -70,7 +71,7 @@ st.markdown("""
 
 @st.cache_resource(show_spinner="Đang tải mô hình PhoBERT (lần đầu mất khoảng 1 phút)...")
 def load_predictor() -> tuple[Predictor, str]:
-    predictor = Predictor()
+    predictor = Predictor(revision=MODEL_REVISION)
     try:  # show which model commit is loaded, so a stale cache is easy to spot
         from huggingface_hub import model_info
         sha = model_info(predictor.model_id, revision=predictor.revision).sha[:7]
@@ -132,22 +133,22 @@ with st.sidebar:
         st.caption(i["hint"])
     st.divider()
     st.subheader("Về mô hình")
-    st.markdown(f"**{MODEL_CARD['version']}**, fine-tune trên khoảng 52 nghìn bình luận tiếng Việt "
-                "và được kiểm tra lại trên 1.000 bình luận YouTube và diễn đàn năm 2026.")
+    st.markdown(f"**{MODEL_CARD['version']}**, fine-tune trên khoảng 52 nghìn bình luận tiếng Việt, rồi tinh chỉnh "
+                "thêm trên 1.700 bình luận YouTube năm 2026 gán theo định nghĩa hiện tại.")
     m1, m2 = st.columns(2)
-    m1.metric("F1 tập test", f"{MODEL_CARD['f1_indomain']:.3f}", help="F1-macro trên tập test nội bộ (3 nhãn).")
-    m2.metric("F1 thực tế 2026", f"{MODEL_CARD['f1_2026']:.3f}",
-              help="F1-macro trên bình luận YouTube/VOZ năm 2026, dữ liệu mô hình chưa từng thấy.")
-    st.caption(f"Khi báo một bình luận là độc hại, mô hình đúng khoảng "
-               f"{MODEL_CARD['precision_toxic_2026']:.0%} số lần (trên dữ liệu 2026).")
+    m1.metric("Báo đúng", f"{MODEL_CARD['precision_toxic']:.0%}",
+              help="Precision: trong các bình luận mô hình báo độc hại, bao nhiêu phần trăm độc hại thật.")
+    m2.metric("Bắt được", f"{MODEL_CARD['recall_toxic']:.0%}",
+              help="Recall: trong các bình luận độc hại thật, mô hình bắt được bao nhiêu phần trăm.")
+    st.caption("Đo trên 968 bình luận YouTube năm 2026 mà mô hình chưa từng thấy, quy đổi về tỉ lệ bình luận "
+               "thực tế (khoảng 5% là độc hại). Vì vậy hãy xem kết quả là gợi ý cho người kiểm duyệt.")
     with st.expander("Mô hình còn hạn chế gì?"):
         st.markdown(
             "- Chỉ đọc **từng bình luận riêng lẻ**, không thấy ngữ cảnh: \"bạn mập quá đấy\" có thể là "
             "trêu đùa hoặc chê bai.\n"
             "- Dễ bỏ sót **thù ghét ngầm** không có từ chửi (mỉa mai, biệt danh miệt thị mới).\n"
             "- Ranh giới *công kích* / *thù ghét* vốn chủ quan; con người cũng không luôn đồng ý.\n"
-            "- Mô hình hiện tại được huấn luyện theo định nghĩa cũ (mắng một người cũng tính là *thù ghét*), "
-            "nên có thể báo *thù ghét* cho câu mà định nghĩa mới xếp vào *công kích*.\n\n"
+            "- Phân biệt *thù ghét* với *công kích* còn yếu: mô hình mới học định nghĩa hiện tại từ ít ví dụ.\n\n"
             + ("Góp ý 👍/👎 (kèm câu bình luận) được lưu **ẩn danh** để tác giả rà soát và huấn luyện lại "
                "mô hình; bạn có thể tắt ở mục góp ý." if store.enabled else
                "Góp ý 👍/👎 chỉ lưu trong trình duyệt của bạn; tải về ở tab **Lịch sử & góp ý** "

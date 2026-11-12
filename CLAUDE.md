@@ -6,7 +6,7 @@ Code, commits and README in English.
 
 ## What exists
 - 3-class Vietnamese toxic comment classifier (clean / offensive / hate), extension of the thesis.
-- PhoBERT v3 on HF Hub `HaruKaru/phobert-vi-toxic-comment` (`main`; branches `v2`, `v3`); demo on Streamlit Cloud
+- PhoBERT on HF Hub `HaruKaru/phobert-vi-toxic-comment` (`main` = v3; branches v2-v6; the Streamlit demo serves branch `v6` via MODEL_REVISION in streamlit_app.py since Nov 2026); demo on Streamlit Cloud
   (`streamlit_app/`, https://vi-toxic-moderation.streamlit.app/); FastAPI + Gradio + Docker in `app/`;
   GitHub Actions CI runs pytest (HF Space deploy is manual only: free Docker Spaces return HTTP 402).
 - README has all results; read it first.
@@ -77,7 +77,7 @@ weak on implicit hate. Leakage (4.7%) and inconsistent profanity labels were the
    Findings: v2-v5 all equal on test set 2 (toxic F1 0.40-0.42, reports/testset2_eval.json); weighted to the pool
    (inverse-probability weights, scripts/tune_threshold.py) v3 = precision 0.28 / recall 0.45; no threshold helps
    (reports/threshold_v3.json). Primary metric on test set 2 = binary toxic vs clean, weighted.
-2d. v6 (adaptation, WAITING FOR AUTHOR'S KAGGLE RUN): continue training v3 for 3 epochs, lr 1e-5, on the 1,739 v3.2 rows
+2d. v6 (adaptation; Kaggle run DONE and DEPLOYED in the demo: held-out weighted toxic P 0.45 / R 0.50 / F1 0.47, +0.125 vs v3 CI [0.045,0.223]; set 1 binary F1 0.58 vs 0.63; author asked to keep looking for improvements): continue training v3 for 3 epochs, lr 1e-5, on the 1,739 v3.2 rows
    only (data/adapt_v6; Kaggle files data/active/kaggle_upload/v6_train.csv + v6_val.csv; notebook
    notebooks/train_phobert_v6_kaggle.ipynb -> HF branch v6). Local CPU run "v6a" (models/phobert_v6a/best, not on HF):
    held-out weighted toxic P 0.53 / R 0.50 / F1 0.51 vs v3 0.28 / 0.45 / 0.35, delta +0.17 CI [0.09, 0.27];
