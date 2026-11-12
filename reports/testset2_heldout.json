@@ -22,6 +22,22 @@
       "f1_offensive": 0.348,
       "f1_hate": 0.157
     },
+    "v5": {
+      "toxic_weighted": {
+        "precision": 0.356,
+        "recall": 0.411,
+        "f1": 0.382
+      },
+      "toxic_unweighted": {
+        "precision": 0.376,
+        "recall": 0.704,
+        "f1": 0.49
+      },
+      "f1_macro_3class": 0.448,
+      "f1_clean": 0.842,
+      "f1_offensive": 0.328,
+      "f1_hate": 0.172
+    },
     "v6": {
       "toxic_weighted": {
         "precision": 0.547,
@@ -38,40 +54,32 @@
       "f1_offensive": 0.502,
       "f1_hate": 0.145
     },
-    "v7a": {
+    "v7": {
       "toxic_weighted": {
-        "precision": 0.682,
-        "recall": 0.435,
-        "f1": 0.531
+        "precision": 0.622,
+        "recall": 0.488,
+        "f1": 0.547
       },
       "toxic_unweighted": {
-        "precision": 0.647,
-        "recall": 0.635,
-        "f1": 0.641
+        "precision": 0.574,
+        "recall": 0.679,
+        "f1": 0.622
       },
-      "f1_macro_3class": 0.527,
-      "f1_clean": 0.93,
-      "f1_offensive": 0.523,
-      "f1_hate": 0.128
-    },
-    "v8b": {
-      "toxic_weighted": {
-        "precision": 0.613,
-        "recall": 0.468,
-        "f1": 0.531
-      },
-      "toxic_unweighted": {
-        "precision": 0.579,
-        "recall": 0.692,
-        "f1": 0.63
-      },
-      "f1_macro_3class": 0.522,
-      "f1_clean": 0.919,
+      "f1_macro_3class": 0.535,
+      "f1_clean": 0.918,
       "f1_offensive": 0.53,
-      "f1_hate": 0.118
+      "f1_hate": 0.156
     }
   },
   "vs_baseline": {
+    "v5": {
+      "delta_weighted_toxic_f1": -0.014,
+      "ci95": [
+        -0.043,
+        0.012
+      ],
+      "p_not_better": 0.8355
+    },
     "v6": {
       "delta_weighted_toxic_f1": 0.104,
       "ci95": [
@@ -80,19 +88,11 @@
       ],
       "p_not_better": 0.0
     },
-    "v7a": {
-      "delta_weighted_toxic_f1": 0.135,
+    "v7": {
+      "delta_weighted_toxic_f1": 0.15,
       "ci95": [
-        0.059,
-        0.228
-      ],
-      "p_not_better": 0.0
-    },
-    "v8b": {
-      "delta_weighted_toxic_f1": 0.134,
-      "ci95": [
-        0.066,
-        0.22
+        0.067,
+        0.243
       ],
       "p_not_better": 0.0
     }

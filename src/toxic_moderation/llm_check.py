@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 
 import requests
 
@@ -64,7 +65,8 @@ def parse_labels(reply: str, n: int) -> list[str]:
 
 
 def review(texts: list[str], api_key: str | None = None, model: str = DEFAULT_MODEL, batch_size: int = 20,
-           timeout: float = 60, session: requests.Session | None = None) -> list[str]:
+           timeout: float = 60, session: requests.Session | None = None, retries: int = 3,
+           backoff: float = 2.0) -> list[str]:
     """Label each comment with the LLM. Raises LLMError on an API error or a malformed reply."""
     http = session or requests.Session()
     headers = {"Content-Type": "application/json", "x-goog-api-key": api_key or os.getenv("GEMINI_API_KEY", "")}
@@ -72,8 +74,16 @@ def review(texts: list[str], api_key: str | None = None, model: str = DEFAULT_MO
     for i in range(0, len(texts), batch_size):
         batch = texts[i:i + batch_size]
         body = {"contents": [{"parts": [{"text": _prompt(batch)}]}], "generationConfig": {"temperature": 0}}
-        r = http.post(API.format(model=model), headers=headers, json=body, timeout=timeout)
-        data = r.json()
+        for attempt in range(retries + 1):
+            r = http.post(API.format(model=model), headers=headers, json=body, timeout=timeout)
+            try:
+                data = r.json()
+            except ValueError:  # a gateway in between answered with plain text (502/504)
+                data = {"error": {"code": getattr(r, "status_code", 502), "message": str(getattr(r, "text", ""))[:200]}}
+            busy = "error" in data and data["error"].get("code") in (429, 500, 502, 503, 504)
+            if not busy or attempt == retries:
+                break
+            time.sleep(backoff * 2 ** attempt)  # the free tier is often briefly overloaded
         if "error" in data:
             raise LLMError(f"{data['error'].get('code')}: {data['error'].get('message')}")
         try:

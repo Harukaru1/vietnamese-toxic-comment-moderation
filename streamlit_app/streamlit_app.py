@@ -49,12 +49,12 @@ PARAGRAPH_EXAMPLE = ("Hôm qua mình xem trận chung kết, công nhận đội
                      "Còn thằng số 7 thì ngu như bò, đá như thế thì cút về quê đi. "
                      "Nói chung trận đấu vẫn đáng xem, mong mùa sau còn hay hơn.")
 # Shown in the sidebar; update together with the model on the Hub (see README "Results").
-MODEL_CARD = {"version": "PhoBERT v6", "precision_toxic": 0.45, "recall_toxic": 0.50}
-MODEL_REVISION = os.getenv("MODEL_REVISION") or "v6"  # Hub branch served by this demo; set to "v3" to roll back
+MODEL_CARD = {"version": "PhoBERT v7", "precision_toxic": 0.62, "recall_toxic": 0.49}
+MODEL_REVISION = os.getenv("MODEL_REVISION") or "v7"  # Hub branch served by this demo; set to "v6" to roll back
 GITHUB = "https://github.com/Harukaru1/vietnamese-toxic-comment-moderation"
 REVIEW_BELOW = 0.6  # below this confidence, suggest a human look
 # YouTube queues, on P(toxic) = 1 - P(clean). 0.8 was chosen on the validation split; on held-out comments
-# it gives precision 0.62 / recall 0.36 (reports/threshold_v6.json). Between the two a human should decide.
+# it gave precision 0.62 / recall 0.36 for v6 (reports/threshold_v6.json). Between the two a human should decide.
 HIDE_ABOVE, REVIEW_ABOVE = 0.8, 0.4
 PROFANITY_HELP = ("Bộ lọc riêng, dò theo danh sách từ (vl, đm, đéo...). Mô hình coi từ tục dùng để nhấn mạnh "
                   "(\"hay vcl\") là bình thường; bật mục này nếu kênh của bạn không chấp nhận từ tục dù với ý gì.")
@@ -140,7 +140,7 @@ with st.sidebar:
     st.divider()
     st.subheader("Về mô hình")
     st.markdown(f"**{MODEL_CARD['version']}**, fine-tune trên khoảng 52 nghìn bình luận tiếng Việt, rồi tinh chỉnh "
-                "thêm trên 1.700 bình luận YouTube năm 2026 gán theo định nghĩa hiện tại.")
+                "thêm trên 1.700 bình luận YouTube năm 2026 gán theo định nghĩa hiện tại (chọn bản tốt nhất trong 3 lần huấn luyện).")
     m1, m2 = st.columns(2)
     m1.metric("Báo đúng", f"{MODEL_CARD['precision_toxic']:.0%}",
               help="Precision: trong các bình luận mô hình báo độc hại, bao nhiêu phần trăm độc hại thật.")

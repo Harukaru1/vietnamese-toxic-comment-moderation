@@ -48,4 +48,10 @@ def test_review_batches_requests_and_sends_the_key_in_a_header():
 def test_review_raises_on_api_error():
     session = FakeSession([{"error": {"code": 429, "message": "quota"}}])
     with pytest.raises(LLMError, match="429"):
-        review(["a b c"], api_key="k", session=session)
+        review(["a b c"], api_key="k", session=session, retries=0)
+
+
+def test_review_retries_when_the_model_is_busy():
+    session = FakeSession([{"error": {"code": 503, "message": "busy"}}, answer('["clean"]')])
+    assert review(["a b c"], api_key="k", session=session, backoff=0) == ["clean"]
+    assert len(session.calls) == 2
