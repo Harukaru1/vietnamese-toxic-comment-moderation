@@ -16,21 +16,29 @@ characteristics*) and OLID's split between insults at an individual and at a gro
 author on the 84 checked comments: Cohen's kappa 0.41 under v3.1 -> **0.70** under v3.2 (binary
 toxic-vs-clean: 0.61 -> 0.84).
 
-**v3.3 (Nov 2026, after a second blind check of 155 held-out comments).** Three clarifications, decided by
-the author:
+**v3.3 (Nov 2026, after a second blind check of 155 held-out comments). The definition is now frozen:**
+the author decided to stop revising it and to collect real feedback instead. Changes from v3.2:
 
-- **Negative remarks about a nation or group with "bọn / tụi / lũ / đám / chúng nó"**, in otherwise plain
-  words ("bọn Hàn hay thượng đẳng", "lũ fan K-pop hết cứu"), are **offensive**: not clean, not hate.
+- **Negative remarks about a nation, region, gender or ethnic group with "bọn / tụi / lũ / đám / chúng nó"**,
+  in otherwise plain words ("bọn Hàn hay thượng đẳng"), are **offensive**: not clean, not hate. For other
+  groups ("bọn tiktok", "bọn lừa đảo") the word "bọn" alone decides nothing; judge the rest of the sentence.
 - **Slur names ("hàn xẻng", "tàu khựa", "ricon", "3 que") are judged by the sentence.** Used only to name the
   group in a mild sentence -> *offensive*; combined with an attack (body, intelligence, "sủa") -> *hate*;
   merely quoted or discussed -> *clean*.
-- **Severity for insults at one person.** Still *offensive* by default ("m ngu", "dở hơi à"), but *hate* when
+- **Insults at one person** stay *offensive* by default ("m ngu", "dở hơi à", "ngáo à"), but are *hate* when
   the insult dehumanizes ("sủa", "súc vật", "óc chó"), uses a disability as a slur ("thiểu năng", "Down"),
-  attacks the person's family, or calls for killing someone.
-- **Crude bodily talk** with no target ("ỉa", "đái") is *offensive* (vulgar), not clean.
+  attacks the person's family, or calls for killing someone outside the law.
+- **Explicit profanity is judged by the mood of the sentence.** In an annoyed or angry sentence
+  ("Dẫn trước đéo giữ được lại kêu trời", "kêu ca éo j") it is *offensive*; as praise, surprise or a joke
+  ("hay vcl", "đỉnh vãi", "đm t đang uống nước 😂") it stays *clean*.
+- **Condemning a wrongdoer**: asking for legal punishment in common words ("mất dạy", "côn đồ", "xử thật
+  nặng", "tử hình là xứng đáng") is *clean*; piling personal insults on top is *offensive*; calling the
+  person an animal or asking for them to be killed without trial is *hate*.
+- **Crude bodily talk** with no target ("ỉa", "đái") is *offensive* (vulgar).
 
-Agreement with the author over both blind rounds (239 comments): three-class kappa 0.55 under v3.2 -> 0.64
-under v3.3; toxic-vs-clean kappa 0.70.
+Agreement with the author over both blind rounds (239 comments): three-class kappa 0.55 under v3.2 -> 0.68
+under v3.3; toxic-vs-clean kappa 0.73 -> 0.74. The hate/offensive boundary is a judgement of severity and two
+annotators will keep disagreeing on part of it; toxic-vs-clean is the reliable signal.
 
 **Scope:** v3.2/v3.3 apply to **test set 2 and the 2026 training rows** (`labels/`). The training data and the
 first 2026 test set still follow v3.1, where an insult at one person is *hate*. Models trained on v3.1

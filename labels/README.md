@@ -11,4 +11,4 @@ text can be fetched again through the YouTube Data API; no comment text or autho
 | `pool_train_v33_hard.csv` | 229 hard examples: comments the v6 model flagged or was unsure about |
 
 Labels were written by an LLM (Claude) without seeing model predictions; the author labeled 260
-comments blind in two rounds (Cohen's kappa 0.64 on three classes, 0.70 on toxic vs clean under v3.3).
+comments blind in two rounds (Cohen's kappa 0.68 on three classes, 0.74 on toxic vs clean under v3.3).
