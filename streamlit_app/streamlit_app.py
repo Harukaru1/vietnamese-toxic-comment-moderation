@@ -52,6 +52,9 @@ MODEL_CARD = {"version": "PhoBERT v6", "precision_toxic": 0.45, "recall_toxic": 
 MODEL_REVISION = os.getenv("MODEL_REVISION") or "v6"  # Hub branch served by this demo; set to "v3" to roll back
 GITHUB = "https://github.com/Harukaru1/vietnamese-toxic-comment-moderation"
 REVIEW_BELOW = 0.6  # below this confidence, suggest a human look
+# YouTube queues, on P(toxic) = 1 - P(clean). 0.8 was chosen on the validation split; on held-out comments
+# it gives precision 0.62 / recall 0.36 (reports/threshold_v6.json). Between the two a human should decide.
+HIDE_ABOVE, REVIEW_ABOVE = 0.8, 0.4
 
 st.set_page_config(page_title="Kiểm tra bình luận tiếng Việt", page_icon="🛡️", layout="centered")
 st.markdown("""
@@ -437,19 +440,22 @@ with video:
                        f'· đã phân tích {len(df)} bình luận'
                        + (f' · bỏ qua {ss.video_skipped} bình luận chỉ có emoji' if ss.get("video_skipped") else ''))
             toxic = df["label"] != "clean"
-            sure = df["confidence"] >= REVIEW_BELOW
+            p_toxic = 1 - df["p_clean"]
+            hide, review = p_toxic >= HIDE_ABOVE, (p_toxic >= REVIEW_ABOVE) & (p_toxic < HIDE_ABOVE)
             cols = st.columns(4)
             cols[0].metric("Tỉ lệ độc hại", f"{toxic.mean():.0%}", help="Công kích + thù ghét, theo dự đoán của mô hình.")
             cols[1].metric(f'{INFO["hate"]["icon"]} {INFO["hate"]["name"]}', int((df["label"] == "hate").sum()))
             cols[2].metric(f'{INFO["offensive"]["icon"]} {INFO["offensive"]["name"]}', int((df["label"] == "offensive").sum()))
-            cols[3].metric("🤔 Cần xem lại", int((~sure).sum()),
-                           help=f"Độ tin cậy dưới {REVIEW_BELOW:.0%}: nên để người kiểm duyệt quyết định.")
+            cols[3].metric("🤔 Cần xem lại", int(review.sum()),
+                           help=f"Mô hình cho khả năng độc hại từ {REVIEW_ABOVE:.0%} đến {HIDE_ABOVE:.0%}: "
+                                "nên để người kiểm duyệt quyết định.")
             st.bar_chart(df["label"].map(lambda lab: INFO[lab]["name"]).value_counts(), horizontal=True, height=160)
             queue = st.segmented_control(
                 "Hàng đợi kiểm duyệt", ["hide", "review", "ok", "all"], default="hide", key="yt_queue",
                 format_func={"hide": "🚫 Đề xuất ẩn", "review": "🤔 Cần xem lại", "ok": "✅ Để nguyên", "all": "Tất cả"}.get)
-            view = {"hide": df[toxic & sure], "review": df[~sure], "ok": df[~toxic & sure]}.get(queue, df)
-            st.caption({"hide": "Mô hình khá chắc là độc hại. Sắp theo lượt thích: câu nhiều người thấy nhất ở trên.",
+            view = {"hide": df[hide], "review": df[review], "ok": df[~hide & ~review]}.get(queue, df)
+            st.caption({"hide": f"Khả năng độc hại từ {HIDE_ABOVE:.0%} trở lên (ở mức này mô hình đúng khoảng 6 trên 10 lần). "
+                                "Sắp theo lượt thích: câu nhiều người thấy nhất ở trên.",
                         "review": "Mô hình không chắc. Người kiểm duyệt nên đọc những câu này.",
                         "ok": "Mô hình khá chắc là bình thường.", "all": "Toàn bộ bình luận đã phân tích."}.get(queue, ""))
             st.dataframe(

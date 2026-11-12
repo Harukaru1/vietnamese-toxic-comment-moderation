@@ -1,0 +1,47 @@
+{
+  "revision": "v6",
+  "note": "0.80 was selected on the 261-row validation split (max binary F1); the other thresholds are shown for reference only. Held-out half of test set 2, weighted to the pool.",
+  "thresholds": {
+    "0.40": {
+      "precision": 0.402,
+      "recall": 0.589,
+      "f1": 0.478,
+      "share_of_traffic_flagged": 0.0738
+    },
+    "0.50": {
+      "precision": 0.443,
+      "recall": 0.547,
+      "f1": 0.49,
+      "share_of_traffic_flagged": 0.0623
+    },
+    "0.60": {
+      "precision": 0.515,
+      "recall": 0.495,
+      "f1": 0.505,
+      "share_of_traffic_flagged": 0.0484
+    },
+    "0.70": {
+      "precision": 0.543,
+      "recall": 0.455,
+      "f1": 0.495,
+      "share_of_traffic_flagged": 0.0423
+    },
+    "0.80": {
+      "precision": 0.615,
+      "recall": 0.362,
+      "f1": 0.456,
+      "share_of_traffic_flagged": 0.0297
+    },
+    "0.90": {
+      "precision": 0.676,
+      "recall": 0.193,
+      "f1": 0.301,
+      "share_of_traffic_flagged": 0.0144
+    }
+  },
+  "review_band_0.40_0.80": {
+    "share_of_traffic": 0.0442,
+    "toxic_share_inside": 0.259,
+    "toxic_caught_hide_or_review": 0.589
+  }
+}

@@ -7,10 +7,10 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 A 3-class classifier for Vietnamese social-media comments (**clean / offensive / hate**), taken from
-a graduation-thesis prototype to a deployed, evaluated system. Most of the work went into the
-**data**: finding leakage and label noise, writing a consistent annotation guideline, building a
-fresh real-world test set from 2025–2026 YouTube and forum comments, and closing the loop with
-active learning and user feedback from the demo.
+a graduation-thesis prototype to a deployed, evaluated moderation tool. Most of the work went into
+the **data and the measurement**: removing leakage and label noise, writing an annotation guideline
+and checking it against blind human labels, and building two fresh test sets from 2026 YouTube and
+forum comments. The model was a small part of the story.
 
 **[Try the live demo →](https://vi-toxic-moderation.streamlit.app/)**
 
@@ -21,227 +21,156 @@ active learning and user feedback from the demo.
 
 ## Highlights
 
-- **Real-world evaluation, not just a held-out split.** On a new set of 1,000 comments from 2026
-  (YouTube Data API + VOZ forum), the first model scored **0.59 F1-macro** against 0.80 in-domain.
-  The error analysis behind that gap drove every later iteration.
-- **Data quality first.** Found that **4.7% of the test set leaked from train** (inflating F1 by
-  ~0.03), flagged 5.5% likely label errors with confident learning, and traced the weak *offensive*
-  class to one root cause: the same profanity token (`vl`) was labeled clean, offensive *and* hate.
-- **Measured, not guessed.** Bootstrap confidence intervals on every comparison; Cohen's κ for
-  every annotation round (LLM-assisted labels, blind human checks).
-- **Iterative fixes with clear gains.** Guideline v3 + re-labeling 772 comments lifted real-world
-  F1-macro from **0.594 to 0.679** (paired bootstrap 95% CI [+0.015, +0.153]) and toxic-comment
-  precision from 0.71 to 0.82.
-- **Shipped.** Model on the Hugging Face Hub, Streamlit app with feedback collection, FastAPI +
-  Docker service, GitHub Actions CI.
+- **Tested on new data, not only on a held-out split.** A model that scored 0.80 F1-macro in-domain
+  scored 0.59 on 1,000 comments collected in 2026. Every later step came from analysing that gap.
+- **Data problems found and fixed.** 4.7% of the test set leaked from train; one profanity token
+  (`vl`) was labeled clean, offensive *and* hate; a thesis-era text artifact had replaced a swear
+  word in ~1,700 rows.
+- **Negative results reported.** Two retraining rounds (v4, v5) brought no measurable gain and were
+  not deployed. A second, larger test set then showed that all versions shared the same weakness.
+- **What finally worked was small.** Continuing the deployed model for 3 epochs on 1,739 comments
+  labeled under the current guideline raised toxic-comment precision from 0.28 to 0.45 at slightly
+  higher recall (v6, paired bootstrap ΔF1 +0.125, 95% CI [+0.045, +0.223]).
+- **Every comparison has a confidence interval; every annotation round has a Cohen's κ.**
+- **Shipped.** Hugging Face Hub (one branch per version), Streamlit app with single-comment,
+  paragraph, batch and YouTube-video modes plus anonymous feedback, FastAPI + Docker, CI.
 
 ## Results
 
-F1-macro on three test sets. The in-domain test set is our own leakage-free split; the 2026 set is
-the out-of-time, out-of-platform benchmark; ViHSD is a public dataset from another source.
+**Test set 2** is the main benchmark: 968 held-out YouTube comments from 2026 (guideline v3.2),
+never used for training or tuning. It is a stratified sample of a 12k-comment pool, so scores are
+weighted back to the pool with inverse-probability weights and describe real traffic, where about
+5% of comments are toxic. The primary metric is binary (toxic vs clean), because that is where two
+annotators agree best (κ 0.84).
 
-| Model | In-domain test | **2026 real-world** | ViHSD test | Notes |
+| Model | Toxic precision | Toxic recall | Toxic F1 | F1 offensive | F1 hate |
+|---|---:|---:|---:|---:|---:|
+| PhoBERT v3 | 0.28 | 0.45 | 0.35 | 0.26 | 0.17 |
+| PhoBERT v5 | 0.28 | 0.42 | 0.34 | 0.27 | 0.17 |
+| **PhoBERT v6** (deployed) | **0.45** | **0.50** | **0.47** | **0.51** | **0.28** |
+
+With a threshold of 0.8 on P(toxic), v6 reaches precision 0.62 at recall 0.36; the demo uses that
+for "suggest hiding" and sends the 0.4–0.8 band to a human (`reports/threshold_v6.json`).
+
+Earlier benchmarks, F1-macro over three classes (older guideline versions):
+
+| Model | In-domain test | 2026 set 1 | ViHSD test | Training data |
 |---|---:|---:|---:|---|
-| TF-IDF + Linear SVM | 0.799 | – | 0.616 | strong classic baseline |
-| PhoBERT v1 | 0.780 | – | 0.643 | original data, class-weighted loss |
-| PhoBERT v2 | 0.801 | 0.594² | **0.690** | + leakage removal, label-noise pruning, UIT-ViHSD |
-| **PhoBERT v3** (deployed) | **0.815**¹ | **0.679**² | 0.674 | + guideline v3, 772 labels fixed |
-| PhoBERT v4 | 0.804 | 0.641³ | 0.683 | + 821 active-learning comments; **not deployed** (no gain, see §5) |
-| PhoBERT v5 | 0.781⁴ | 0.635³ | 0.673 | + 163 labels fixed (guideline v3.1), `bad`→`đéo` text fix; **not deployed** (see §6) |
+| TF-IDF + Linear SVM | 0.799 | – | 0.616 | classic baseline |
+| PhoBERT v1 | 0.780 | – | 0.643 | original thesis data |
+| PhoBERT v2 | 0.801 | 0.556 | **0.690** | + leakage removal, label-noise pruning, UIT-ViHSD |
+| PhoBERT v3 | **0.815** | **0.647** | 0.674 | + guideline v3, 772 labels fixed |
+| PhoBERT v4 | 0.804 | 0.641 | 0.683 | + 821 active-learning comments (no gain) |
+| PhoBERT v5 | 0.781 | 0.635 | 0.673 | + 163 labels fixed, text-artifact fix (no gain) |
 
-¹ On the v3-labeled test split (v2 scores 0.796 on the same split).
-² Guideline v3 labels. After the v3.1 clarification (13 *hate* → *clean*), v2 scores 0.556 and v3 0.647.
-³ Guideline v3.1 labels; compare with v3's 0.647 (paired bootstrap v4 Δ −0.006, 95% CI [−0.068, +0.051]; v5 Δ −0.012, CI [−0.067, +0.041]).
-⁴ On the v5 test split (19 labels changed, `bad`→`đéo`); v3 scores 0.799 on the same split.
-All PhoBERT models are `vinai/phobert-base-v2`, fine-tuned on a Kaggle T4. Model selection always
-uses the validation split; each test set is used once per model.
+In-domain numbers use slightly different label versions per row; exact files are in `reports/`.
+All models are `vinai/phobert-base-v2` fine-tuned on a Kaggle T4. Model selection uses validation
+data only.
 
 What the numbers say:
 
-- **In-domain, PhoBERT and TF-IDF are tied** (differences < 0.015 are within the bootstrap CI).
-  PhoBERT's advantage only appears on unseen sources, which is why the 2026 set matters.
-- **The ViHSD drop from v2 to v3 is deliberate**: ViHSD labels intensifier profanity ("đẹp vl",
-  *very pretty*) as offensive, while our guideline labels it clean.
-- **Remaining weak spot: implicit hate** (no profanity: regional slurs, gender stereotypes,
-  threats, body shaming). Hate F1 on the 2026 set is still ~0.4–0.5; v4 did not fix it (§5).
+- **In-domain, PhoBERT and TF-IDF are tied.** PhoBERT's advantage only shows on unseen sources.
+- **v2–v5 are indistinguishable on test set 2** (toxic F1 0.40–0.42 unweighted, overlapping CIs).
+  Fixing a few hundred labels inside 52k older ones did not move the model.
+- **v6 trades a little on the older benchmark**: on 2026 set 1 its toxic F1 is 0.58 against 0.63
+  for v3. Part of that is the changed hate/offensive definition, part is forgetting.
+- **Hate is still weak** (F1 0.28): only 78 hate examples exist under the current guideline. A
+  learning-curve check (half the new data) shows toxic-vs-clean has stopped improving with more
+  data, while hate has not.
 
 ## How it works
 
 ```mermaid
 flowchart LR
-    A[Thesis data<br/>37.6k comments] --> B[Leakage removal<br/>+ cleanlab pruning]
-    V[UIT-ViHSD<br/>train/dev] --> C
-    B --> C[Train split]
-    G[Annotation guideline v3.1] --> R[Re-label 1,179<br/>profanity comments]
-    R --> C
-    Y[YouTube API + VOZ<br/>2025-2026] --> T[2026 test set<br/>1,000 comments]
-    Y --> P[Unlabeled pool 9.5k] --> AL[Active learning<br/>uncertain + error patterns] --> C
-    F[Demo feedback<br/>👍/👎 + correct label] --> AL
-    C --> M[PhoBERT fine-tuning<br/>Kaggle GPU] --> H[Hugging Face Hub<br/>versioned branches]
-    H --> S[Streamlit demo]
-    H --> API[FastAPI + Docker]
-    T -.evaluates.-> M
+    A[Thesis data + UIT-ViHSD<br/>52k comments] --> B[Leakage removal, cleanlab,<br/>label patches] --> M3[PhoBERT v3]
+    Y[YouTube API 2026<br/>12k-comment pool] --> S[Stratified sample<br/>2,000 + 779] --> L[LLM labels +<br/>blind human check]
+    L --> TR[1,739 training rows<br/>guideline v3.2] --> M6[PhoBERT v6<br/>3 more epochs]
+    M3 --> M6
+    L --> TE[968 held-out rows] -.evaluates.-> M6
+    M6 --> H[Hugging Face Hub] --> APP[Streamlit demo<br/>FastAPI + Docker]
+    APP --> F[Anonymous feedback] -.future labels.-> L
 ```
 
 **Preprocessing** (`src/toxic_moderation/preprocess.py`): Unicode NFC, lowercase, URL/mention/emoji
-removal, squeezing repeated characters ("vlllll" → "vl"), then word segmentation with pyvi for
-PhoBERT. A 650-entry teencode dictionary is included, but the ablation below shows it does not help.
+removal, squeezing repeated characters ("vlllll" → "vl"), word segmentation with pyvi. Comments
+with no text left (emoji only) are returned as clean without calling the model.
 
-**Model** (`scripts/train_phobert.py`): PhoBERT-base-v2, max length 160, lr 2e-5, 6 epochs with
-early stopping on validation F1-macro. Removing the class-weighted loss fixed the over-prediction
-of *offensive* (precision 0.52 → 0.62).
+**Model** (`scripts/train_phobert.py`): PhoBERT-base-v2. v1–v5: lr 2e-5, up to 6 epochs, best
+validation F1-macro. v6: start from v3, lr 1e-5, 3 epochs on the new labels only.
+
+**Labels** ([`docs/annotation_guidelines.md`](docs/annotation_guidelines.md)): *hate* attacks
+someone for who they are (region, nationality, gender, appearance…) or threatens them; *offensive*
+insults a person without that, or is crude venting; profanity used only as an intensifier
+("đẹp vl") is *clean*.
 
 ## The data story
 
-### 1. Leakage and label noise
+Each step below has its numbers in `reports/` and its code in `scripts/`.
 
-178 test comments (4.7%) and 211 validation comments appeared verbatim in train, mostly spam-like
-toxic comments posted many times; 11 of them with conflicting labels.
+**1. Leakage and label noise.** 178 test comments (4.7%) also appeared in train, which inflated
+F1-macro by about 0.03 (0.820 → 0.793 for TF-IDF + LR after removal).
+[cleanlab](https://github.com/cleanlab/cleanlab) flagged 5.5% of labels; a manual review of 120
+found a third clearly wrong. They were pruned from train only.
 
-| TF-IDF + LR | Test F1-macro | Test F1 offensive |
-|---|---:|---:|
-| original splits (with leakage) | 0.820 | 0.710 |
-| leakage-free splits | **0.793** | **0.647** |
+**2. More data.** [UIT-ViHSD](https://huggingface.co/datasets/ura-hcmut/UIT-ViHSD) train/dev were
+added; its test set is kept as an outside benchmark.
 
-[cleanlab](https://github.com/cleanlab/cleanlab) on 5-fold out-of-fold probabilities flagged 2,076
-comments (5.5%; 11.6% of *offensive*). A manual review of 120 of them: 34% clearly mislabeled, 30%
-ambiguous under the thesis guideline, 36% correct. Pruning them from **train only** gave +0.007
-test F1-macro. Scripts: `find_label_issues.py` → `make_clean_splits.py --prune`.
+**3. 2026 test set 1.** 1,000 comments (700 YouTube via the official API, 300 from the VOZ forum).
+An LLM (Claude) labels every comment; the author labels a random subset blind.
 
-### 2. More data: UIT-ViHSD
+**4. The weak *offensive* class had one root cause.** Comments containing `vl` were labeled 52%
+clean, 25% offensive, 23% hate. Guideline v3 fixed the rule and 772 labels were changed through a
+public patch that stores only row indices ([`relabels/`](relabels/)). 2026 F1-macro: 0.594 → 0.679.
 
-[UIT-ViHSD](https://huggingface.co/datasets/ura-hcmut/UIT-ViHSD) (Luu et al., 2021) uses the same
-three labels. Its train/dev sets (22.5k after removing overlaps) were added to our train split; its
-test set (6.4k) is kept as an out-of-domain benchmark. In-domain F1 is unchanged, ViHSD test F1
-goes from 0.659 to 0.690 (the thesis model scored 0.60 there).
+**5. Two rounds that did not help (v4, v5).** An active-learning batch of 821 comments, then 163
+more label fixes and a text-artifact fix ("đéo" had been replaced by "bad" in ~1,700 rows, found by
+the author during a blind check). Both models were within noise of v3 (paired bootstrap CIs
+[−0.068, +0.051] and [−0.067, +0.041]) and v5 raised more false alarms. Lesson: the 2026 set, with
+48 hate comments, could not resolve differences that small.
 
-### 3. A fresh real-world test set (2026)
+**6. Test set 2 and a changed definition.** 12k new YouTube comments were collected and 2,000
+sampled (random, model-flagged, cue words). The author's blind labels agreed poorly with the
+guideline on one pattern, insults at one person ("m ngu"): the guideline called them *hate*, the
+author *offensive*. The guideline was changed (v3.2, in line with VLSP 2019 and OLID) and the set
+re-labeled.
 
-1,000 comments posted in 2025–2026: 700 from 20 YouTube videos in 8 categories (news, society,
-football, showbiz, gaming, music, tech, film) via the official YouTube Data API, and 300 from the
-VOZ forum ([VOZ-HSD](https://huggingface.co/datasets/tarudesu/VOZ-HSD)). Anything seen in training
-is removed (`scripts/build_realworld_set.py`). The set is very imbalanced, like real traffic:
-YouTube is 96% clean, VOZ 78%.
-
-**Annotation** follows [`docs/annotation_guidelines.md`](docs/annotation_guidelines.md). An LLM
-(Claude) pre-annotates every comment, and the author labels a random subset **blind**:
-
-| Round | Blind subset | Independent κ | Outcome |
-|---|---:|---:|---|
-| 2026 test set | 100 | **0.72** | guideline v3: profanity used only as an intensifier is clean |
-| Active-learning batch | 50 | **0.47** | guideline v3.1: criticism of behaviour without insults is clean |
-
-The second round was harder by design (only uncertain comments); all disagreements were discussed,
-the guideline was updated, and both the batch and the 2026 set were re-checked under the new rule.
-
-### 4. Root cause of the weak *offensive* class
-
-Comments containing `vl` were labeled 52% clean, 25% offensive and 23% hate in the training data
-(`má` 39/19/43, `éo` 26/22/52). The model could not learn a boundary the labels did not have.
-Guideline v3 fixed the rule; 1,179 matching comments were re-reviewed and **772 labels changed**.
-The patch stores only row indices and labels ([`relabels/guidelines_v3.csv`](relabels/guidelines_v3.csv)),
-so it is public while the data stays private.
-
-| Training labels | In-domain F1 offensive | 2026 F1-macro (PhoBERT) |
-|---|---:|---:|
-| original (v2) | 0.629 | 0.594 |
-| guideline v3 (v3) | **0.679** | **0.679** |
-
-### 5. Active learning and user feedback (v4: a negative result)
-
-`scripts/build_active_pool.py` collected 9.5k new comments (39 YouTube videos chosen for topics
-where implicit hate is common, plus VOZ; none overlap the test set), scored them with v3, and picked
-817 to label: the most uncertain, those with hate cues the model called clean, those it called toxic,
-a random slice, and comments matching **error patterns reported through the demo's feedback
-button** (body shaming, an intensifier aimed at a person such as "m béo vl", lone regional slurs).
-The labeled batch is added to train only (`scripts/add_active_labels.py`, repeated ×3).
-
-**It did not help.** v4 is within noise of v3 everywhere: 2026 set 0.641 vs 0.647 (paired bootstrap
-Δ −0.006, 95% CI [−0.068, +0.051], `scripts/bootstrap_compare.py`), in-domain 0.804 vs 0.815, ViHSD
-0.683 vs 0.674. It trades precision for recall on the 2026 set (hate recall 16 → 23 of 48, but
-toxic precision 0.68 → 0.55), and only 34 of 1,000 predictions change. On 33 hand-written probe
-sentences targeting the reported errors (none in train), v4 fixes 1 (a lone regional slur): body
-shaming and an intensifier aimed at a person ("m lùn vl") are still missed
-(`reports/probe_v1_v3_vs_v4.json`).
-
-The likely reason is the old training data: ~2.4k new rows cannot outvote ~50k rows that label the
-same patterns inconsistently (for example, of 14 train comments with "mày/m … vl", *you … so*, 8 are
-hate and 6 clean; a manual check is still needed to tell real inconsistency from context). The next step is therefore to re-label those patterns in the existing data under guideline
-v3.1, not to add more new comments. v3 stays deployed; v4 is kept on the `v4` branch for reference.
-
-### 6. Fixing old labels and a text artifact (v5: targeted gains, but more false alarms)
-
-Two fixes to the existing data (`relabels/guidelines_v31.csv`, `scripts/fix_bad_token.py`):
-
-- **Re-labeling.** 790 short comments matching the reported error patterns were reviewed under
-  guideline v3.1; 163 labels changed. The author blind-labeled 50 of them: κ 0.42 with the new labels
-  vs 0.21 with the original ones, 0.59 after two rules were clarified in the guideline.
-- **A text artifact found by the author during that check.** In ~1,700 thesis comments the swear
-  word "đéo" had been replaced by the English word "bad" ("có sai bad đâu"). 69% of those rows are
-  *hate*, and real comments never contain it (0 of 1,000 in the 2026 set), so the model had learned
-  a token it will never see. The script maps it back.
-
-Result: v5 is better exactly where it was aimed and no better overall.
-
-| | v3 | v4 | v5 |
+| Annotation round | Blind subset | κ before | κ after the guideline fix |
 |---|---:|---:|---:|
-| Probe set (48 hand-written sentences, none in train) | 36 | 39 | **43** |
-| 2026 set, F1-macro | **0.647** | 0.641 | 0.635 |
-| 2026 set, toxic precision / recall | **0.68** / 0.58 | 0.55 / 0.60 | 0.57 / 0.58 |
+| 2026 set 1 | 100 | 0.72 | 0.91 |
+| Active-learning batch | 50 | 0.47 | 0.84 |
+| Re-labeled training rows | 50 | 0.42 | 0.59 |
+| Test set 2 (3 classes / binary) | 84 | 0.41 / 0.61 | 0.70 / 0.84 |
 
-On the 2026 set v5 changes 29 predictions: 8 fixed, 19 broken. The fixes are real insults that v3
-under-rated; the breaks are mostly neutral comments that mention politics, regions or groups, now
-flagged as hate with low confidence (0.5–0.65). The re-labeled rows and the active batch are rich in
-political/regional hate, and the model generalized "mentions a group" → hate. For a moderation tool
-false alarms on innocent comments cost more than these gains, so **v3 stays deployed**.
+**7. v6.** On test set 2 every earlier version flagged about 7 clean comments for every 3 toxic
+ones: the older training labels call harsh criticism of wrongdoers toxic. No decision threshold
+fixed that (`reports/threshold_v3.json`). Half of test set 2 plus 779 more pool comments became
+training data, and v3 was trained for 3 more epochs on those alone.
 
-A second lesson is about measurement: the 2026 set has only 48 hate and 30 offensive comments, so
-its 95% CI is about ±0.06 and cannot resolve differences of 0.01–0.03 between versions. The next
-step is a larger real-world test set (the demo's anonymous feedback is the source), not another
-training round.
+The demo stores each 👍/👎 anonymously (no name or IP, opt-out) in a private Hugging Face dataset
+(`src/toxic_moderation/feedback_store.py`) for future labeling rounds.
 
-The demo now closes the loop on its own: each 👍/👎 (and the label the user says is correct) is
-saved **anonymously** (comment text, model scores, vote, model commit; no name or IP, and users can
-opt out) to a private Hugging Face dataset through `huggingface_hub.CommitScheduler`
-(`src/toxic_moderation/feedback_store.py`). `scripts/export_feedback.py` downloads it, keeps each
-user's final vote and groups votes per comment for review under the guideline before any of it is
-used for training.
-
-<details>
-<summary><b>Ablation: teencode normalization</b> (no measurable gain)</summary>
-
-| Model | Teencode dictionary | Val F1-macro | Test F1-macro | Test F1 offensive |
-|---|---|---:|---:|---:|
-| TF-IDF + Logistic Regression | yes | 0.829 | 0.812 | 0.695 |
-| TF-IDF + Linear SVM | no | 0.823 | 0.822 | 0.718 |
-| PhoBERT | yes | 0.828 | 0.798 | 0.659 |
-| PhoBERT | no | 0.843 | 0.801 | 0.662 |
-
-Character n-grams and subword tokens already cover most spelling variants, and fine-tuning lets
-PhoBERT learn slang directly (original splits, before leakage removal).
-</details>
+Project report and study guide in Vietnamese: [`docs/bao_cao_du_an.md`](docs/bao_cao_du_an.md),
+[`docs/tai_lieu_hoc.md`](docs/tai_lieu_hoc.md).
 
 ## Limitations
 
-- **One comment, no context.** Whether "bạn mập quá đấy" (*you're quite chubby*) is teasing or body
-  shaming depends on who says it to whom. Such comments are labeled by their surface meaning and
-  flagged as uncertain; the demo sends low-confidence predictions to a "needs review" filter. A
-  context-aware model (parent comment + reply) is future work.
-- **Annotation is subjective.** Labels come from one LLM and one human with measured, not perfect,
-  agreement (κ 0.47–0.72 before discussion). The 2026 set has only 48 *hate* comments, so per-class
-  scores there have wide confidence intervals.
-- **Not for automatic removal.** The model is meant to prioritize comments for human moderators.
+- **Precision 0.45 means the model prioritizes, it does not decide.** It is meant to order a
+  moderator's queue, not to remove comments automatically.
+- **One comment, no context.** "bạn mập quá đấy" can be teasing or body shaming.
+- **Subjective labels.** One LLM and one human; agreement is measured, not perfect.
+- **Hate vs offensive is unreliable** (few hate examples under the current definition).
+- **Run-to-run variance.** Two v6 runs with the same data gave precision 0.45 and 0.53.
 
 ## Repository structure
 
 ```
 src/toxic_moderation/   preprocessing, teencode dictionary, features, evaluation, predictor, YouTube client
 scripts/                data pipeline, training, evaluation, annotation agreement, active learning
-notebooks/              Kaggle GPU notebooks, one per model version (v1-v4)
+notebooks/              Kaggle GPU notebooks, one per model version (v1-v6)
 streamlit_app/          Streamlit demo (deployed on Streamlit Community Cloud)
 app/                    FastAPI service + Gradio UI, Dockerfile at the repo root
-docs/                   annotation guidelines, screenshots
-relabels/               label patches (row indices + labels only)
+docs/                   annotation guidelines, project report and study guide (Vietnamese), screenshots
+relabels/, labels/      label patches and test-set labels (ids + labels only, no text)
 reports/                JSON results of every experiment quoted in this README
 tests/                  pytest suite, run by GitHub Actions on every push
 ```
@@ -259,7 +188,7 @@ pytest
 ```python
 from toxic_moderation.predictor import Predictor
 
-clf = Predictor()   # downloads HaruKaru/phobert-vi-toxic-comment from the Hugging Face Hub
+clf = Predictor(revision="v6")   # downloads HaruKaru/phobert-vi-toxic-comment from the Hugging Face Hub
 clf.predict(["Video rất hay và bổ ích", "Đá như này thì nghỉ mẹ đi cho rồi"])
 # [{'label': 'clean', 'scores': {...}}, {'label': 'offensive', 'scores': {...}}]
 ```
@@ -292,20 +221,11 @@ python scripts/train_baseline.py --data-dir data/clean_vihsd_v3
 
 PhoBERT training runs on Kaggle with the notebooks in `notebooks/`.
 
-## Roadmap
+## Next steps
 
-- [x] TF-IDF baselines, PhoBERT fine-tuning, model on the Hugging Face Hub
-- [x] Data audit: leakage removal, confident-learning label noise, UIT-ViHSD
-- [x] 2026 real-world test set with LLM-assisted annotation and blind human checks
-- [x] Guideline v3 and re-labeling; PhoBERT v3 deployed
-- [x] Streamlit demo with anonymous shared feedback (private HF dataset); FastAPI + Docker; CI
-- [x] PhoBERT v4 with an active-learning batch (no gain: documented as a negative result)
-- [x] Re-label inconsistent patterns + `bad`→`đéo` fix (v5: better on probes, more false alarms; not deployed)
-- [ ] Larger real-world test set from anonymous demo feedback (current one cannot resolve small gains)
-- [x] Short-paragraph mode: sentences are classified one by one and highlighted (`src/toxic_moderation/segment.py`)
-- [ ] Context-aware model (parent comment + reply)
-- [ ] YouTube moderation dashboard (analyse all comments of a video)
-- [ ] LLM zero/few-shot comparison (quality, latency, cost)
+- More *hate* examples under guideline v3.2 (the class that still improves with data).
+- Averaging several fine-tuning runs to reduce run-to-run variance.
+- A context-aware model (parent comment + reply).
 
 ## Data and licences
 
@@ -320,3 +240,5 @@ results and label patches (row indices) are committed.
 - Nguyen & Nguyen (2020). *PhoBERT: Pre-trained language models for Vietnamese.* Findings of EMNLP.
 - Luu et al. (2021). *A Large-scale Dataset for Hate Speech Detection on Vietnamese Social Media Texts* (UIT-ViHSD).
 - Northcutt et al. (2021). *Confident Learning: Estimating Uncertainty in Dataset Labels.* JAIR.
+- Vu et al. (2020). *HSD Shared Task in VLSP Campaign 2019.*
+- Zampieri et al. (2019). *Predicting the Type and Target of Offensive Posts in Social Media* (OLID).
