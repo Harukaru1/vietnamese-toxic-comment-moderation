@@ -593,6 +593,5 @@ with history:
                       if store.enabled else "Không có gì được gửi đi."))
 
 st.divider()
-st.markdown('<p class="foot">Mô hình có thể sai, nhất là ở ranh giới giữa <i>công kích</i> và <i>thù ghét</i> '
-            'hoặc với câu thù ghét ngầm không có từ chửi.<br>Đây là công cụ hỗ trợ, không thay thế người kiểm duyệt.</p>',
+st.markdown('<p class="foot">Kết quả chỉ mang tính tham khảo. Hãy để người kiểm duyệt xem lại trước khi xử lý.</p>',
             unsafe_allow_html=True)
