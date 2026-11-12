@@ -149,9 +149,6 @@ training data, and v3 was trained for 3 more epochs on those alone.
 The demo stores each 👍/👎 anonymously (no name or IP, opt-out) in a private Hugging Face dataset
 (`src/toxic_moderation/feedback_store.py`) for future labeling rounds.
 
-Project report and study guide in Vietnamese: [`docs/bao_cao_du_an.md`](docs/bao_cao_du_an.md),
-[`docs/tai_lieu_hoc.md`](docs/tai_lieu_hoc.md).
-
 ## Limitations
 
 - **Precision 0.45 means the model prioritizes, it does not decide.** It is meant to order a
@@ -169,7 +166,7 @@ scripts/                data pipeline, training, evaluation, annotation agreemen
 notebooks/              Kaggle GPU notebooks, one per model version (v1-v6)
 streamlit_app/          Streamlit demo (deployed on Streamlit Community Cloud)
 app/                    FastAPI service + Gradio UI, Dockerfile at the repo root
-docs/                   annotation guidelines, project report and study guide (Vietnamese), screenshots
+docs/                   annotation guidelines, screenshots
 relabels/, labels/      label patches and test-set labels (ids + labels only, no text)
 reports/                JSON results of every experiment quoted in this README
 tests/                  pytest suite, run by GitHub Actions on every push

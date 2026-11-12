@@ -1,10 +1,9 @@
-name: CI / Deploy
+name: CI
 
 on:
   push:
     branches: [main]
   pull_request:
-  workflow_dispatch:   # manual trigger (Actions tab -> Run workflow) deploys the Space
 
 jobs:
   test:
@@ -19,42 +18,3 @@ jobs:
       - run: pip install pandas scikit-learn joblib emoji requests pytest httpx fastapi gradio
       - run: pip install --no-deps -e .
       - run: pytest -q
-
-  deploy-space:
-    needs: test
-    # Deploy only on manual trigger: Docker/Gradio Spaces on free cpu-basic now need a HF PRO plan.
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    env:
-      HF_TOKEN: ${{ secrets.HF_TOKEN }}
-      SPACE_ID: HaruKaru/vietnamese-toxic-comment-moderation
-    steps:
-      - uses: actions/checkout@v4
-      - name: Skip if HF_TOKEN is not configured
-        id: check
-        run: echo "ok=$([ -n "$HF_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-      - if: steps.check.outputs.ok == 'true'
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - if: steps.check.outputs.ok == 'true'
-        name: Upload app to Hugging Face Space (Docker)
-        run: |
-          pip install -q huggingface_hub
-          python - <<'PY'
-          import os
-          from huggingface_hub import HfApi
-          api = HfApi(token=os.environ["HF_TOKEN"])
-          space = os.environ["SPACE_ID"]
-          api.create_repo(space, repo_type="space", space_sdk="docker", exist_ok=True)
-          api.upload_folder(
-              repo_id=space, repo_type="space", folder_path=".",
-              allow_patterns=["Dockerfile", ".dockerignore", "requirements-app.txt",
-                              "pyproject.toml", "src/**", "app/**"],
-              ignore_patterns=["**/__pycache__/**", "*.egg-info/**"],
-              commit_message=f"Deploy {os.environ['GITHUB_SHA'][:7]} from GitHub",
-          )
-          api.upload_file(path_or_fileobj="space/README.md", path_in_repo="README.md",
-                          repo_id=space, repo_type="space")
-          print(f"https://huggingface.co/spaces/{space}")
-          PY
