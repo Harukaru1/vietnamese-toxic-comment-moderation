@@ -15,6 +15,6 @@ __pycache__/
 .env
 *.egg-info/
 
-# private working notes and study documents (kept locally, not published)
+# local notes
 private_docs/
 CLAUDE.md

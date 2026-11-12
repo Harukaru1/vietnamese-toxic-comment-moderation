@@ -62,16 +62,49 @@ PROFANITY_HELP = ("Bộ lọc riêng, dò theo danh sách từ (vl, đm, đéo..
 st.set_page_config(page_title="Kiểm tra bình luận tiếng Việt", page_icon="💬", layout="centered")
 st.markdown("""
 <style>
-.result-card {border-left: 6px solid var(--c); background: color-mix(in srgb, var(--c) 12%, transparent);
-              border-radius: 10px; padding: 14px 18px; margin: 8px 0 14px 0;}
-.result-card .title {font-size: 1.35rem; font-weight: 700; color: var(--c); margin-bottom: 4px;}
-.result-card .sub {opacity: .85;}
+/* layout */
+.block-container {max-width: 880px; padding-top: 2.2rem; padding-bottom: 3rem;}
+#MainMenu, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {visibility: hidden; height: 0;}
+[data-testid="stSidebar"] {border-right: 1px solid #e3e6f0;}
+/* hero */
+.hero {background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #db2777 100%); color: #fff; border-radius: 20px;
+       padding: 30px 28px 26px; text-align: center; box-shadow: 0 12px 30px -12px rgba(79,70,229,.55); margin-bottom: 18px;}
+.hero h1 {color: #fff; font-size: 2.05rem; font-weight: 800; letter-spacing: -.02em; margin: 0 0 6px; padding: 0;}
+.hero p {margin: 0; opacity: .93; font-size: 1.02rem;}
+.hero .chips {margin-top: 14px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;}
+.hero .chip {background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.28); border-radius: 999px;
+             padding: 3px 12px; font-size: .82rem; backdrop-filter: blur(4px);}
+/* tabs as pills */
+[data-baseweb="tab-list"] {gap: 6px; background: #e9ebf5; padding: 5px; border-radius: 14px;}
+[data-baseweb="tab"] {border-radius: 10px; padding: 6px 14px; height: auto; background: transparent;}
+[data-baseweb="tab"][aria-selected="true"] {background: #fff; box-shadow: 0 1px 4px rgba(17,24,39,.12);}
+[data-baseweb="tab-highlight"], [data-baseweb="tab-border"] {display: none;}
+/* controls */
+.stButton > button, .stDownloadButton > button {border-radius: 12px; font-weight: 600; padding: .5rem 1.1rem;}
+.stTextArea textarea, .stTextInput input {border-radius: 12px;}
+[data-testid="stMetric"] {background: #fff; border: 1px solid #e3e6f0; border-radius: 14px; padding: 12px 14px;
+                          box-shadow: 0 1px 3px rgba(17,24,39,.05);}
+[data-testid="stSidebar"] [data-testid="stMetric"] {padding: 8px 12px;}
+[data-testid="stExpander"] {border-radius: 12px; border-color: #e3e6f0; background: #fff;}
+[data-testid="stFileUploaderDropzone"] {border-radius: 14px; background: #fff;}
+/* result */
+.result-card {border: 1px solid color-mix(in srgb, var(--c) 35%, transparent); border-left: 6px solid var(--c);
+              background: color-mix(in srgb, var(--c) 7%, #fff); border-radius: 14px; padding: 16px 20px;
+              margin: 10px 0 14px 0; box-shadow: 0 6px 18px -10px color-mix(in srgb, var(--c) 60%, transparent);}
+.result-card .title {font-size: 1.35rem; font-weight: 800; color: var(--c); margin-bottom: 4px;}
+.result-card .sub {opacity: .8; font-size: .92rem; margin-top: 2px;}
+.score {display: grid; grid-template-columns: 170px 1fr 54px; align-items: center; gap: 10px; margin: 7px 0; font-size: .92rem;}
+.score .track {height: 10px; background: #e6e8f2; border-radius: 999px; overflow: hidden;}
+.score .fill {height: 100%; border-radius: 999px; background: var(--c);}
+.score .pct {text-align: right; font-variant-numeric: tabular-nums; color: #4b5563;}
 .sent {padding: 2px 4px; border-radius: 5px; line-height: 2.0;
        background: color-mix(in srgb, var(--c) var(--a), transparent); border-bottom: 2px solid var(--c);}
 .sent.unsure {border-bottom-style: dashed;}
-.para-box {border: 1px solid color-mix(in srgb, currentColor 15%, transparent); border-radius: 10px; padding: 14px 16px;}
-.label-chip {display:inline-block; padding: 1px 9px; border-radius: 999px; font-size: .85rem;
-             background: color-mix(in srgb, var(--c) 15%, transparent); color: var(--c); font-weight: 600;}
+.para-box {border: 1px solid #e3e6f0; background: #fff; border-radius: 14px; padding: 16px 18px;}
+.label-chip {display:inline-block; padding: 2px 11px; border-radius: 999px; font-size: .85rem;
+             background: color-mix(in srgb, var(--c) 13%, #fff); color: var(--c); font-weight: 700;
+             border: 1px solid color-mix(in srgb, var(--c) 30%, transparent);}
+.foot {text-align: center; color: #6b7280; font-size: .85rem;}
 </style>""", unsafe_allow_html=True)
 
 
@@ -163,9 +196,12 @@ with st.sidebar:
     st.caption(f"`{predictor.model_id}` @ `{predictor.revision or 'main'}` · commit `{model_sha}`")
 
 # ---------------------------------------------------------------- header
-st.markdown("<h1 style='text-align:center'>💬 Kiểm tra bình luận tiếng Việt</h1>"
-            "<p style='text-align:center'>Mô hình cho biết một bình luận là <b>bình thường</b>, "
-            "<b>công kích</b> hay <b>thù ghét</b>, kèm mức độ chắc chắn.</p>", unsafe_allow_html=True)
+st.markdown(
+    '<div class="hero"><h1>Kiểm tra bình luận tiếng Việt</h1>'
+    '<p>Phát hiện bình luận công kích và thù ghét, gợi ý cho người kiểm duyệt câu nào cần xem trước.</p>'
+    '<div class="chips"><span class="chip">PhoBERT</span><span class="chip">Một câu · đoạn văn · file CSV</span>'
+    '<span class="chip">Bình luận YouTube</span><span class="chip">LLM kiểm tra lại</span></div></div>',
+    unsafe_allow_html=True)
 
 single, paragraph, batch, video, history = st.tabs(["💬 Một bình luận", "📝 Đoạn văn", "📋 Nhiều bình luận", "📺 Video YouTube", "🕘 Lịch sử & góp ý"])
 
@@ -200,8 +236,11 @@ with single:
     if cur:
         conf = cur["scores"][cur["label"]]
         result_card(cur["label"], conf)
-        for lab in sorted(LABELS, key=lambda lab: -cur["scores"][lab]):
-            st.progress(cur["scores"][lab], text=f'{INFO[lab]["icon"]} {INFO[lab]["name"]}: {cur["scores"][lab]:.1%}')
+        st.markdown("".join(
+            f'<div class="score" style="--c:{INFO[lab]["color"]}"><span>{INFO[lab]["icon"]} {INFO[lab]["name"]}</span>'
+            f'<span class="track"><span class="fill" style="width:{cur["scores"][lab]:.1%};display:block"></span></span>'
+            f'<span class="pct">{cur["scores"][lab]:.1%}</span></div>'
+            for lab in sorted(LABELS, key=lambda lab: -cur["scores"][lab])), unsafe_allow_html=True)
         with st.expander("Mô hình thực sự \"nhìn thấy\" gì? (văn bản sau tiền xử lý)"):
             st.code(predictor.preprocess(cur["text"]), language=None)
             st.caption("Chữ thường, bỏ link/emoji/dấu câu, rút gọn ký tự lặp (\"vlllll\" → \"vl\"), "
@@ -555,6 +594,6 @@ with history:
                       if store.enabled else "Không có gì được gửi đi."))
 
 st.divider()
-st.caption("⚠️ Mô hình phục vụ nghiên cứu và có thể sai, nhất là ranh giới giữa *công kích* và *thù ghét*, "
-           "hoặc những câu thù ghét ngầm không có từ chửi. Hãy dùng như một công cụ hỗ trợ, "
-           "không thay thế người kiểm duyệt.")
+st.markdown('<p class="foot">Mô hình có thể sai, nhất là ở ranh giới giữa <i>công kích</i> và <i>thù ghét</i> '
+            'hoặc với câu thù ghét ngầm không có từ chửi.<br>Đây là công cụ hỗ trợ, không thay thế người kiểm duyệt.</p>',
+            unsafe_allow_html=True)

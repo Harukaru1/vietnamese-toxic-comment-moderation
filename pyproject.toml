@@ -6,9 +6,15 @@ build-backend = "setuptools.build_meta"
 name = "toxic-moderation"
 version = "0.1.0"
 description = "Vietnamese toxic comment moderation (clean / offensive / hate)"
+readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = ["pandas>=2.0", "scikit-learn>=1.4", "joblib>=1.3", "emoji>=2.8", "requests>=2.31"]
+
+[project.urls]
+Repository = "https://github.com/Harukaru1/vietnamese-toxic-comment-moderation"
+Demo = "https://vi-toxic-moderation.streamlit.app/"
+Model = "https://huggingface.co/HaruKaru/phobert-vi-toxic-comment"
 
 [tool.setuptools.packages.find]
 where = ["src"]
