@@ -162,7 +162,7 @@ st.title("🛡️ Kiểm tra bình luận tiếng Việt")
 st.markdown("Dán một bình luận vào ô bên dưới. Mô hình sẽ cho bạn biết nó **bình thường**, "
             "**công kích** hay **thù ghét**, kèm mức độ chắc chắn.")
 
-single, paragraph, batch, history = st.tabs(["💬 Một bình luận", "📝 Đoạn văn", "📋 Nhiều bình luận", "🕘 Lịch sử & góp ý"])
+single, paragraph, batch, video, history = st.tabs(["💬 Một bình luận", "📝 Đoạn văn", "📋 Nhiều bình luận", "📺 Video YouTube", "🕘 Lịch sử & góp ý"])
 
 # ---------------------------------------------------------------- single comment
 with single:
@@ -372,6 +372,94 @@ with batch:
             })
         st.download_button("⬇️ Tải kết quả (CSV)", df.to_csv(index=False).encode("utf-8-sig"),
                            file_name="moderation_results.csv", mime="text/csv")
+
+# ---------------------------------------------------------------- YouTube video dashboard
+@st.cache_data(ttl=900, show_spinner=False)
+def fetch_video(video_id: str, max_comments: int, order: str, _key: str) -> tuple[dict, list[dict]]:
+    """Video title + public comments. Author names are never requested or stored."""
+    from toxic_moderation.youtube import YouTubeClient
+    yt = YouTubeClient(api_key=_key)
+    info = yt.video_info([video_id])
+    if not info:
+        raise ValueError("Không tìm thấy video này (có thể đã bị xoá hoặc để riêng tư).")
+    return info[0], list(yt.iter_comments(video_id, max_comments=max_comments, order=order))
+
+
+with video:
+    yt_key = secret("YOUTUBE_API_KEY")
+    st.markdown("Dán link một video YouTube để xem **bức tranh kiểm duyệt** của phần bình luận: "
+                "bao nhiêu phần trăm độc hại, câu nào nên ẩn, câu nào cần người xem lại.")
+    if not yt_key:
+        st.info("Tính năng này cần khoá YouTube Data API (`YOUTUBE_API_KEY` trong Streamlit secrets). "
+                "Bản demo này chưa được cấu hình khoá.")
+    else:
+        url = st.text_input("Link video", placeholder="https://www.youtube.com/watch?v=...", key="yt_url")
+        c1, c2 = st.columns(2)
+        n_max = c1.select_slider("Số bình luận tối đa", [50, 100, 200, 300], value=100,
+                                 help="Mô hình chạy trên CPU miễn phí nên 100 bình luận mất khoảng 20-30 giây.")
+        order = c2.radio("Lấy bình luận", ["relevance", "time"], horizontal=True,
+                         format_func=lambda o: "Nổi bật nhất" if o == "relevance" else "Mới nhất")
+        if st.button("📺 Phân tích video", type="primary", disabled=not url.strip()):
+            try:
+                from toxic_moderation.youtube import extract_video_id
+                with st.spinner("Đang lấy bình luận từ YouTube..."):
+                    info, comments = fetch_video(extract_video_id(url), n_max, order, yt_key)
+                comments = [c for c in comments if str(c["text"]).strip()]
+                if not comments:
+                    st.warning("Video này không có bình luận công khai (hoặc đã tắt bình luận).")
+                else:
+                    bar = st.progress(0.0, text="Đang phân loại...")
+                    preds = []
+                    for k in range(0, len(comments), 32):
+                        preds += predictor.predict([c["text"] for c in comments[k:k + 32]])
+                        bar.progress(min(1.0, (k + 32) / len(comments)), text=f"Đã xong {len(preds)}/{len(comments)}")
+                    bar.empty()
+                    ss.video = dict(info=info, df=pd.DataFrame({
+                        "text": [c["text"] for c in comments],
+                        "likes": [c["like_count"] for c in comments],
+                        "reply": [c["parent_id"] is not None for c in comments],
+                        "label": [p["label"] for p in preds],
+                        "confidence": [p["scores"][p["label"]] for p in preds],
+                        **{f"p_{lab}": [p["scores"][lab] for p in preds] for lab in LABELS}}))
+            except ValueError as e:
+                st.error(str(e) if "Không tìm thấy" in str(e) else "Link không hợp lệ. Hãy dán link dạng youtube.com/watch?v=... hoặc youtu.be/...")
+            except Exception as e:  # quota exceeded, comments disabled, network
+                st.error(f"Không lấy được bình luận: {e}")
+
+        if "video" in ss:
+            info, df = ss.video["info"], ss.video["df"]
+            st.subheader(info["title"])
+            st.caption(f'{info["channel"]} · {info["view_count"]:,} lượt xem · {info["comment_count"]:,} bình luận '
+                       f'· đã phân tích {len(df)} bình luận')
+            toxic = df["label"] != "clean"
+            sure = df["confidence"] >= REVIEW_BELOW
+            cols = st.columns(4)
+            cols[0].metric("Tỉ lệ độc hại", f"{toxic.mean():.0%}", help="Công kích + thù ghét, theo dự đoán của mô hình.")
+            cols[1].metric(f'{INFO["hate"]["icon"]} {INFO["hate"]["name"]}', int((df["label"] == "hate").sum()))
+            cols[2].metric(f'{INFO["offensive"]["icon"]} {INFO["offensive"]["name"]}', int((df["label"] == "offensive").sum()))
+            cols[3].metric("🤔 Cần xem lại", int((~sure).sum()),
+                           help=f"Độ tin cậy dưới {REVIEW_BELOW:.0%}: nên để người kiểm duyệt quyết định.")
+            st.bar_chart(df["label"].map(lambda lab: INFO[lab]["name"]).value_counts(), horizontal=True, height=160)
+            queue = st.segmented_control(
+                "Hàng đợi kiểm duyệt", ["hide", "review", "ok", "all"], default="hide", key="yt_queue",
+                format_func={"hide": "🚫 Đề xuất ẩn", "review": "🤔 Cần xem lại", "ok": "✅ Để nguyên", "all": "Tất cả"}.get)
+            view = {"hide": df[toxic & sure], "review": df[~sure], "ok": df[~toxic & sure]}.get(queue, df)
+            st.caption({"hide": "Mô hình khá chắc là độc hại. Sắp theo lượt thích: câu nhiều người thấy nhất ở trên.",
+                        "review": "Mô hình không chắc. Người kiểm duyệt nên đọc những câu này.",
+                        "ok": "Mô hình khá chắc là bình thường.", "all": "Toàn bộ bình luận đã phân tích."}.get(queue, ""))
+            st.dataframe(
+                view.sort_values("likes", ascending=False)
+                    .assign(label=lambda v: v["label"].map(lambda lab: f'{INFO[lab]["icon"]} {INFO[lab]["name"]}')),
+                width="stretch", hide_index=True, column_order=["text", "label", "confidence", "likes"],
+                column_config={
+                    "text": st.column_config.TextColumn("Bình luận", width="large"),
+                    "label": st.column_config.TextColumn("Nhãn"),
+                    "confidence": st.column_config.ProgressColumn("Độ tin cậy", min_value=0, max_value=1, format="percent"),
+                    "likes": st.column_config.NumberColumn("👍")})
+            st.download_button("⬇️ Tải kết quả (CSV)", df.to_csv(index=False).encode("utf-8-sig"),
+                               file_name=f'youtube_{info["video_id"]}_moderation.csv', mime="text/csv")
+            st.caption("Chỉ lấy nội dung bình luận công khai, không lấy tên người viết. Mô hình có thể sai: "
+                       "đây là công cụ gợi ý cho người kiểm duyệt, không tự động ẩn gì trên YouTube.")
 
 # ---------------------------------------------------------------- history & feedback
 with history:
