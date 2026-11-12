@@ -36,7 +36,7 @@ the author decided to stop revising it and to collect real feedback instead. Cha
   person an animal or asking for them to be killed without trial is *hate*.
 - **Crude bodily talk** with no target ("ỉa", "đái") is *offensive* (vulgar).
 
-Agreement with the author over both blind rounds (239 comments): three-class kappa 0.55 under v3.2 -> 0.68
+Agreement with the author over both blind rounds (241 comments, `reports/annotation_agreement_testset2.json`): three-class kappa 0.55 under v3.2 -> 0.68
 under v3.3; toxic-vs-clean kappa 0.73 -> 0.74. The hate/offensive boundary is a judgement of severity and two
 annotators will keep disagreeing on part of it; toxic-vs-clean is the reliable signal.
 

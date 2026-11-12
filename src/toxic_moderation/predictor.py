@@ -11,7 +11,7 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from .preprocess import clean_text, load_teencode, has_text
 
 DEFAULT_MODEL_ID = os.getenv("MODEL_ID", "HaruKaru/phobert-vi-toxic-comment")
-DEFAULT_REVISION = os.getenv("MODEL_REVISION") or None  # e.g. a branch such as "v3"
+DEFAULT_REVISION = os.getenv("MODEL_REVISION") or "v7"  # Hub branch; "main" is the older v3
 
 
 class Predictor:

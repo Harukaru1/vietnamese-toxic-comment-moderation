@@ -10,5 +10,9 @@ text can be fetched again through the YouTube Data API; no comment text or autho
 | `pool_train_v33.csv` | 779 more comments from the same pool, labeled for training only |
 | `pool_train_v33_hard.csv` | 229 hard examples: comments the v6 model flagged or was unsure about |
 
-Labels were written by an LLM (Claude) without seeing model predictions; the author labeled 260
-comments blind in two rounds (Cohen's kappa 0.68 on three classes, 0.74 on toxic vs clean under v3.3).
+Labels were written by an LLM (Claude) without seeing model predictions, following
+[guideline v3.3](../docs/annotation_guidelines.md). The author labeled 241 of the test-set comments blind
+in two rounds: Cohen's kappa 0.68 on three classes and 0.74 on toxic vs clean
+([`reports/annotation_agreement_testset2.json`](../reports/annotation_agreement_testset2.json)).
+
+Columns: `label` is one of `clean`, `offensive`, `hate`; `uncertain` marks borderline rows.

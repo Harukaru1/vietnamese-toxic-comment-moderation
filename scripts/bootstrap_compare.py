@@ -1,7 +1,7 @@
 """Paired bootstrap comparison of two model revisions on the same test set.
 
     python scripts/bootstrap_compare.py --a v3 --b v4 --data-dir data/realworld_eval_v4 \
-        --out reports/realworld_2026_v3_vs_v4_bootstrap.json
+        --out reports/earlier/realworld_2026_v3_vs_v4_bootstrap.json
 
 Both models predict every comment once; then comments are resampled with replacement (same
 indices for both models) and F1-macro is recomputed, giving a 95% CI for F1(b) - F1(a) and the

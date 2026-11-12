@@ -56,7 +56,7 @@ def main() -> None:
     stats = {"vihsd_rows_added_to_train": len(added), "added_label_counts": added["label"].value_counts().to_dict(),
              "vihsd_removed_as_duplicates_or_leakage": len(v_train) - len(added),
              "final_train": len(ours["train"]) + len(added), "vihsd_test_benchmark": len(v_test)}
-    (ROOT / "reports" / "add_vihsd.json").write_text(json.dumps(stats, indent=2))
+    (ROOT / "reports" / "earlier" / "add_vihsd.json").write_text(json.dumps(stats, indent=2))
     print(json.dumps(stats, indent=2))
 
 

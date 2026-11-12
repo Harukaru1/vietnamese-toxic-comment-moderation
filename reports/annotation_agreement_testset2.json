@@ -1,0 +1,48 @@
+{
+  "submitted": {
+    "round_1": 100,
+    "round_2": 160
+  },
+  "n": 241,
+  "guideline_v3_2": {
+    "raw_agreement": 0.784,
+    "cohen_kappa_3class": 0.555,
+    "cohen_kappa_binary_toxic": 0.726
+  },
+  "guideline_v3_3": {
+    "raw_agreement": 0.83,
+    "cohen_kappa_3class": 0.676,
+    "cohen_kappa_binary_toxic": 0.744
+  },
+  "per_round_v3_3": {
+    "round_1": {
+      "n": 86,
+      "raw_agreement": 0.884,
+      "cohen_kappa_3class": 0.732,
+      "cohen_kappa_binary_toxic": 0.769
+    },
+    "round_2": {
+      "n": 155,
+      "raw_agreement": 0.8,
+      "cohen_kappa_3class": 0.647,
+      "cohen_kappa_binary_toxic": 0.726
+    }
+  },
+  "confusion_v3_3_rows_author_cols_reference": [
+    [
+      138,
+      26,
+      1
+    ],
+    [
+      2,
+      46,
+      0
+    ],
+    [
+      0,
+      12,
+      16
+    ]
+  ]
+}

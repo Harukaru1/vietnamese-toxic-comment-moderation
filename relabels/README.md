@@ -1,4 +1,8 @@
-# Label patches
+# Label patches (thesis data)
+
+These patches fix labels in the older 52k-comment training data and were used for models v3–v5.
+They follow earlier guideline versions (v3, v3.1); the current definitions are in
+[guideline v3.3](../docs/annotation_guidelines.md) and the 2026 labels are in [`labels/`](../labels/).
 
 `guidelines_v3.csv` re-labels training/validation/test comments to follow
 [annotation guidelines v3](../docs/annotation_guidelines.md) (profanity used only as an intensifier is

@@ -1,6 +1,6 @@
 """Inter-annotator agreement between the author's blind labels and the LLM pre-annotation.
 
-    python scripts/agreement.py data/realworld/blind_100_for_tri.xlsx
+    python scripts/agreement.py data/realworld/blind_100_author.xlsx
 """
 
 from __future__ import annotations
@@ -37,7 +37,7 @@ def main() -> None:
         "confusion_rows_human_cols_llm": confusion_matrix(d["label_human"], d["label_llm"], labels=LABELS).tolist(),
     }
     print(json.dumps(res, indent=2))
-    (ROOT / "reports" / "annotation_agreement.json").write_text(json.dumps(res, indent=2))
+    (ROOT / "reports" / "earlier" / "annotation_agreement.json").write_text(json.dumps(res, indent=2))
     dis = d[d["label_human"] != d["label_llm"]]
     text = pd.read_csv(ROOT / "data" / "realworld" / "realworld_2026_unlabeled.csv", encoding="utf-8-sig")
     dis = dis.drop(columns=["text"], errors="ignore").merge(text[["id", "text"]], on="id")

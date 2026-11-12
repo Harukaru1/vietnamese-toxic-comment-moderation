@@ -7,7 +7,7 @@
 
 Outputs:
     data/label_issues.csv        flagged comments with texts (private: data/ is git-ignored)
-    reports/label_audit.json     aggregate statistics only (safe to publish)
+    reports/earlier/label_audit.json     aggregate statistics only (safe to publish)
 """
 
 from __future__ import annotations
@@ -63,7 +63,7 @@ def main() -> None:
                                out.groupby(["label", "suggested"]).size().items()},
         "oof_accuracy": round(float((probs.argmax(1) == y).mean()), 4),
     }
-    (ROOT / "reports" / "label_audit.json").write_text(json.dumps(stats, indent=2))
+    (ROOT / "reports" / "earlier" / "label_audit.json").write_text(json.dumps(stats, indent=2))
     print(json.dumps(stats, indent=2))
 
 

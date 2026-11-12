@@ -37,7 +37,7 @@ def main() -> None:
     ap.add_argument("--dst", type=Path, default=ROOT / "data" / "clean_vihsd_v4")
     ap.add_argument("--realworld-test", type=Path, default=ROOT / "data" / "realworld_eval" / "test.csv")
     ap.add_argument("--repeat", type=int, default=3)
-    ap.add_argument("--report", type=Path, default=ROOT / "reports" / "add_active_v4.json")
+    ap.add_argument("--report", type=Path, default=ROOT / "reports" / "earlier" / "add_active_v4.json")
     args = ap.parse_args()
 
     act = pd.read_csv(args.active, encoding="utf-8-sig")[["text", "label"]].dropna()

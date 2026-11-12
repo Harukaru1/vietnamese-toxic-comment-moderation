@@ -9,7 +9,7 @@
   <a href="https://github.com/Harukaru1/vietnamese-toxic-comment-moderation/actions/workflows/ci.yml"><img src="https://github.com/Harukaru1/vietnamese-toxic-comment-moderation/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://vi-toxic-moderation.streamlit.app/"><img src="https://img.shields.io/badge/demo-Streamlit-FF4B4B?logo=streamlit&logoColor=white" alt="Live demo"></a>
   <a href="https://huggingface.co/HaruKaru/phobert-vi-toxic-comment"><img src="https://img.shields.io/badge/model-Hugging%20Face-FFD21E?logo=huggingface&logoColor=black" alt="Model"></a>
-  <img src="https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white" alt="Python">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT"></a>
 </p>
 
@@ -81,8 +81,9 @@ author ([`reports/llm_second_stage.json`](reports/llm_second_stage.json)):
 
 This sample deliberately over-represents hard cases; read the two rows against each other.
 
-**Label quality.** An LLM (Claude) labeled the data and the author labeled 239 comments blind.
-Cohen's κ is 0.74 for toxic vs clean and 0.68 for the three classes.
+**Label quality.** An LLM (Claude) labeled the data and the author labeled 241 comments blind.
+Cohen's κ is 0.74 for toxic vs clean and 0.68 for the three classes
+([`reports/annotation_agreement_testset2.json`](reports/annotation_agreement_testset2.json)).
 
 <details>
 <summary><b>Earlier benchmarks</b> (older label definitions, three-class F1-macro)</summary>
@@ -97,7 +98,7 @@ Cohen's κ is 0.74 for toxic vs clean and 0.68 for the three classes.
 | PhoBERT v5 | 0.781 | 0.635 | 0.673 | + 163 labels fixed, text-artifact fix |
 
 In-domain, TF-IDF and PhoBERT are tied; PhoBERT only pulls ahead on unseen sources. v4 and v5 were
-within noise of v3 (paired bootstrap) and were not deployed. Exact files are in [`reports/`](reports/).
+within noise of v3 (paired bootstrap) and were not deployed. Exact files are in [`reports/earlier/`](reports/earlier/).
 </details>
 
 ## How it works
@@ -123,7 +124,7 @@ flowchart LR
 | Paragraphs | Split into sentences, classify each, take the most severe confident one. | [`segment.py`](src/toxic_moderation/segment.py) |
 | Swear-word flag | A separate word list, off by default: under the guideline most comments with a swear word are clean, so it is kept apart from the toxicity label. | [`profanity.py`](src/toxic_moderation/profanity.py) |
 | Feedback loop | Votes and corrections are stored anonymously (no name or IP, opt-out) in a private Hugging Face dataset. | [`feedback_store.py`](src/toxic_moderation/feedback_store.py) |
-| Evaluation | Inverse-probability weights for the stratified sample, paired bootstrap for every comparison, Cohen's κ for every annotation round. | [`eval_heldout.py`](scripts/eval_heldout.py), [`agreement.py`](scripts/agreement.py) |
+| Evaluation | Inverse-probability weights for the stratified sample, paired bootstrap for every comparison, Cohen's κ for every annotation round. | [`eval_heldout.py`](scripts/eval_heldout.py), [`agreement_testset2.py`](scripts/agreement_testset2.py) |
 
 ## How the project got here
 
@@ -170,7 +171,7 @@ streamlit_app/          Streamlit demo (deployed on Streamlit Community Cloud)
 app/                    FastAPI service + Gradio UI, Dockerfile at the repo root
 docs/                   annotation guidelines, screenshots
 relabels/, labels/      label patches and test-set labels (ids + labels only, no text)
-reports/                JSON results of every experiment quoted in this README
+reports/                JSON results behind every number in this README (older experiments in earlier/)
 tests/                  pytest suite, run by GitHub Actions on every push
 ```
 

@@ -34,7 +34,7 @@ def fix(text: str) -> str:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dir", type=Path, required=True)
-    ap.add_argument("--report", type=Path, default=ROOT / "reports" / "fix_bad_token.json")
+    ap.add_argument("--report", type=Path, default=ROOT / "reports" / "earlier" / "fix_bad_token.json")
     args = ap.parse_args()
     rep = {}
     for split in ("train", "val", "test"):

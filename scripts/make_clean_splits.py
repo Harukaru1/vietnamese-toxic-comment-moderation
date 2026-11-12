@@ -61,7 +61,7 @@ def main() -> None:
         d[["text", "label"]].to_csv(args.out / f"{s}.csv", index=False, encoding="utf-8-sig")
     stats["final"] = {s: len(d) for s, d in splits.items()}
     stats["final_label_counts"] = {s: d["label"].value_counts().to_dict() for s, d in splits.items()}
-    (ROOT / "reports" / f"clean_splits{'_pruned' if args.prune else ''}.json").write_text(json.dumps(stats, indent=2))
+    (ROOT / "reports" / "earlier" / f"clean_splits{'_pruned' if args.prune else ''}.json").write_text(json.dumps(stats, indent=2))
     print(json.dumps(stats, indent=2))
 
 
