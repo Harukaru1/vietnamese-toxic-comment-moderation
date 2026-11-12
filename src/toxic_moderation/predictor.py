@@ -8,7 +8,7 @@ import torch
 from pyvi import ViTokenizer
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-from .preprocess import clean_text, load_teencode
+from .preprocess import clean_text, load_teencode, has_text
 
 DEFAULT_MODEL_ID = os.getenv("MODEL_ID", "HaruKaru/phobert-vi-toxic-comment")
 DEFAULT_REVISION = os.getenv("MODEL_REVISION") or None  # e.g. a branch such as "v3"
@@ -32,13 +32,23 @@ class Predictor:
 
     @torch.inference_mode()
     def predict(self, texts: list[str], batch_size: int = 32) -> list[dict]:
-        results = []
-        for i in range(0, len(texts), batch_size):
-            batch = [self.preprocess(t) for t in texts[i:i + batch_size]]
+        # Emoji are removed in cleaning, so an emoji-only comment would reach the model as an empty string
+        # and get an arbitrary label. Such comments are returned as clean without running the model.
+        results: list[dict | None] = [None] * len(texts)
+        todo = []
+        for k, t in enumerate(texts):
+            if has_text(t):
+                todo.append(k)
+            else:
+                results[k] = {"label": "clean", "scores": {lab: float(lab == "clean") for lab in self.labels},
+                              "empty": True}
+        for i in range(0, len(todo), batch_size):
+            idx = todo[i:i + batch_size]
+            batch = [self.preprocess(texts[k]) for k in idx]
             enc = self.tokenizer(batch, truncation=True, max_length=self.max_len,
                                  padding=True, return_tensors="pt").to(self.device)
             probs = torch.softmax(self.model(**enc).logits, dim=-1).cpu().tolist()
-            for p in probs:
+            for k, p in zip(idx, probs):
                 scores = {lab: round(s, 4) for lab, s in zip(self.labels, p)}
-                results.append({"label": max(scores, key=scores.get), "scores": scores})
+                results[k] = {"label": max(scores, key=scores.get), "scores": scores}
         return results

@@ -67,3 +67,12 @@ def test_fix_bad_token():
     assert fbt.fix("lý lẽ cái bad gì") == "lý lẽ cái đéo gì"
     assert fbt.fix("độ bad trip") == "độ bad trip"
     assert fbt.fix("too bad i forgot") == "too bad i forgot"
+
+
+def test_has_text_ignores_emoji_only_comments():
+    from toxic_moderation.preprocess import has_text
+    assert not has_text("😂😂😂")
+    assert not has_text("❤❤ !!! 🎉")
+    assert not has_text("   ")
+    assert has_text("hay quá 😂")
+    assert has_text("vl")

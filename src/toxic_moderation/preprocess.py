@@ -62,3 +62,8 @@ def is_too_short(text: str, min_words: int = 5) -> bool:
     Only used when building a dataset; never applied at inference time.
     """
     return len(text.split()) < min_words
+
+
+def has_text(text: str) -> bool:
+    """False when nothing is left to classify after cleaning (emoji-only, punctuation-only, empty)."""
+    return any(ch.isalnum() for ch in clean_text(text))

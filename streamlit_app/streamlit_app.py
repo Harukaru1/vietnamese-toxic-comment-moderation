@@ -404,7 +404,10 @@ with video:
                 from toxic_moderation.youtube import extract_video_id
                 with st.spinner("Đang lấy bình luận từ YouTube..."):
                     info, comments = fetch_video(extract_video_id(url), n_max, order, yt_key)
-                comments = [c for c in comments if str(c["text"]).strip()]
+                from toxic_moderation.preprocess import has_text
+                n_fetched = len(comments)
+                comments = [c for c in comments if has_text(str(c["text"]))]
+                ss.video_skipped = n_fetched - len(comments)
                 if not comments:
                     st.warning("Video này không có bình luận công khai (hoặc đã tắt bình luận).")
                 else:
@@ -430,7 +433,8 @@ with video:
             info, df = ss.video["info"], ss.video["df"]
             st.subheader(info["title"])
             st.caption(f'{info["channel"]} · {info["view_count"]:,} lượt xem · {info["comment_count"]:,} bình luận '
-                       f'· đã phân tích {len(df)} bình luận')
+                       f'· đã phân tích {len(df)} bình luận'
+                       + (f' · bỏ qua {ss.video_skipped} bình luận chỉ có emoji' if ss.get("video_skipped") else ''))
             toxic = df["label"] != "clean"
             sure = df["confidence"] >= REVIEW_BELOW
             cols = st.columns(4)
