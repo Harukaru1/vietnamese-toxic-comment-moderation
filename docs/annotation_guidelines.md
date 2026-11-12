@@ -1,4 +1,31 @@
-# Annotation guidelines v3.1 (clean / offensive / hate)
+# Annotation guidelines v3.2 (clean / offensive / hate)
+
+**v3.2 (Nov 2026, after the blind check on test set 2): the hate / offensive boundary moved.**
+The author's independent labels disagreed with v3.1 mainly on one pattern (10 of 24 disagreements):
+insults aimed at one person with no reference to who they are ("thế thì m ngu", "thằng đần").
+From v3.2 on:
+
+| Label | v3.2 definition |
+|---|---|
+| **hate** | Attacks a person or group **because of who they are** (nationality, ethnicity, region, religion, gender, sexuality, age, political or fan-group slur such as "3 que", "ricon", "hàn xẻng"), **body shaming**, dehumanizing a group, sexual degradation, threats and death wishes. |
+| **offensive** | Insults one person or the people being replied to **without** any of the above (intelligence, behaviour, character: "m ngu", "óc cu", "con điên này"), plus crude venting with no target (unchanged). |
+| **clean** | Unchanged. Reminder from the same check: harsh words about what a wrongdoer did ("con này quá mất dạy, phải xử nghiêm") and plain-word generalizations ("bọn nó thượng đẳng") are clean. |
+
+This matches the VLSP 2019 definition (hate targets individuals or groups *on the basis of their
+characteristics*) and OLID's split between insults at an individual and at a group. Agreement with the
+author on the 84 checked comments: Cohen's kappa 0.41 under v3.1 -> **0.70** under v3.2 (binary
+toxic-vs-clean: 0.61 -> 0.84).
+
+**Scope:** v3.2 is applied to **test set 2 only** (`labels/testset2_v2.csv`). The training data and the
+first 2026 test set still follow v3.1, where an insult at one person is *hate*. Models trained on v3.1
+labels are therefore expected to lose points on the hate/offensive split of test set 2, so the primary
+metric there is **binary toxic vs clean**; the 3-class score is secondary. Rows below that say
+"insulting one specific person ... = hate" describe v3.1.
+
+Test set 2 also excludes English comments and comments shorter than 3 words (too little to judge).
+
+---
+
 
 **v3.1 (Nov 2026, after the second blind check on the active-learning batch):** criticism of a
 person's or group's **behaviour or character**, without profanity, slurs, dehumanizing words or
