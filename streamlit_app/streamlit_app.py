@@ -27,18 +27,19 @@ INFO = {
                   say="Bình luận này ổn. Không thấy lời lẽ xúc phạm hay thô tục nhắm vào ai.",
                   hint="Khen, chê, góp ý, tranh luận lịch sự. Từ chửi chỉ để nhấn mạnh (\"hay vl\") vẫn tính là bình thường."),
     "offensive": dict(icon="🟠", name="Công kích / thô tục", color="#b35900",
-                      say="Có lời lẽ thô tục hoặc bực bội, nhưng không nhắm vào một người hay nhóm người cụ thể.",
-                      hint="Chửi thề để xả bực (\"đéo hiểu nổi\", \"mẹ nó lại mất điện\"), nội dung thô tục."),
-    "hate": dict(icon="🔴", name="Thù ghét / xúc phạm", color="#c62828",
-                 say="Bình luận này đang xúc phạm, hạ thấp hoặc đe doạ một người hay một nhóm người.",
-                 hint="Chửi người khác, miệt thị vùng miền, giới tính, dân tộc; đe doạ, trù ẻo."),
+                      say="Có lời lẽ thô tục, hoặc chê bai, mắng một người, nhưng không miệt thị họ vì họ là ai.",
+                      hint="Chửi thề để xả bực (\"mẹ nó lại mất điện\"), mắng một người (\"mày ngu thế\"), nội dung thô tục."),
+    "hate": dict(icon="🔴", name="Thù ghét / miệt thị", color="#c62828",
+                 say="Bình luận này miệt thị người khác vì họ là ai (vùng miền, dân tộc, giới tính, ngoại hình...) hoặc đe doạ, trù ẻo.",
+                 hint="Miệt thị vùng miền, quốc gia, dân tộc, giới tính, tôn giáo, nhóm fan; chê ngoại hình; đe doạ, trù ẻo."),
 }
 EXAMPLES = {
     "Khen ngợi": "Video rất hay và bổ ích, cảm ơn bạn đã chia sẻ",
     "Chê nhẹ nhàng": "Tập này hơi dài, mong lần sau làm gọn hơn",
     "Nhấn mạnh (\"vl\")": "Phim hay vl, xem 3 lần rồi vẫn thích",
     "Xả bực": "Đá như này thì nghỉ mẹ đi cho rồi",
-    "Xúc phạm": "Bọn này ngu như chó, cút hết về nước đi",
+    "Mắng một người": "Mày ngu thế, nói mãi không hiểu à",
+    "Miệt thị": "Bọn này ngu như chó, cút hết về nước đi",
 }
 MAX_BATCH = 200
 MAX_PARAGRAPH_CHARS = 3000
@@ -144,7 +145,9 @@ with st.sidebar:
             "- Chỉ đọc **từng bình luận riêng lẻ**, không thấy ngữ cảnh: \"bạn mập quá đấy\" có thể là "
             "trêu đùa hoặc chê bai.\n"
             "- Dễ bỏ sót **thù ghét ngầm** không có từ chửi (mỉa mai, biệt danh miệt thị mới).\n"
-            "- Ranh giới *công kích* / *thù ghét* vốn chủ quan; con người cũng không luôn đồng ý.\n\n"
+            "- Ranh giới *công kích* / *thù ghét* vốn chủ quan; con người cũng không luôn đồng ý.\n"
+            "- Mô hình hiện tại được huấn luyện theo định nghĩa cũ (mắng một người cũng tính là *thù ghét*), "
+            "nên có thể báo *thù ghét* cho câu mà định nghĩa mới xếp vào *công kích*.\n\n"
             + ("Góp ý 👍/👎 (kèm câu bình luận) được lưu **ẩn danh** để tác giả rà soát và huấn luyện lại "
                "mô hình; bạn có thể tắt ở mục góp ý." if store.enabled else
                "Góp ý 👍/👎 chỉ lưu trong trình duyệt của bạn; tải về ở tab **Lịch sử & góp ý** "

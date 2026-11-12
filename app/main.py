@@ -14,7 +14,7 @@ import gradio as gr
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
-LABEL_VI = {"clean": "Bình thường", "offensive": "Công kích", "hate": "Thù ghét / xúc phạm"}
+LABEL_VI = {"clean": "Bình thường", "offensive": "Công kích", "hate": "Thù ghét / miệt thị"}
 
 EXAMPLES = [
     "Video rất hay và bổ ích, cảm ơn bạn đã chia sẻ",
