@@ -456,6 +456,28 @@ with video:
             toxic = df["label"] != "clean"
             p_toxic = 1 - df["p_clean"]
             hide, review = p_toxic >= HIDE_ABOVE, (p_toxic >= REVIEW_ABOVE) & (p_toxic < HIDE_ABOVE)
+            # Optional second stage: an LLM re-reads only the comments the classifier flagged.
+            llm_key = secret("GEMINI_API_KEY")
+            flagged = p_toxic >= REVIEW_ABOVE
+            if llm_key and flagged.any():
+                if "llm" not in df and st.button(f"🤖 Nhờ LLM xem lại {int(flagged.sum())} câu bị báo", key="yt_llm",
+                                                 help="Chỉ gửi nội dung các câu bị báo (không có tên người viết) tới Gemini. "
+                                                      "Trong thử nghiệm, bước này nâng tỉ lệ báo đúng từ 44% lên 78%."):
+                    try:
+                        from toxic_moderation.llm_check import review as llm_review
+                        with st.spinner("LLM đang đọc lại các câu bị báo..."):
+                            verdict = llm_review(df.loc[flagged, "text"].tolist(), api_key=llm_key)
+                        df["llm"] = ""
+                        df.loc[flagged, "llm"] = verdict
+                        ss.video["df"] = df
+                    except Exception as e:  # quota, network, malformed answer: keep the classifier-only view
+                        st.warning(f"Chưa dùng được LLM lúc này ({e}). Kết quả bên dưới chỉ dựa trên mô hình PhoBERT.")
+            if "llm" in df:
+                confirmed = df["llm"].isin(["offensive", "hate"])
+                hide, review = flagged & confirmed, flagged & ~confirmed & (p_toxic >= HIDE_ABOVE)
+                st.success(f"LLM đã xem lại {int(flagged.sum())} câu: xác nhận {int(confirmed.sum())} câu độc hại, "
+                           f"gỡ cờ {int((flagged & ~confirmed).sum())} câu. Câu PhoBERT rất chắc mà LLM không đồng ý "
+                           "được đưa vào hàng \"Cần xem lại\".")
             cols = st.columns(4)
             cols[0].metric("Tỉ lệ độc hại", f"{toxic.mean():.0%}", help="Công kích + thù ghét, theo dự đoán của mô hình.")
             cols[1].metric(f'{INFO["hate"]["icon"]} {INFO["hate"]["name"]}', int((df["label"] == "hate").sum()))
@@ -482,12 +504,14 @@ with video:
                 view.sort_values("likes", ascending=False)
                     .assign(label=lambda v: v["label"].map(lambda lab: f'{INFO[lab]["icon"]} {INFO[lab]["name"]}')),
                 width="stretch", hide_index=True,
-                column_order=["text", "label", "confidence", "likes"] + (["profanity"] if yt_swear else []),
+                column_order=["text", "label", "confidence"] + (["llm"] if "llm" in df else []) + ["likes"]
+                + (["profanity"] if yt_swear else []),
                 column_config={
                     "text": st.column_config.TextColumn("Bình luận", width="large"),
                     "label": st.column_config.TextColumn("Nhãn"),
                     "confidence": st.column_config.ProgressColumn("Độ tin cậy", min_value=0, max_value=1, format="percent"),
                     "likes": st.column_config.NumberColumn("👍"),
+                    "llm": st.column_config.TextColumn("LLM"),
                     "profanity": st.column_config.TextColumn("Từ tục")})
             st.download_button("⬇️ Tải kết quả (CSV)", df.to_csv(index=False).encode("utf-8-sig"),
                                file_name=f'youtube_{info["video_id"]}_moderation.csv', mime="text/csv")
