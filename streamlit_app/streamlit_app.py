@@ -19,6 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from toxic_moderation.feedback_store import FeedbackStore, make_record  # noqa: E402
 from toxic_moderation.predictor import Predictor  # noqa: E402
+from toxic_moderation.profanity import find_profanity
 from toxic_moderation.segment import split_sentences, summarize  # noqa: E402
 
 LABELS = ["clean", "offensive", "hate"]
@@ -55,6 +56,8 @@ REVIEW_BELOW = 0.6  # below this confidence, suggest a human look
 # YouTube queues, on P(toxic) = 1 - P(clean). 0.8 was chosen on the validation split; on held-out comments
 # it gives precision 0.62 / recall 0.36 (reports/threshold_v6.json). Between the two a human should decide.
 HIDE_ABOVE, REVIEW_ABOVE = 0.8, 0.4
+PROFANITY_HELP = ("Bộ lọc riêng, dò theo danh sách từ (vl, đm, đéo...). Mô hình coi từ tục dùng để nhấn mạnh "
+                  "(\"hay vcl\") là bình thường; bật mục này nếu kênh của bạn không chấp nhận từ tục dù với ý gì.")
 
 st.set_page_config(page_title="Kiểm tra bình luận tiếng Việt", page_icon="🛡️", layout="centered")
 st.markdown("""
@@ -347,9 +350,11 @@ with batch:
             "confidence": [p["scores"][p["label"]] for p in preds],
             **{f"p_{lab}": [p["scores"][lab] for p in preds] for lab in LABELS},
         })
+        ss.batch["profanity"] = [", ".join(find_profanity(t)) for t in texts]
 
     if "batch" in ss and len(ss.batch):
         df = ss.batch
+        flag_swear = st.toggle("Đánh dấu cả bình luận có từ tục", key="batch_swear", help=PROFANITY_HELP)
         counts = df["label"].value_counts()
         cols = st.columns(4)
         for col, lab in zip(cols, LABELS):
@@ -358,21 +363,29 @@ with batch:
         cols[3].metric("🤔 Cần xem lại", int((df["confidence"] < REVIEW_BELOW).sum()),
                        help=f"Độ tin cậy dưới {REVIEW_BELOW:.0%}: nên để người kiểm duyệt xem lại.")
 
-        show = st.segmented_control("Lọc theo nhãn", ["Tất cả"] + LABELS + ["Cần xem lại"], default="Tất cả",
-                                    format_func=lambda x: x if x in ("Tất cả", "Cần xem lại") else INFO[x]["name"])
+        options = ["Tất cả"] + LABELS + ["Cần xem lại"] + (["Có từ tục"] if flag_swear else [])
+        show = st.segmented_control("Lọc theo nhãn", options, default="Tất cả",
+                                    format_func=lambda x: x if x not in LABELS else INFO[x]["name"])
         view = df
         if show in LABELS:
             view = df[df["label"] == show]
         elif show == "Cần xem lại":
             view = df[df["confidence"] < REVIEW_BELOW]
+        elif show == "Có từ tục":
+            view = df[df["profanity"] != ""]
+        if flag_swear:
+            n_swear = int((df["profanity"] != "").sum())
+            st.caption(f"🤬 {n_swear} bình luận có từ tục, trong đó {int(((df['profanity'] != '') & (df['label'] == 'clean')).sum())} "
+                       "câu mô hình xếp là bình thường.")
         st.dataframe(
             view.assign(label=view["label"].map(lambda lab: f'{INFO[lab]["icon"]} {INFO[lab]["name"]}')),
             width="stretch", hide_index=True,
-            column_order=["text", "label", "confidence"],
+            column_order=["text", "label", "confidence"] + (["profanity"] if flag_swear else []),
             column_config={
                 "text": st.column_config.TextColumn("Bình luận", width="large"),
                 "label": st.column_config.TextColumn("Nhãn"),
                 "confidence": st.column_config.ProgressColumn("Độ tin cậy", min_value=0, max_value=1, format="percent"),
+                "profanity": st.column_config.TextColumn("Từ tục"),
             })
         st.download_button("⬇️ Tải kết quả (CSV)", df.to_csv(index=False).encode("utf-8-sig"),
                            file_name="moderation_results.csv", mime="text/csv")
@@ -427,6 +440,7 @@ with video:
                         "reply": [c["parent_id"] is not None for c in comments],
                         "label": [p["label"] for p in preds],
                         "confidence": [p["scores"][p["label"]] for p in preds],
+                        "profanity": [", ".join(find_profanity(c["text"])) for c in comments],
                         **{f"p_{lab}": [p["scores"][lab] for p in preds] for lab in LABELS}}))
             except ValueError as e:
                 st.error(str(e) if "Không tìm thấy" in str(e) else "Link không hợp lệ. Hãy dán link dạng youtube.com/watch?v=... hoặc youtu.be/...")
@@ -450,23 +464,31 @@ with video:
                            help=f"Mô hình cho khả năng độc hại từ {REVIEW_ABOVE:.0%} đến {HIDE_ABOVE:.0%}: "
                                 "nên để người kiểm duyệt quyết định.")
             st.bar_chart(df["label"].map(lambda lab: INFO[lab]["name"]).value_counts(), horizontal=True, height=160)
+            yt_swear = st.toggle("Đánh dấu cả bình luận có từ tục", key="yt_swear", help=PROFANITY_HELP)
+            queues = ["hide", "review", "ok"] + (["swear"] if yt_swear else []) + ["all"]
             queue = st.segmented_control(
-                "Hàng đợi kiểm duyệt", ["hide", "review", "ok", "all"], default="hide", key="yt_queue",
-                format_func={"hide": "🚫 Đề xuất ẩn", "review": "🤔 Cần xem lại", "ok": "✅ Để nguyên", "all": "Tất cả"}.get)
-            view = {"hide": df[hide], "review": df[review], "ok": df[~hide & ~review]}.get(queue, df)
+                "Hàng đợi kiểm duyệt", queues, default="hide", key="yt_queue",
+                format_func={"hide": "🚫 Đề xuất ẩn", "review": "🤔 Cần xem lại", "ok": "✅ Để nguyên",
+                             "swear": "🤬 Có từ tục", "all": "Tất cả"}.get)
+            swear = df["profanity"] != ""
+            view = {"hide": df[hide], "review": df[review], "ok": df[~hide & ~review], "swear": df[swear]}.get(queue, df)
             st.caption({"hide": f"Khả năng độc hại từ {HIDE_ABOVE:.0%} trở lên (ở mức này mô hình đúng khoảng 6 trên 10 lần). "
                                 "Sắp theo lượt thích: câu nhiều người thấy nhất ở trên.",
                         "review": "Mô hình không chắc. Người kiểm duyệt nên đọc những câu này.",
-                        "ok": "Mô hình khá chắc là bình thường.", "all": "Toàn bộ bình luận đã phân tích."}.get(queue, ""))
+                        "ok": "Mô hình khá chắc là bình thường.", "all": "Toàn bộ bình luận đã phân tích.",
+                        "swear": f"{int(swear.sum())} bình luận có từ tục, trong đó {int((swear & ~hide & ~review).sum())} câu mô hình cho là bình thường. "
+                                 "Bộ lọc này chỉ dò theo danh sách từ, không xét ý nghĩa của câu."}.get(queue, ""))
             st.dataframe(
                 view.sort_values("likes", ascending=False)
                     .assign(label=lambda v: v["label"].map(lambda lab: f'{INFO[lab]["icon"]} {INFO[lab]["name"]}')),
-                width="stretch", hide_index=True, column_order=["text", "label", "confidence", "likes"],
+                width="stretch", hide_index=True,
+                column_order=["text", "label", "confidence", "likes"] + (["profanity"] if yt_swear else []),
                 column_config={
                     "text": st.column_config.TextColumn("Bình luận", width="large"),
                     "label": st.column_config.TextColumn("Nhãn"),
                     "confidence": st.column_config.ProgressColumn("Độ tin cậy", min_value=0, max_value=1, format="percent"),
-                    "likes": st.column_config.NumberColumn("👍")})
+                    "likes": st.column_config.NumberColumn("👍"),
+                    "profanity": st.column_config.TextColumn("Từ tục")})
             st.download_button("⬇️ Tải kết quả (CSV)", df.to_csv(index=False).encode("utf-8-sig"),
                                file_name=f'youtube_{info["video_id"]}_moderation.csv', mime="text/csv")
             st.caption("Chỉ lấy nội dung bình luận công khai, không lấy tên người viết. Mô hình có thể sai: "

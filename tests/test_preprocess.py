@@ -76,3 +76,12 @@ def test_has_text_ignores_emoji_only_comments():
     assert not has_text("   ")
     assert has_text("hay quá 😂")
     assert has_text("vl")
+
+
+def test_profanity_flag_is_a_word_list_not_a_toxicity_label():
+    from toxic_moderation.profanity import find_profanity, has_profanity
+    assert has_profanity("Phim hay vcllll, xem 3 lần rồi")       # clean under the guideline, still flagged
+    assert find_profanity("đm hay vl thật, đm") == ["đm", "vl"]
+    assert not has_profanity("Video rất hay và bổ ích")
+    assert not has_profanity("CM Quân về vlog mới")               # "vlog" is not "vl"; "cm" is not listed
+    assert not has_profanity("bọn này ngu thật")                  # an insult, but no swear word
