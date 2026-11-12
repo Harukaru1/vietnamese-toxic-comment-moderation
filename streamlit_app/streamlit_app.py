@@ -63,17 +63,18 @@ st.set_page_config(page_title="Kiểm tra bình luận tiếng Việt", page_ico
 st.markdown("""
 <style>
 /* layout */
-.block-container {max-width: 880px; padding-top: 2.2rem; padding-bottom: 3rem;}
-#MainMenu, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {visibility: hidden; height: 0;}
+.block-container {max-width: 880px; padding-top: 4.2rem; padding-bottom: 3rem;}
+footer {visibility: hidden;}
 [data-testid="stSidebar"] {border-right: 1px solid #e3e6f0;}
 /* hero */
-.hero {background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #db2777 100%); color: #fff; border-radius: 20px;
-       padding: 30px 28px 26px; text-align: center; box-shadow: 0 12px 30px -12px rgba(79,70,229,.55); margin-bottom: 18px;}
-.hero h1 {color: #fff; font-size: 2.05rem; font-weight: 800; letter-spacing: -.02em; margin: 0 0 6px; padding: 0;}
-.hero p {margin: 0; opacity: .93; font-size: 1.02rem;}
-.hero .chips {margin-top: 14px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;}
-.hero .chip {background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.28); border-radius: 999px;
-             padding: 3px 12px; font-size: .82rem; backdrop-filter: blur(4px);}
+.hero {background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%); border: 1px solid #e0e7ff;
+       border-radius: 18px; padding: 24px 24px 20px; text-align: center; margin-bottom: 14px;}
+.hero h1 {color: #312e81; font-size: 1.9rem; font-weight: 800; letter-spacing: -.01em; margin: 0 0 6px; padding: 0;}
+.hero p {margin: 0; color: #4b5563; font-size: 1rem;}
+@media (max-width: 640px) {
+  .hero {padding: 16px 14px;} .hero h1 {font-size: 1.4rem;} .hero p {font-size: .9rem;}
+  .score {grid-template-columns: 130px 1fr 48px;}
+}
 /* tabs as pills */
 [data-baseweb="tab-list"] {gap: 6px; background: #e9ebf5; padding: 5px; border-radius: 14px;}
 [data-baseweb="tab"] {border-radius: 10px; padding: 6px 14px; height: auto; background: transparent;}
@@ -198,9 +199,7 @@ with st.sidebar:
 # ---------------------------------------------------------------- header
 st.markdown(
     '<div class="hero"><h1>Kiểm tra bình luận tiếng Việt</h1>'
-    '<p>Phát hiện bình luận công kích và thù ghét, gợi ý cho người kiểm duyệt câu nào cần xem trước.</p>'
-    '<div class="chips"><span class="chip">PhoBERT</span><span class="chip">Một câu · đoạn văn · file CSV</span>'
-    '<span class="chip">Bình luận YouTube</span><span class="chip">LLM kiểm tra lại</span></div></div>',
+    '<p>Phát hiện bình luận công kích và thù ghét, gợi ý cho người kiểm duyệt câu nào cần xem trước.</p></div>',
     unsafe_allow_html=True)
 
 single, paragraph, batch, video, history = st.tabs(["💬 Một bình luận", "📝 Đoạn văn", "📋 Nhiều bình luận", "📺 Video YouTube", "🕘 Lịch sử & góp ý"])
