@@ -53,6 +53,22 @@
       "f1_clean": 0.92,
       "f1_offensive": 0.537,
       "f1_hate": 0.289
+    },
+    "v6": {
+      "toxic_weighted": {
+        "precision": 0.45,
+        "recall": 0.495,
+        "f1": 0.471
+      },
+      "toxic_unweighted": {
+        "precision": 0.441,
+        "recall": 0.677,
+        "f1": 0.534
+      },
+      "f1_macro_3class": 0.564,
+      "f1_clean": 0.907,
+      "f1_offensive": 0.509,
+      "f1_hate": 0.277
     }
   },
   "vs_baseline": {
@@ -69,6 +85,14 @@
       "ci95": [
         0.087,
         0.267
+      ],
+      "p_not_better": 0.0
+    },
+    "v6": {
+      "delta_weighted_toxic_f1": 0.125,
+      "ci95": [
+        0.045,
+        0.223
       ],
       "p_not_better": 0.0
     }
