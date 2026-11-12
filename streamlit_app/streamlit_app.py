@@ -462,7 +462,7 @@ with video:
             if llm_key and flagged.any():
                 if "llm" not in df and st.button(f"🤖 Nhờ LLM xem lại {int(flagged.sum())} câu bị báo", key="yt_llm",
                                                  help="Chỉ gửi nội dung các câu bị báo (không có tên người viết) tới Gemini. "
-                                                      "Trong thử nghiệm, bước này nâng tỉ lệ báo đúng từ 44% lên 78%."):
+                                                      "Trong thử nghiệm trên nhãn do người gán, bước này nâng tỉ lệ báo đúng từ 46% lên 69%."):
                     try:
                         from toxic_moderation.llm_check import review as llm_review
                         with st.spinner("LLM đang đọc lại các câu bị báo..."):

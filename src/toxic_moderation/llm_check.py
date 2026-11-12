@@ -2,9 +2,9 @@
 
 PhoBERT is cheap and reads every comment; an LLM is slower and costs money but follows the guideline better.
 So only the small share of comments the classifier flags (about 6% of traffic) is sent to the LLM, which
-confirms or overrules the flag. On 121 flagged comments labeled blind by the author, the classifier alone was
-right 44% of the time; where an LLM following the guideline agreed, 78% (and 85% of the truly toxic ones were
-kept). See README, "LLM second stage".
+confirms or overrules the flag. On 111 comments flagged by PhoBERT v7 and labeled blind by the author, the
+classifier alone was right 46% of the time; where Gemini Flash-Lite agreed, 69% (84% of the truly toxic ones
+were kept). See reports/llm_second_stage.json and scripts/eval_llm_stage.py.
 
 Uses the Gemini REST API. The key is read from the argument or the GEMINI_API_KEY environment variable and is
 sent in the `x-goog-api-key` header. Comment texts are sent to Google; no author names or ids are included.
