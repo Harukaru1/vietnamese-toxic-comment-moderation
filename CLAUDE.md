@@ -68,15 +68,23 @@ weak on implicit hate. Leakage (4.7%) and inconsistent profanity labels were the
    + active batch x3 -> data/clean_vihsd_v5; notebook notebooks/train_phobert_v5_kaggle.ipynb -> HF branch v5.
    Evaluate like v4: realworld_eval_v4, clean_vihsd_v5 test (v3 baseline: reports/phobert_v3_eval_clean_vihsd_v5_test.json),
    vihsd_test, probe set (data/probe/probe_v2.csv, now 53 rows incl. slur-literal and animal idiom vs comparison: v1 + 11 family-body / insult / slur-question / plain-criticism cases), bootstrap_compare.py --a v3 --b v5.
-2c. TEST SET 2 (LABELED Nov 2026, author blind check pending): 2,000 new YouTube comments (57 videos from 2026) labeled
-   by Claude under guideline v3.1 without seeing predictions: clean 1,705 / hate 253 / offensive 42, 517 uncertain.
-   Labels (ids only) in labels/testset2_v1.csv; private files data/testset2/{to_label.csv,labels.txt,testset2_labeled.csv},
-   eval dirs data/testset2_eval (all) and data/testset2_eval_random (955 random rows: 43 hate, 5 offensive).
-   First results (reports/testset2*_bootstrap.json): whole set v5-v3 F1 +0.014 CI [-0.004,0.031]; toxic precision only
-   0.33 (v3) / 0.35 (v5), recall 0.75; random stratum delta -0.011 CI [-0.071,0.039], recall 0.48. Main finding: many
-   false alarms (v3 flagged 447 clean comments among the selected 2,000). NEXT: author labels
-   data/testset2/blindcheck_100.xlsx (ids in blindcheck_ids.csv: 40 toxic, 30 clean-uncertain, 30 clean) -> kappa with
-   scripts/agreement.py, fix disagreements, then evaluate v2-v5 (evaluate_model.py) and add a README section.
+2c. TEST SET 2 + GUIDELINE v3.2 (Nov 2026). Author's blind check (84 rows): kappa 0.41 under v3.1 -> author chose to
+   move the boundary: insult at one person without identity reference = OFFENSIVE; hate = identity-based attack, body
+   shaming, threats (docs/annotation_guidelines.md v3.2; apps updated). After relabel: kappa 0.70 (binary 0.84).
+   labels/testset2_v2.csv: 1,928 kept (clean 1,679 / offensive 157 / hate 92; English and <3-word rows excluded).
+   labels/testset2_split.csv: tune half 960 (now TRAIN data) / held-out half 968 (NEVER train on it).
+   labels/pool_train_v32.csv: 779 more pool comments labeled v3.2 for training. Private text files in data/testset2/.
+   Findings: v2-v5 all equal on test set 2 (toxic F1 0.40-0.42, reports/testset2_eval.json); weighted to the pool
+   (inverse-probability weights, scripts/tune_threshold.py) v3 = precision 0.28 / recall 0.45; no threshold helps
+   (reports/threshold_v3.json). Primary metric on test set 2 = binary toxic vs clean, weighted.
+2d. v6 (adaptation, WAITING FOR AUTHOR'S KAGGLE RUN): continue training v3 for 3 epochs, lr 1e-5, on the 1,739 v3.2 rows
+   only (data/adapt_v6; Kaggle files data/active/kaggle_upload/v6_train.csv + v6_val.csv; notebook
+   notebooks/train_phobert_v6_kaggle.ipynb -> HF branch v6). Local CPU run "v6a" (models/phobert_v6a/best, not on HF):
+   held-out weighted toxic P 0.53 / R 0.50 / F1 0.51 vs v3 0.28 / 0.45 / 0.35, delta +0.17 CI [0.09, 0.27];
+   offensive F1 0.54, hate F1 0.29 (still weak); 2026 set 1 (v3.1 labels) toxic F1 0.56 (v3 ~0.63: small loss).
+   When the author pastes v6 results: python scripts/eval_heldout.py --models v3 v5 v6 ; if it matches v6a, propose
+   promoting v6 to main, then update MODEL_CARD in streamlit_app.py, remove the "old definition" caveat, README.
+   Ideas if more is needed: mix a sample of old clean rows to limit forgetting; label more hate examples.
 3. Short texts / context (author's request): (a) DONE Nov 2026: "Đoạn văn" tab in the app, src/toxic_moderation/segment.py
    (split_sentences + summarize; label = most severe sentence with conf >= 0.6, lower -> needs review). Original plan: app mode for a short paragraph: split into
    sentences, classify each, text label = most severe sentence, highlight sentences by colour;
@@ -94,7 +102,8 @@ weak on implicit hate. Leakage (4.7%) and inconsistent profanity labels were the
    syllable pairs within 2-3 positions, keep only candidates matching a toxic-phrase lexicon, re-score the
    decoded text, show "possible spoonerism" + needs-review (never auto-hate); small test set of harmful vs
    playful spoonerisms; guideline rule "label by decoded meaning".
-4. YouTube moderation dashboard in the Streamlit app (needs the API key in Streamlit secrets).
+4. YouTube dashboard: DONE Nov 2026 (tab "Video YouTube"; key YOUTUBE_API_KEY added to Streamlit secrets by the author;
+   emoji-only comments skipped via preprocess.has_text). Not verified from the container (streamlit.app unreachable).
 5. At the end, write for the author (in Vietnamese, to read and learn from): (a) a project report (process, results,
    lessons); (b) a study guide explaining the theory, algorithms and code used (TF-IDF, LR/SVM, PhoBERT &
    fine-tuning, class weights, cleanlab/confident learning, bootstrap CI, Cohen's κ, active learning,

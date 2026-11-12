@@ -1,0 +1,47 @@
+{
+  "model": "HaruKaru/phobert-vi-toxic-comment",
+  "teencode": false,
+  "config": {
+    "model": "HaruKaru/phobert-vi-toxic-comment",
+    "data_dir": "data/adapt_v6",
+    "output_dir": "models/phobert_v6a",
+    "teencode": "False",
+    "max_len": "128",
+    "epochs": "3.0",
+    "lr": "1e-05",
+    "batch_size": "16",
+    "no_class_weights": "False",
+    "max_train_samples": "None",
+    "push_to_hub": "None",
+    "no_push": "True",
+    "seed": "42",
+    "tag": "_v6a"
+  },
+  "val_f1_macro": 0.5577,
+  "test": {
+    "accuracy": 0.8502,
+    "f1_macro": 0.5822,
+    "f1_per_class": {
+      "clean": 0.9198,
+      "offensive": 0.5374,
+      "hate": 0.2895
+    },
+    "confusion_matrix": [
+      [
+        751,
+        76,
+        14
+      ],
+      [
+        15,
+        61,
+        4
+      ],
+      [
+        26,
+        10,
+        11
+      ]
+    ]
+  }
+}
