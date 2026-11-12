@@ -27,11 +27,11 @@ INFO = {
                   say="Bình luận này ổn. Không thấy lời lẽ xúc phạm hay thô tục nhắm vào ai.",
                   hint="Khen, chê, góp ý, tranh luận lịch sự. Từ chửi chỉ để nhấn mạnh (\"hay vl\") vẫn tính là bình thường."),
     "offensive": dict(icon="🟠", name="Công kích / thô tục", color="#b35900",
-                      say="Có lời lẽ thô tục, hoặc chê bai, mắng một người, nhưng không miệt thị họ vì họ là ai.",
-                      hint="Chửi thề để xả bực (\"mẹ nó lại mất điện\"), mắng một người (\"mày ngu thế\"), nội dung thô tục."),
+                      say="Có lời lẽ thô tục, mắng một người, hoặc nói xấu một nhóm kiểu \"bọn này\", nhưng chưa tới mức miệt thị nặng.",
+                      hint="Chửi thề để xả bực, mắng một người (\"mày ngu thế\"), nói xấu chung một nhóm (\"bọn này hay thượng đẳng\"), nội dung thô tục."),
     "hate": dict(icon="🔴", name="Thù ghét / miệt thị", color="#c62828",
-                 say="Bình luận này miệt thị người khác vì họ là ai (vùng miền, dân tộc, giới tính, ngoại hình...) hoặc đe doạ, trù ẻo.",
-                 hint="Miệt thị vùng miền, quốc gia, dân tộc, giới tính, tôn giáo, nhóm fan; chê ngoại hình; đe doạ, trù ẻo."),
+                 say="Bình luận này miệt thị nặng: vì người ta là ai (vùng miền, dân tộc, giới tính, ngoại hình...), coi người như con vật, hoặc đe doạ, trù ẻo.",
+                 hint="Miệt thị vùng miền, quốc gia, giới tính; chê ngoại hình; ví người với con vật, lấy khuyết tật ra chửi, chửi gia đình người khác; đe doạ, trù ẻo."),
 }
 EXAMPLES = {
     "Khen ngợi": "Video rất hay và bổ ích, cảm ơn bạn đã chia sẻ",

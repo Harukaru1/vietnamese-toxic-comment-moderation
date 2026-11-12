@@ -54,7 +54,7 @@ def main() -> None:
     d = ROOT / "data" / "testset2"
     pool = pd.read_csv(d / "pool.csv", encoding="utf-8-sig")
     pool["cell"] = cell(pool)
-    rows = pd.read_csv(d / "testset2_labeled_v2.csv")
+    rows = pd.read_csv(d / "testset2_labeled_v3.csv")
     rows = rows[rows["excluded"].isna() | (rows["excluded"] == "")].merge(pool[["comment_id", "cell"]], on="comment_id")
     rows["w"] = rows["cell"].map(pool["cell"].value_counts() / rows["cell"].value_counts())
 

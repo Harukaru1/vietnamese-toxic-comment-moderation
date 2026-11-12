@@ -52,7 +52,7 @@ x0049,4Q83Ra2XPSE,Ugwsbr9mcg7NWy0O8qh4AaABAg,rest,clean
 x0050,d17P75_oqJg,UgwJXwDbNvb4vemzidx4AaABAg.AV8SyLUhxp6AV9lRA8FwNm,flagged,clean
 x0051,jqSKwDqyyH0,Ugxm2OChM_l2EOiVjMJ4AaABAg.ATAKu0CSFo6ATBp-Zxa02_,flagged,offensive
 x0052,d17P75_oqJg,UgwEUwyvQAcFBA4Jm_N4AaABAg.AV7vPTdD7FjAV8VIx8NjJr,flagged,offensive
-x0053,iWuOS6Ez7_Q,UgzzNoniiMBtxdi7uNR4AaABAg.Ab2h7KSadwTAb5u3oJExLK,flagged,hate
+x0053,iWuOS6Ez7_Q,UgzzNoniiMBtxdi7uNR4AaABAg.Ab2h7KSadwTAb5u3oJExLK,flagged,offensive
 x0054,toJjgQgBwx0,UgyTm-h1mg7fyxgp1Jp4AaABAg,cue,clean
 x0055,FgwsvGNq8ZM,UgwCwCCJ3KqP03v105B4AaABAg,rest,clean
 x0056,P3YUTQVHjro,UgyJlzEZGwzEq70lhZp4AaABAg,rest,clean
@@ -191,7 +191,7 @@ x0188,4Q83Ra2XPSE,UgzmZFXC1W3TMVvYUfx4AaABAg.Ab7HWwWNHp8Ab7MRW1inH6,cue,clean
 x0189,TDfCf2wnZeY,UgwWe3HCP06o3qKD7Bp4AaABAg,flagged,clean
 x0190,1-d18J58v-Y,Ugyf5QQkd-CcIOexGqJ4AaABAg,flagged,clean
 x0191,2NQsdmVdm4M,UgxnR70E_h6ArPq3u3J4AaABAg,rest,clean
-x0192,Y97IZyxcX8g,Ugx5alXJYEaYLeJ9TPp4AaABAg.AYzONlVIRs3AZEY16dJmWN,cue,hate
+x0192,Y97IZyxcX8g,Ugx5alXJYEaYLeJ9TPp4AaABAg.AYzONlVIRs3AZEY16dJmWN,cue,offensive
 x0193,iKdtbeQ2Pgs,UgyaF_9wc7iMB-TfDTN4AaABAg.AUlp2-wbMtFAUzOINE275e,flagged,offensive
 x0194,WRfVklxa4J8,UgwWeNM1OqViH6kQeMl4AaABAg,cue,clean
 x0195,E0j17u1a260,Ugyly_kYGKvAKe7T-754AaABAg.AUZYILy3q9WAUZZacqknR1,rest,clean
@@ -230,7 +230,7 @@ x0227,onpG_SjSErk,Ugz0zJdW5sQUm_Mkrjh4AaABAg.AbGA2kE6Oa9AbH__6DdZdj,flagged,hate
 x0228,sfLZl5E4pKo,UgxRVgATdDNucEMEJxB4AaABAg,cue,clean
 x0229,iWuOS6Ez7_Q,Ugy5p48USj0ABllnnK54AaABAg.Ab2Tg_wiCXXAb2VTVHoMZW,flagged,clean
 x0230,E0j17u1a260,UgzHWB7u477h3FpdxP54AaABAg,cue,clean
-x0231,gmmwEYL0OhI,Ugz3LQBHFEE29tvxELh4AaABAg,flagged,hate
+x0231,gmmwEYL0OhI,Ugz3LQBHFEE29tvxELh4AaABAg,flagged,offensive
 x0232,Ue-1hlIagDE,UgzD_D8bYAMZdVNujwN4AaABAg,rest,clean
 x0233,JMGsgm6Qdt0,Ugy3dhiA3b6KKGYkM654AaABAg,cue,clean
 x0234,jP0fMDymy_E,Ugwi4YDcOiCcpexqaqB4AaABAg,flagged,clean
@@ -249,7 +249,7 @@ x0246,PbT00kPvHgM,Ugyd7hFg2jnPuUsfE-F4AaABAg,rest,clean
 x0247,jP0fMDymy_E,Ugzd9kDnszxNWWkDOdh4AaABAg,flagged,clean
 x0248,toJjgQgBwx0,UgxFWCg6cnaRxQfCQLN4AaABAg.AUvgD4u37cIAUwx81tLbFv,flagged,clean
 x0249,WRfVklxa4J8,Ugxej_tGOe3oULh1mIl4AaABAg.AY0kZJhH6YzAY1zOUGySgg,rest,clean
-x0250,azbX5-yQTiQ,UgxHr0UxvriPV_kzuRd4AaABAg,cue,hate
+x0250,azbX5-yQTiQ,UgxHr0UxvriPV_kzuRd4AaABAg,cue,offensive
 x0251,xpq2NRKhnLg,UgxJ5tVbEvFF1uCiVzt4AaABAg,rest,clean
 x0252,WRfVklxa4J8,UgzINwyqVc2Xs4nKvrd4AaABAg,rest,clean
 x0253,xJguA0b8mkw,UgwAiSi_sKxUsBkH7M94AaABAg.AbYDEn9Xg-sAbYJbWTfCta,flagged,clean
@@ -285,9 +285,9 @@ x0282,jP0fMDymy_E,UgxifNhf-AnFMlwzgrt4AaABAg,flagged,clean
 x0283,4JomUkgcVqk,Ugy68ljihoVZF8an9zt4AaABAg,cue,clean
 x0284,-8C9sKci-Lo,UgzYnwidG6bav8_1Ne54AaABAg.Ad-UYVpVlOeAd-wGIK07cN,cue,clean
 x0285,2gBHKi7UPT4,UgxQZDDHNzYq-1DthQx4AaABAg,cue,clean
-x0286,4Q83Ra2XPSE,Ugwyw4XVocQO8Ko8SGZ4AaABAg.Ab7dP0ZMy8uAb7hCoicSJB,flagged,hate
+x0286,4Q83Ra2XPSE,Ugwyw4XVocQO8Ko8SGZ4AaABAg.Ab7dP0ZMy8uAb7hCoicSJB,flagged,offensive
 x0287,pTQsPxNbQHY,UgwkpJivBx1epjYXjth4AaABAg,flagged,clean
-x0288,P3YUTQVHjro,UgzX0SiUFeAjayMisIp4AaABAg.Aa9UsIxUrPsAaMWJPiCbpK,flagged,hate
+x0288,P3YUTQVHjro,UgzX0SiUFeAjayMisIp4AaABAg.Aa9UsIxUrPsAaMWJPiCbpK,flagged,offensive
 x0289,9L37LM-3Q8s,UgwQV8Z0dyGkof-V-lp4AaABAg.AbeNRTobu1aAbeStUyPbyV,flagged,clean
 x0290,jP0fMDymy_E,Ugxz0gGhi00u9i3y95F4AaABAg,flagged,clean
 x0291,UOmRbl1Ihrc,Ugz42tOwC7G6GPSJ4o54AaABAg,cue,clean
@@ -330,7 +330,7 @@ x0327,XoFALjTUXhw,UgxnR7J5a9TXUQSLxZt4AaABAg.AbroyUyQNk2AbrtN32QZRC,cue,clean
 x0328,4JomUkgcVqk,Ugzt68b40ckPqjQbcNR4AaABAg,flagged,clean
 x0329,xpq2NRKhnLg,UgxyEajnlk78euWnKLh4AaABAg,rest,clean
 x0330,pTQsPxNbQHY,Ugw0eDY_eTk-vS1hzbV4AaABAg,flagged,clean
-x0331,iWuOS6Ez7_Q,UgyqG2TogisfULBcOzt4AaABAg,cue,hate
+x0331,iWuOS6Ez7_Q,UgyqG2TogisfULBcOzt4AaABAg,cue,offensive
 x0332,PbT00kPvHgM,UgwosaQl6WwRpcD_XxR4AaABAg,rest,clean
 x0333,HfyiHHqDZVI,UgzchNGIkuoDokJ3HvJ4AaABAg,flagged,clean
 x0334,iWuOS6Ez7_Q,Ugx2UyHN3lnLObcugOx4AaABAg.Ab2a3_58rNSAb2akFzHzzn,cue,offensive
@@ -362,13 +362,13 @@ x0359,K0YjVdLBgrw,UgzEEn9yAET-6_BBJUJ4AaABAg.AWs579gaSI_AWx5jCi1J-e,cue,clean
 x0360,toJjgQgBwx0,UgyisRcJJemuTDpIIHd4AaABAg.AUrZuR-L10CAUrrY20cfls,cue,clean
 x0361,iv171_AN1PM,UgyCSSFDxNh3T-_TBG54AaABAg,rest,clean
 x0362,XoFALjTUXhw,Ugx7XaeEJsC1aKhT7fZ4AaABAg,cue,clean
-x0363,azbX5-yQTiQ,UgwQnqNvFMfNLNz1H0Z4AaABAg.AZ9KlX4PPVBAZ9qEF6_cRO,cue,hate
+x0363,azbX5-yQTiQ,UgwQnqNvFMfNLNz1H0Z4AaABAg.AZ9KlX4PPVBAZ9qEF6_cRO,cue,offensive
 x0364,jqSKwDqyyH0,UgxrDfUGqXh0GDFisMx4AaABAg,flagged,clean
 x0365,pTQsPxNbQHY,UgwlfMYRbtkzbnQpJy54AaABAg,flagged,clean
 x0366,d17P75_oqJg,UgzDDElWGtTpxtbeaMd4AaABAg.AV7aGJxBJ33AV7cZ7fLulY,rest,clean
-x0367,gmmwEYL0OhI,UgyVeCNQxpHQ6TZFpw94AaABAg,flagged,hate
+x0367,gmmwEYL0OhI,UgyVeCNQxpHQ6TZFpw94AaABAg,flagged,offensive
 x0368,LgaBYX1lFZQ,Ugwg1Fp04GCqyOOFnOF4AaABAg,rest,clean
-x0369,azbX5-yQTiQ,UgzKnEsLdBlHX2TFNdh4AaABAg,rest,hate
+x0369,azbX5-yQTiQ,UgzKnEsLdBlHX2TFNdh4AaABAg,rest,offensive
 x0370,4JomUkgcVqk,Ugxr8ZoJqiCIVZoMT3B4AaABAg,rest,clean
 x0371,KOQe-VVnI-s,UgxEgbu-8RkCf9aHpQR4AaABAg.AXkfEhFMaE3AXkm-uW35S7,cue,clean
 x0372,jP0fMDymy_E,Ugyclpjhyv49ZTNBiER4AaABAg.AcoP2RsmbYUAcqhhPaQVhK,flagged,offensive
@@ -402,7 +402,7 @@ x0399,toJjgQgBwx0,Ugx-iIt4n3_xS5-geqd4AaABAg,flagged,clean
 x0400,4Q83Ra2XPSE,Ugw-TuWTKDR4pzJhF5J4AaABAg.Ab7AXf90wdsAb7ECUznhib,flagged,hate
 x0401,sfLZl5E4pKo,UgzD2qlMlwgcjr0kwk14AaABAg,cue,clean
 x0402,K-x_wmytmsA,UgyK_OBUZoO7Gd0J3Ix4AaABAg,flagged,clean
-x0403,azbX5-yQTiQ,UgwWEttoo8bY9HOiMEl4AaABAg.AZ9H9BDdJMBAZ9UgPrw1n8,cue,hate
+x0403,azbX5-yQTiQ,UgwWEttoo8bY9HOiMEl4AaABAg.AZ9H9BDdJMBAZ9UgPrw1n8,cue,offensive
 x0404,FNbT75NoaAI,UgzDoidovnXIQadWABx4AaABAg.Aa5ZbBv1YbKAa5bOrgY6Lp,rest,clean
 x0405,4JomUkgcVqk,UgzIbU3HndyY7OmK8Z94AaABAg,flagged,clean
 x0406,9L37LM-3Q8s,UgzDTeovgAvZa6tQnG14AaABAg,rest,clean
@@ -464,11 +464,11 @@ x0461,FgwsvGNq8ZM,UgxrJoUXlsuynxG5zFd4AaABAg,rest,clean
 x0462,TDfCf2wnZeY,Ugz5ySTqDPpag-eG9iN4AaABAg,flagged,clean
 x0463,4JomUkgcVqk,UgyfjSdpY4OtRJfvuq94AaABAg,rest,clean
 x0464,XoFALjTUXhw,UgzZz04ybDG9C6Wjgdh4AaABAg.Abro1XM7CqXAc7xnrkasvl,rest,clean
-x0465,8HHJsqbGs6o,UgxnGlx80vtkI217EgB4AaABAg.Aa4HQlf4bQWAa4ktcMpYok,flagged,clean
+x0465,8HHJsqbGs6o,UgxnGlx80vtkI217EgB4AaABAg.Aa4HQlf4bQWAa4ktcMpYok,flagged,offensive
 x0466,iv171_AN1PM,UgxbAcD5guBZ69_n5UR4AaABAg,rest,clean
 x0467,xpq2NRKhnLg,Ugw1ISgr44LP7-CeKtJ4AaABAg,rest,clean
 x0468,4Q83Ra2XPSE,UgyZ__0l3sbo1U_vhOZ4AaABAg,flagged,hate
-x0469,4JomUkgcVqk,Ugw1Ng3YvHBBsdGeleB4AaABAg,cue,hate
+x0469,4JomUkgcVqk,Ugw1Ng3YvHBBsdGeleB4AaABAg,cue,offensive
 x0470,8OiOSC6TpDE,UgxAUW4vdIcmFG16Kt54AaABAg.ActjP8RcC9mAcyvqfqqWse,flagged,clean
 x0471,jP0fMDymy_E,UgwVNzN6jcra5WbnoQF4AaABAg,flagged,clean
 x0472,azbX5-yQTiQ,UgwWXbvRRBDOxeYlAlJ4AaABAg.AZ9FTCRMZBAAZ9Vlo60RYE,cue,clean
@@ -477,7 +477,7 @@ x0474,1-d18J58v-Y,Ugz8x4yCUX6FbQzpjE14AaABAg,flagged,clean
 x0475,xJguA0b8mkw,UgzPnfnK_RmjMXcXfhB4AaABAg.AbZz-qZFNjuAba-h9v4kvj,cue,clean
 x0476,Y97IZyxcX8g,UgxoAi7RalejNRKO36N4AaABAg.AYzNrlH7wuVAYzYNDgVW8k,cue,clean
 x0477,4JomUkgcVqk,UgxyS4qUO7COJZuwQl14AaABAg,flagged,clean
-x0478,E0j17u1a260,UgyuLkl7ZlVeH7cezRF4AaABAg.AUh-YefGHXVA_Fn0t0N55X,flagged,offensive
+x0478,E0j17u1a260,UgyuLkl7ZlVeH7cezRF4AaABAg.AUh-YefGHXVA_Fn0t0N55X,flagged,hate
 x0479,8OiOSC6TpDE,Ugy5CVwYhdoKcpGk0Xl4AaABAg,cue,clean
 x0480,GSda8rjWDf4,UgykTRE6msgIzd9VGHB4AaABAg,flagged,clean
 x0481,azbX5-yQTiQ,Ugz9VsLNb28O4_P-bs54AaABAg,flagged,clean
@@ -486,8 +486,8 @@ x0483,acZh6Ot2j68,UgzYmuHdqtztT7VqkVR4AaABAg.AXTe39kkLWoAXTlOLR--6_,rest,clean
 x0484,xJguA0b8mkw,UgwAiSi_sKxUsBkH7M94AaABAg.AbYDEn9Xg-sAbYDMmA31pd,cue,clean
 x0485,toJjgQgBwx0,UgyisRcJJemuTDpIIHd4AaABAg.AUrZuR-L10CAUt3c_XE2TA,cue,clean
 x0486,sfLZl5E4pKo,Ugz_Sww2g67e6pUsAe54AaABAg,rest,clean
-x0487,Y97IZyxcX8g,UgyTnKOT4cpJggdlJpt4AaABAg.AYzIyAvw3mbAYzL2iKR7PA,cue,hate
-x0488,4Q83Ra2XPSE,UgxVFuGLilhkirO-iEh4AaABAg.Ab7K53CstOwAb7OePkO9Cj,cue,hate
+x0487,Y97IZyxcX8g,UgyTnKOT4cpJggdlJpt4AaABAg.AYzIyAvw3mbAYzL2iKR7PA,cue,offensive
+x0488,4Q83Ra2XPSE,UgxVFuGLilhkirO-iEh4AaABAg.Ab7K53CstOwAb7OePkO9Cj,cue,offensive
 x0489,LgaBYX1lFZQ,Ugzc87GcxQjR512UoyR4AaABAg,rest,clean
 x0490,FgwsvGNq8ZM,UgwCdrhZV9ikUebcEbx4AaABAg,rest,clean
 x0491,2NQsdmVdm4M,Ugzkp8vMQyrktMlMisN4AaABAg,flagged,clean
@@ -545,7 +545,7 @@ x0542,KOQe-VVnI-s,Ugz8IrcVrIHRsGGmZGt4AaABAg,rest,clean
 x0543,E0j17u1a260,UgxBKAX3qKrXc7Fc0tt4AaABAg.AUXrh-oJPV0AUXwXXy65RL,cue,clean
 x0544,jP0fMDymy_E,UgyE-XeeqN0nRF0hYDx4AaABAg,flagged,clean
 x0545,KOQe-VVnI-s,UgxHwXhyv_HSBe9QFE94AaABAg,rest,clean
-x0546,iWuOS6Ez7_Q,Ugxq-ZFVT-QIg5Qqpq14AaABAg,flagged,hate
+x0546,iWuOS6Ez7_Q,Ugxq-ZFVT-QIg5Qqpq14AaABAg,flagged,offensive
 x0547,4Q83Ra2XPSE,UgzmZFXC1W3TMVvYUfx4AaABAg.Ab7HWwWNHp8Ab7IPGECSK6,flagged,offensive
 x0548,pTQsPxNbQHY,UgznFbicYgz0-QwsbkR4AaABAg,flagged,clean
 x0549,GSda8rjWDf4,UgxeV0_snA6FuT-GtL54AaABAg,rest,clean
@@ -573,7 +573,7 @@ x0570,GSda8rjWDf4,UgwgqowRAhAFzfiweh14AaABAg,cue,clean
 x0571,0z6FlCuWUug,UgzaU1-1pnBt4GaOv7F4AaABAg,flagged,offensive
 x0572,sfLZl5E4pKo,UgxDVMHB3xnjKZNXn1h4AaABAg,rest,clean
 x0573,l6EKIzoi9Us,UgzQNFy06x1Wf1zhK3F4AaABAg.AWd0422-PQxAWdwvnmRNh5,rest,clean
-x0574,jqSKwDqyyH0,UgzCwxgwdnR65pDfoaN4AaABAg,flagged,hate
+x0574,jqSKwDqyyH0,UgzCwxgwdnR65pDfoaN4AaABAg,flagged,offensive
 x0575,8HHJsqbGs6o,UgzBt6jmp1JJE_Chza94AaABAg,cue,clean
 x0576,8HHJsqbGs6o,UgyqiY74ql8RJuHuDIN4AaABAg.AaeQvfMVrfGAahCA8BrMVF,rest,clean
 x0577,toJjgQgBwx0,UgzYCPd6Ppe6hgw6nZt4AaABAg.AUuGxGRVTK5AUvWM5zbseJ,rest,offensive
@@ -637,7 +637,7 @@ x0634,FgwsvGNq8ZM,UgxXwRx9ihze-PiuiHR4AaABAg,rest,clean
 x0635,toJjgQgBwx0,Ugx4WiAAMLcHHHdZNwZ4AaABAg.AUsfiIfr-j2AUsxuB8gUy-,flagged,clean
 x0636,2NQsdmVdm4M,UgyDJTdSSLGasu15nld4AaABAg.AV_OeMfjpY_AV_QL7Em84M,flagged,clean
 x0637,ze9vr1V0iSQ,UgyvWSqMLJyfN9bA7q54AaABAg,rest,clean
-x0638,2gBHKi7UPT4,UgydjuE7hCOrBCr2goB4AaABAg,cue,hate
+x0638,2gBHKi7UPT4,UgydjuE7hCOrBCr2goB4AaABAg,cue,offensive
 x0639,8OiOSC6TpDE,Ugwja5uHC8MvnAhgtI14AaABAg.Acu1TIR3oDQAcxbbxz2E52,cue,clean
 x0640,SlQR9iu09bQ,UgwmEedyb0yWHzbKZZZ4AaABAg.AXouYetZE6lAXpJg2UmRkM,rest,clean
 x0641,d17P75_oqJg,UgwPNpKVNfN5ovys41d4AaABAg,flagged,clean
@@ -678,7 +678,7 @@ x0675,4Q83Ra2XPSE,UgwwKIEfYyduzhvJkrt4AaABAg,flagged,clean
 x0676,xpq2NRKhnLg,UgzSMSDcLvNqvgRlW_N4AaABAg,cue,clean
 x0677,UH21OnJwxZE,Ugw3UG5w7xZ5u0TuGEd4AaABAg.A_XtPpSna7gA_ZRHXaCsrZ,rest,clean
 x0678,jP0fMDymy_E,UgwwKMS7aQVjY0QRhvd4AaABAg,rest,clean
-x0679,iWuOS6Ez7_Q,Ugyc8clQCVO5ep2r1aN4AaABAg.Ab2lhLpIxgpAb4l3CR1eIK,flagged,hate
+x0679,iWuOS6Ez7_Q,Ugyc8clQCVO5ep2r1aN4AaABAg.Ab2lhLpIxgpAb4l3CR1eIK,flagged,offensive
 x0680,Ue-1hlIagDE,Ugzyclt0GdyyzjdKl6t4AaABAg,cue,clean
 x0681,azbX5-yQTiQ,UgzpMbTr-14f_tzhQDV4AaABAg.AZ9ID9UOiKgAZ9eTWJy6AH,cue,offensive
 x0682,WRfVklxa4J8,Ugx-ZO0TafKrVHdZ-s14AaABAg,cue,clean
@@ -715,7 +715,7 @@ x0712,YrL2jeR3bus,UgzcGrlBCgNU6KjSLtp4AaABAg,rest,clean
 x0713,xpq2NRKhnLg,UgzZtCnV-qTNLU0uQ9t4AaABAg,flagged,clean
 x0714,jqSKwDqyyH0,UgwD8TikR6Vn04I-dRt4AaABAg,flagged,clean
 x0715,jP0fMDymy_E,Ugw9RH9Xend_1EhQ2DR4AaABAg,cue,clean
-x0716,iWuOS6Ez7_Q,UgyRyY5WoCLLzujYqjl4AaABAg.Ab2oW72mHj3Ab3WcG6JYTn,cue,hate
+x0716,iWuOS6Ez7_Q,UgyRyY5WoCLLzujYqjl4AaABAg.Ab2oW72mHj3Ab3WcG6JYTn,cue,offensive
 x0717,E0j17u1a260,UgzogVn-sdR8PEqeeyF4AaABAg,cue,clean
 x0718,d17P75_oqJg,UgyE-9ERiCxupxRAkp14AaABAg.AVAAHqkLdvsAVG2IdiKHwN,rest,clean
 x0719,gmmwEYL0OhI,UgwxULKt97WWMyC7zXd4AaABAg.Ab3MV2VTBoPAb3QtGpbmtI,rest,hate

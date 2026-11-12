@@ -1,4 +1,4 @@
-# Annotation guidelines v3.2 (clean / offensive / hate)
+# Annotation guidelines v3.3 (clean / offensive / hate)
 
 **v3.2 (Nov 2026, after the blind check on test set 2): the hate / offensive boundary moved.**
 The author's independent labels disagreed with v3.1 mainly on one pattern (10 of 24 disagreements):
@@ -16,7 +16,23 @@ characteristics*) and OLID's split between insults at an individual and at a gro
 author on the 84 checked comments: Cohen's kappa 0.41 under v3.1 -> **0.70** under v3.2 (binary
 toxic-vs-clean: 0.61 -> 0.84).
 
-**Scope:** v3.2 is applied to **test set 2 only** (`labels/testset2_v2.csv`). The training data and the
+**v3.3 (Nov 2026, after a second blind check of 155 held-out comments).** Three clarifications, decided by
+the author:
+
+- **Negative remarks about a nation or group with "bọn / tụi / lũ / đám / chúng nó"**, in otherwise plain
+  words ("bọn Hàn hay thượng đẳng", "lũ fan K-pop hết cứu"), are **offensive**: not clean, not hate.
+- **Slur names ("hàn xẻng", "tàu khựa", "ricon", "3 que") are judged by the sentence.** Used only to name the
+  group in a mild sentence -> *offensive*; combined with an attack (body, intelligence, "sủa") -> *hate*;
+  merely quoted or discussed -> *clean*.
+- **Severity for insults at one person.** Still *offensive* by default ("m ngu", "dở hơi à"), but *hate* when
+  the insult dehumanizes ("sủa", "súc vật", "óc chó"), uses a disability as a slur ("thiểu năng", "Down"),
+  attacks the person's family, or calls for killing someone.
+- **Crude bodily talk** with no target ("ỉa", "đái") is *offensive* (vulgar), not clean.
+
+Agreement with the author over both blind rounds (239 comments): three-class kappa 0.55 under v3.2 -> 0.64
+under v3.3; toxic-vs-clean kappa 0.70.
+
+**Scope:** v3.2/v3.3 apply to **test set 2 and the 2026 training rows** (`labels/`). The training data and the
 first 2026 test set still follow v3.1, where an insult at one person is *hate*. Models trained on v3.1
 labels are therefore expected to lose points on the hate/offensive split of test set 2, so the primary
 metric there is **binary toxic vs clean**; the 3-class score is secondary. Rows below that say
