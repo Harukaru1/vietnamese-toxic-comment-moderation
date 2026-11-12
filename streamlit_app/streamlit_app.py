@@ -59,7 +59,7 @@ HIDE_ABOVE, REVIEW_ABOVE = 0.8, 0.4
 PROFANITY_HELP = ("Bộ lọc riêng, dò theo danh sách từ (vl, đm, đéo...). Mô hình coi từ tục dùng để nhấn mạnh "
                   "(\"hay vcl\") là bình thường; bật mục này nếu kênh của bạn không chấp nhận từ tục dù với ý gì.")
 
-st.set_page_config(page_title="Kiểm tra bình luận tiếng Việt", page_icon="🛡️", layout="centered")
+st.set_page_config(page_title="Kiểm tra bình luận tiếng Việt", page_icon="💬", layout="centered")
 st.markdown("""
 <style>
 .result-card {border-left: 6px solid var(--c); background: color-mix(in srgb, var(--c) 12%, transparent);
@@ -139,15 +139,13 @@ with st.sidebar:
         st.caption(i["hint"])
     st.divider()
     st.subheader("Về mô hình")
-    st.markdown(f"**{MODEL_CARD['version']}**, fine-tune trên khoảng 52 nghìn bình luận tiếng Việt, rồi tinh chỉnh "
-                "thêm trên 1.700 bình luận YouTube năm 2026 gán theo định nghĩa hiện tại (chọn bản tốt nhất trong 3 lần huấn luyện).")
+    st.markdown(f"**{MODEL_CARD['version']}**, huấn luyện trên khoảng 54 nghìn bình luận tiếng Việt.")
     m1, m2 = st.columns(2)
     m1.metric("Báo đúng", f"{MODEL_CARD['precision_toxic']:.0%}",
               help="Precision: trong các bình luận mô hình báo độc hại, bao nhiêu phần trăm độc hại thật.")
     m2.metric("Bắt được", f"{MODEL_CARD['recall_toxic']:.0%}",
               help="Recall: trong các bình luận độc hại thật, mô hình bắt được bao nhiêu phần trăm.")
-    st.caption("Đo trên 968 bình luận YouTube năm 2026 mà mô hình chưa từng thấy, quy đổi về tỉ lệ bình luận "
-               "thực tế (khoảng 5% là độc hại). Vì vậy hãy xem kết quả là gợi ý cho người kiểm duyệt.")
+    st.caption("Số liệu tham khảo, đo trên bình luận YouTube và chỉ mang tính tương đối.")
     with st.expander("Mô hình còn hạn chế gì?"):
         st.markdown(
             "- Chỉ đọc **từng bình luận riêng lẻ**, không thấy ngữ cảnh: \"bạn mập quá đấy\" có thể là "
@@ -165,9 +163,9 @@ with st.sidebar:
     st.caption(f"`{predictor.model_id}` @ `{predictor.revision or 'main'}` · commit `{model_sha}`")
 
 # ---------------------------------------------------------------- header
-st.title("🛡️ Kiểm tra bình luận tiếng Việt")
-st.markdown("Dán một bình luận vào ô bên dưới. Mô hình sẽ cho bạn biết nó **bình thường**, "
-            "**công kích** hay **thù ghét**, kèm mức độ chắc chắn.")
+st.markdown("<h1 style='text-align:center'>💬 Kiểm tra bình luận tiếng Việt</h1>"
+            "<p style='text-align:center'>Mô hình cho biết một bình luận là <b>bình thường</b>, "
+            "<b>công kích</b> hay <b>thù ghét</b>, kèm mức độ chắc chắn.</p>", unsafe_allow_html=True)
 
 single, paragraph, batch, video, history = st.tabs(["💬 Một bình luận", "📝 Đoạn văn", "📋 Nhiều bình luận", "📺 Video YouTube", "🕘 Lịch sử & góp ý"])
 
@@ -326,69 +324,47 @@ with paragraph:
 
 # ---------------------------------------------------------------- batch
 with batch:
-    st.markdown("Kiểm tra nhiều bình luận cùng lúc: **mỗi dòng một bình luận** "
-                f"(tối đa {MAX_BATCH} dòng), hoặc tải lên file CSV có cột `text`.")
-    raw = st.text_area("Danh sách bình luận", value="\n".join(EXAMPLES.values()), height=160)
-    upload = st.file_uploader("Hoặc tải lên CSV", type="csv")
-    if st.button("🔍 Phân loại tất cả", type="primary"):
-        if upload is not None:
-            texts = pd.read_csv(upload)["text"].dropna().astype(str).tolist()
-        else:
-            texts = [t for t in raw.splitlines() if t.strip()]
-        if len(texts) > MAX_BATCH:
-            st.info(f"Chỉ lấy {MAX_BATCH} dòng đầu tiên.")
-        texts = texts[:MAX_BATCH]
-        bar = st.progress(0.0, text="Đang phân loại...")
-        preds = []
-        for k in range(0, len(texts), 32):
-            preds += predictor.predict(texts[k:k + 32])
-            bar.progress(min(1.0, (k + 32) / max(len(texts), 1)), text=f"Đã xong {len(preds)}/{len(texts)}")
-        bar.empty()
-        ss.batch = pd.DataFrame({
-            "text": texts,
-            "label": [p["label"] for p in preds],
-            "confidence": [p["scores"][p["label"]] for p in preds],
-            **{f"p_{lab}": [p["scores"][lab] for p in preds] for lab in LABELS},
-        })
-        ss.batch["profanity"] = [", ".join(find_profanity(t)) for t in texts]
+    st.markdown(f"Tải lên một file CSV có cột `text` (tối đa {MAX_BATCH} dòng). Bạn nhận lại chính file đó, "
+                "thêm cột nhãn và độ tin cậy.")
+    upload = st.file_uploader("File CSV", type="csv")
+    if upload is not None and st.button("🔍 Gán nhãn file này", type="primary"):
+        try:
+            src = pd.read_csv(upload)
+            if "text" not in src.columns:
+                st.error("File cần có một cột tên là `text`.")
+            else:
+                src = src.dropna(subset=["text"]).head(MAX_BATCH).reset_index(drop=True)
+                texts = src["text"].astype(str).tolist()
+                bar = st.progress(0.0, text="Đang phân loại...")
+                preds = []
+                for k in range(0, len(texts), 32):
+                    preds += predictor.predict(texts[k:k + 32])
+                    bar.progress(min(1.0, (k + 32) / max(len(texts), 1)), text=f"Đã xong {len(preds)}/{len(texts)}")
+                bar.empty()
+                out = src.copy()
+                out["label"] = [p["label"] for p in preds]
+                out["confidence"] = [p["scores"][p["label"]] for p in preds]
+                for lab in LABELS:
+                    out[f"p_{lab}"] = [p["scores"][lab] for p in preds]
+                out["needs_review"] = out["confidence"] < REVIEW_BELOW
+                out["profanity"] = [", ".join(find_profanity(t)) for t in texts]
+                ss.batch = dict(name=upload.name.rsplit(".", 1)[0], df=out)
+        except Exception as e:
+            st.error(f"Không đọc được file CSV: {e}")
 
-    if "batch" in ss and len(ss.batch):
-        df = ss.batch
-        flag_swear = st.toggle("Đánh dấu cả bình luận có từ tục", key="batch_swear", help=PROFANITY_HELP)
+    if isinstance(ss.get("batch"), dict):
+        df = ss.batch["df"]
         counts = df["label"].value_counts()
         cols = st.columns(4)
         for col, lab in zip(cols, LABELS):
             n = int(counts.get(lab, 0))
             col.metric(f'{INFO[lab]["icon"]} {INFO[lab]["name"]}', f"{n} ({n / len(df):.0%})")
-        cols[3].metric("🤔 Cần xem lại", int((df["confidence"] < REVIEW_BELOW).sum()),
+        cols[3].metric("🤔 Cần xem lại", int(df["needs_review"].sum()),
                        help=f"Độ tin cậy dưới {REVIEW_BELOW:.0%}: nên để người kiểm duyệt xem lại.")
-
-        options = ["Tất cả"] + LABELS + ["Cần xem lại"] + (["Có từ tục"] if flag_swear else [])
-        show = st.segmented_control("Lọc theo nhãn", options, default="Tất cả",
-                                    format_func=lambda x: x if x not in LABELS else INFO[x]["name"])
-        view = df
-        if show in LABELS:
-            view = df[df["label"] == show]
-        elif show == "Cần xem lại":
-            view = df[df["confidence"] < REVIEW_BELOW]
-        elif show == "Có từ tục":
-            view = df[df["profanity"] != ""]
-        if flag_swear:
-            n_swear = int((df["profanity"] != "").sum())
-            st.caption(f"🤬 {n_swear} bình luận có từ tục, trong đó {int(((df['profanity'] != '') & (df['label'] == 'clean')).sum())} "
-                       "câu mô hình xếp là bình thường.")
-        st.dataframe(
-            view.assign(label=view["label"].map(lambda lab: f'{INFO[lab]["icon"]} {INFO[lab]["name"]}')),
-            width="stretch", hide_index=True,
-            column_order=["text", "label", "confidence"] + (["profanity"] if flag_swear else []),
-            column_config={
-                "text": st.column_config.TextColumn("Bình luận", width="large"),
-                "label": st.column_config.TextColumn("Nhãn"),
-                "confidence": st.column_config.ProgressColumn("Độ tin cậy", min_value=0, max_value=1, format="percent"),
-                "profanity": st.column_config.TextColumn("Từ tục"),
-            })
-        st.download_button("⬇️ Tải kết quả (CSV)", df.to_csv(index=False).encode("utf-8-sig"),
-                           file_name="moderation_results.csv", mime="text/csv")
+        st.download_button("⬇️ Tải file đã gán nhãn (CSV)", df.to_csv(index=False).encode("utf-8-sig"),
+                           file_name=f'{ss.batch["name"]}_labeled.csv', mime="text/csv", type="primary")
+        st.caption("Các cột được thêm: `label`, `confidence`, `p_clean`, `p_offensive`, `p_hate`, `needs_review` "
+                   "và `profanity` (từ tục tìm thấy theo danh sách từ, tách riêng với nhãn của mô hình).")
 
 # ---------------------------------------------------------------- YouTube video dashboard
 @st.cache_data(ttl=900, show_spinner=False)
@@ -500,19 +476,49 @@ with video:
                         "ok": "Mô hình khá chắc là bình thường.", "all": "Toàn bộ bình luận đã phân tích.",
                         "swear": f"{int(swear.sum())} bình luận có từ tục, trong đó {int((swear & ~hide & ~review).sum())} câu mô hình cho là bình thường. "
                                  "Bộ lọc này chỉ dò theo danh sách từ, không xét ý nghĩa của câu."}.get(queue, ""))
-            st.dataframe(
-                view.sort_values("likes", ascending=False)
-                    .assign(label=lambda v: v["label"].map(lambda lab: f'{INFO[lab]["icon"]} {INFO[lab]["name"]}')),
-                width="stretch", hide_index=True,
-                column_order=["text", "label", "confidence"] + (["llm"] if "llm" in df else []) + ["likes"]
-                + (["profanity"] if yt_swear else []),
+            names = {INFO[lab]["name"]: lab for lab in LABELS}
+            shown = view.sort_values("likes", ascending=False)
+            table = shown.assign(label=shown["label"].map(lambda lab: f'{INFO[lab]["icon"]} {INFO[lab]["name"]}'),
+                                 correct=None)
+            order = ["text", "label", "correct", "confidence"] + (["llm"] if "llm" in df else []) + ["likes"] \
+                + (["profanity"] if yt_swear else [])
+            edited = st.data_editor(
+                table, width="stretch", hide_index=True, column_order=order, key=f"yt_edit_{info['video_id']}_{queue}",
+                disabled=[c for c in table.columns if c != "correct"],
                 column_config={
                     "text": st.column_config.TextColumn("Bình luận", width="large"),
                     "label": st.column_config.TextColumn("Nhãn"),
+                    "correct": st.column_config.SelectboxColumn("Nhãn đúng (nếu sai)", options=list(names),
+                                                                help="Thấy mô hình gán sai? Chọn nhãn đúng ở đây rồi bấm Gửi góp ý."),
                     "confidence": st.column_config.ProgressColumn("Độ tin cậy", min_value=0, max_value=1, format="percent"),
                     "likes": st.column_config.NumberColumn("👍"),
                     "llm": st.column_config.TextColumn("LLM"),
                     "profanity": st.column_config.TextColumn("Từ tục")})
+            fixes = edited[edited["correct"].notna()]
+            if len(fixes) and st.button(f"📨 Gửi góp ý cho {len(fixes)} bình luận", key="yt_send"):
+                sent = ss.setdefault("yt_sent", set())
+                n_new = 0
+                for idx, row in fixes.iterrows():
+                    correct = names[row["correct"]]
+                    if (info["video_id"], idx, correct) in sent:
+                        continue
+                    src = df.loc[idx]
+                    scores = {lab: float(src[f"p_{lab}"]) for lab in LABELS}
+                    ss.history.append(dict(id=len(ss.history), time=datetime.now().strftime("%H:%M:%S"), text=src["text"],
+                                           label=src["label"], scores=scores,
+                                           feedback="sai" if correct != src["label"] else "đúng", correct=correct))
+                    if store.enabled and ss.share_ok:
+                        try:
+                            store.add(make_record(session=ss.session_id, item=ss.history[-1]["id"], text=src["text"],
+                                                  model_label=src["label"], scores=scores,
+                                                  feedback=ss.history[-1]["feedback"], correct=correct,
+                                                  model_revision=predictor.revision or "main", model_sha=model_sha))
+                        except Exception as e:  # never break the demo because of logging
+                            print("feedback not saved:", e)
+                    sent.add((info["video_id"], idx, correct))
+                    n_new += 1
+                st.success(f"Đã ghi nhận góp ý cho {n_new} bình luận. Cảm ơn bạn!"
+                           + ("" if store.enabled and ss.share_ok else " (chỉ lưu trong trình duyệt của bạn.)"))
             st.download_button("⬇️ Tải kết quả (CSV)", df.to_csv(index=False).encode("utf-8-sig"),
                                file_name=f'youtube_{info["video_id"]}_moderation.csv', mime="text/csv")
             st.caption("Chỉ lấy nội dung bình luận công khai, không lấy tên người viết. Mô hình có thể sai: "
