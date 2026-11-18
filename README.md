@@ -189,7 +189,7 @@ pytest
 from toxic_moderation.predictor import Predictor
 
 clf = Predictor(revision="v7")   # downloads HaruKaru/phobert-vi-toxic-comment from the Hugging Face Hub
-clf.predict(["Video rất hay và bổ ích", "Đá như này thì nghỉ mẹ đi cho rồi"])
+clf.predict(["Video rất hay và bổ ích", "Mày ngu thế, nói mãi không hiểu à"])
 # [{'label': 'clean', 'scores': {...}}, {'label': 'offensive', 'scores': {...}}]
 ```
 
