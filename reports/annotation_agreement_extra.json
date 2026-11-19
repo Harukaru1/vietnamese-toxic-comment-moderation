@@ -1,0 +1,16 @@
+{
+  "sample": "50 comments of the extra batch, 25 toxic and 25 clean by the first labels (hard cases by design: mostly PhoBERT/Gemini disagreements)",
+  "author_left_blank_or_unsure": 4,
+  "before_discussion": {
+    "n": 46,
+    "raw_agreement": 0.609,
+    "cohen_kappa_3class": 0.348,
+    "cohen_kappa_binary_toxic": 0.527
+  },
+  "after_clarifications": {
+    "n": 46,
+    "raw_agreement": 0.717,
+    "cohen_kappa_3class": 0.52,
+    "cohen_kappa_binary_toxic": 0.565
+  }
+}

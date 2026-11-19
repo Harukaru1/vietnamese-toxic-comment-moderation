@@ -36,6 +36,25 @@ the author decided to stop revising it and to collect real feedback instead. Cha
   person an animal or asking for them to be killed without trial is *hate*.
 - **Crude bodily talk** with no target ("ỉa", "đái") is *offensive* (vulgar).
 
+**Clarifications after the third blind check (Nov 2026, 50 comments from news, forum and YouTube).** These
+settle cases the rules above left open; no label of the held-out test half had to change.
+
+- **Outrage at a wrongdoer or an event** caps at *offensive*. Under a news story about a crime, "cầm thú",
+  "súc sinh", "quỷ đội lốt người", "khốn nạn" express anger at what someone did, not contempt for who they
+  are, so they are *offensive*, not *hate*. Without insulting words it stays *clean*. Animal words used on
+  someone in an argument ("hỏi ngu thế con chó", "thằng óc chó") remain *hate*.
+- **Mocking someone's appearance is never clean**, even as a joke ("nhìn như phù thủy", "yêu tinh cá sấu xD",
+  "mắt lé"): *offensive* by default.
+- **Words for the female genitals ("lồn" and its spellings "lol", "loz", "lìn", "l`") are heavy.** Used to
+  attack or dismiss someone ("xàm lol", "phim củ loz", "ăn lol với nó") they are *hate*; as an intensifier
+  with no target ("mát lol", "vãi lìn") *offensive*. The English "lol" (laughing), the game LoL and "lon"
+  (a can) are not this word.
+- **A descriptive remark about a nation or group** in a balanced account of an experience is *clean* even
+  with "bọn" ("bọn này xì xà xì xồ… nhưng dịch vụ rất tốt"); the "bọn + group = offensive" rule applies when
+  the sentence is mainly a put-down.
+- **Intensifiers ("méo", "éo") and common condemnation words ("côn đồ") are weighed by the whole sentence**,
+  as before: clean in a neutral or joking sentence, offensive when the sentence is an attack.
+
 Agreement with the author over both blind rounds (241 comments, `reports/annotation_agreement_testset2.json`): three-class kappa 0.55 under v3.2 -> 0.68
 under v3.3; toxic-vs-clean kappa 0.73 -> 0.74. The hate/offensive boundary is a judgement of severity and two
 annotators will keep disagreeing on part of it; toxic-vs-clean is the reliable signal.

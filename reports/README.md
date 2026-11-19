@@ -12,6 +12,7 @@ stored here (metrics, confusion matrices, counts); no comment text.
 | `llm_second_stage.json` | LLM re-check of the comments v7 flags, scored against the author's blind labels | `scripts/eval_llm_stage.py` |
 | `annotation_agreement_testset2.json` | Cohen's κ between the author's blind labels (two rounds, 241 comments) and the reference labels, before and after the guideline revision | `scripts/agreement_testset2.py` |
 | `phobert_results_v6.json`, `phobert_results_v7.json` | Kaggle training runs (v7: validation F1 of each seed and the selected one) | `notebooks/` |
+| `annotation_agreement_extra.json` | κ between the author's blind labels and the extra-batch labels (50 hard comments), before and after the guideline clarifications | inline, see the file |
 | `extra_pool.json`, `extra_batch.json` | Counts for the extra data: cleaning, deduplication and PhoBERT flags per source; the selected batch and the Gemini pre-labels | `scripts/build_extra_pool.py`, `scripts/select_extra_batch.py` |
 | `build_testset2.json` | Sampling of test set 2 from the 12k-comment pool (strata and weights) | `scripts/build_testset_pool.py` |
 | `testset2_eval.json`, `threshold_v3.json`, `threshold_v6.json` | Whole-set scores and decision-threshold study, computed before the final label revision | `scripts/eval_testset2.py`, `scripts/tune_threshold.py` |
