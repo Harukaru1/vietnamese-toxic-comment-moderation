@@ -1,6 +1,6 @@
 """Compare models on the held-out half of test set 2 (guideline v3.2 labels).
 
-    python scripts/eval_heldout.py --models v3 v5 v6a=models/phobert_v6a/best --baseline v3
+    python scripts/eval_heldout.py --models v3 v6 v7 v8 --baseline v3 v7
 
 A model is a Hub revision (`v3`) or `name=local_dir`. The held-out half (labels/testset2_split.csv, half == test)
 is never used for training or threshold tuning. Metrics are weighted back to the 12k-comment pool with the
@@ -32,7 +32,7 @@ from tune_threshold import cell, prf  # noqa: E402
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--models", nargs="+", default=["v3", "v5"])
-    ap.add_argument("--baseline", default="v3")
+    ap.add_argument("--baseline", nargs="+", default=["v3"])
     ap.add_argument("--n", type=int, default=2000)
     args = ap.parse_args()
     d = ROOT / "data" / "testset2"
@@ -64,17 +64,19 @@ def main() -> None:
                 **{f"f1_{lab}": round(float(v), 3) for lab, v in zip(LABELS, per)}}
 
     rep = {"n": int(len(te)), "class_counts": te["label"].value_counts().to_dict(),
-           "models": {n: summary(preds[n].to_numpy()) for n in names}, "vs_baseline": {}}
+           "models": {n: summary(preds[n].to_numpy()) for n in names}}
     rng = np.random.default_rng(0)
     idxs = [rng.integers(0, len(y), len(y)) for _ in range(args.n)]
-    base = preds[args.baseline].to_numpy()
-    for n in names:
-        if n == args.baseline:
-            continue
-        p = preds[n].to_numpy()
-        diffs = np.array([prf(y[i] != "clean", p[i] != "clean", w[i])["f1"] - prf(y[i] != "clean", base[i] != "clean", w[i])["f1"]
-                          for i in idxs])
-        rep["vs_baseline"][n] = {"delta_weighted_toxic_f1": round(float(np.mean(diffs)), 3),
+    for b in args.baseline:
+        base = preds[b].to_numpy()
+        rep[f"vs_{b}"] = {}
+        for n in names:
+            if n == b:
+                continue
+            p = preds[n].to_numpy()
+            diffs = np.array([prf(y[i] != "clean", p[i] != "clean", w[i])["f1"]
+                              - prf(y[i] != "clean", base[i] != "clean", w[i])["f1"] for i in idxs])
+            rep[f"vs_{b}"][n] = {"delta_weighted_toxic_f1": round(float(np.mean(diffs)), 3),
                                  "ci95": [round(float(np.percentile(diffs, q)), 3) for q in (2.5, 97.5)],
                                  "p_not_better": round(float((diffs <= 0).mean()), 4)}
     (ROOT / "reports" / "testset2_heldout.json").write_text(json.dumps(rep, indent=2))

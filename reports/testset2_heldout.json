@@ -22,22 +22,6 @@
       "f1_offensive": 0.348,
       "f1_hate": 0.157
     },
-    "v5": {
-      "toxic_weighted": {
-        "precision": 0.356,
-        "recall": 0.411,
-        "f1": 0.382
-      },
-      "toxic_unweighted": {
-        "precision": 0.376,
-        "recall": 0.704,
-        "f1": 0.49
-      },
-      "f1_macro_3class": 0.448,
-      "f1_clean": 0.842,
-      "f1_offensive": 0.328,
-      "f1_hate": 0.172
-    },
     "v6": {
       "toxic_weighted": {
         "precision": 0.547,
@@ -69,17 +53,25 @@
       "f1_clean": 0.918,
       "f1_offensive": 0.53,
       "f1_hate": 0.156
+    },
+    "v8": {
+      "toxic_weighted": {
+        "precision": 0.598,
+        "recall": 0.54,
+        "f1": 0.568
+      },
+      "toxic_unweighted": {
+        "precision": 0.559,
+        "recall": 0.717,
+        "f1": 0.628
+      },
+      "f1_macro_3class": 0.563,
+      "f1_clean": 0.914,
+      "f1_offensive": 0.519,
+      "f1_hate": 0.255
     }
   },
-  "vs_baseline": {
-    "v5": {
-      "delta_weighted_toxic_f1": -0.014,
-      "ci95": [
-        -0.043,
-        0.012
-      ],
-      "p_not_better": 0.8355
-    },
+  "vs_v3": {
     "v6": {
       "delta_weighted_toxic_f1": 0.104,
       "ci95": [
@@ -95,6 +87,40 @@
         0.243
       ],
       "p_not_better": 0.0
+    },
+    "v8": {
+      "delta_weighted_toxic_f1": 0.17,
+      "ci95": [
+        0.08,
+        0.268
+      ],
+      "p_not_better": 0.0
+    }
+  },
+  "vs_v7": {
+    "v3": {
+      "delta_weighted_toxic_f1": -0.15,
+      "ci95": [
+        -0.243,
+        -0.067
+      ],
+      "p_not_better": 1.0
+    },
+    "v6": {
+      "delta_weighted_toxic_f1": -0.046,
+      "ci95": [
+        -0.115,
+        0.003
+      ],
+      "p_not_better": 0.969
+    },
+    "v8": {
+      "delta_weighted_toxic_f1": 0.021,
+      "ci95": [
+        -0.028,
+        0.088
+      ],
+      "p_not_better": 0.2585
     }
   }
 }
