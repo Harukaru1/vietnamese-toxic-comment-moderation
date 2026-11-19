@@ -15,6 +15,7 @@ from playwright.sync_api import sync_playwright
 
 URL = "https://vi-toxic-moderation.streamlit.app/"
 WAKE_BUTTON = "text=/get this app back up/i"
+APP_TITLE = "Kiểm tra bình luận"  # heading of the demo, see streamlit_app.py
 
 
 def main() -> int:
@@ -34,9 +35,9 @@ def main() -> int:
         else:
             print("App is awake")
 
-        # The app may be served inside an iframe; wait until a heading renders in any frame.
+        # The app may be served inside an iframe; wait until its own heading renders in any frame.
         for _ in range(36):
-            if any(f.locator("h1").count() for f in page.frames):
+            if any(f.locator("h1", has_text=APP_TITLE).count() for f in page.frames):
                 print("App content loaded")
                 break
             page.wait_for_timeout(5_000)
