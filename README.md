@@ -90,15 +90,17 @@ the guideline in the prompt ([`reports/generative_vs_phobert.json`](reports/gene
 | Gemini Flash-Lite, zero-shot | 0.62 | **0.87** | **0.72** | paid API, rate-limited |
 | Qwen2.5-1.5B-Instruct, zero-shot | 0.19 | 0.16 | 0.17 | CPU, ~0.6 s per comment |
 | Qwen2.5-1.5B-Instruct + QLoRA on the ~2k v7 training comments | 0.69 | 0.23 | 0.35 | CPU, ~0.5 s per comment |
+| same, toxic rows oversampled, 3 epochs, threshold tuned on validation | 0.41 | 0.40 | 0.41 | CPU, ~0.5 s per comment |
 
 Gemini finds far more of the toxic comments than PhoBERT (+0.18 F1, 95% CI [+0.03, +0.31]). The reference
 labels were written by an LLM, which could favour LLMs, so the comparison was repeated on the 193 held-out
 comments the author labeled blind: Gemini still leads (F1 0.71 vs 0.62, CI [+0.03, +0.15]). A small open
 model without fine-tuning is not usable. Fine-tuning it with QLoRA (4-bit base, LoRA rank 16, 2 epochs on a T4,
 [`notebooks/train_qwen_qlora_kaggle.ipynb`](notebooks/train_qwen_qlora_kaggle.ipynb)) doubles its F1 and makes
-it precise, but it misses most toxic comments and stays below PhoBERT (−0.20 F1, CI [−0.33, −0.06]). PhoBERT
-also had ~52k older comments behind it; the QLoRA run saw only the 2k new ones, and its validation score was
-still rising after the second epoch.
+it precise, but it misses most toxic comments. A second run that repeats the rare toxic rows and tunes the
+decision threshold finds more of them (F1 0.41) but still stays below PhoBERT (−0.14, CI [−0.25, −0.03]); on
+the author's blind labels the two are within noise (0.68 vs 0.62, CI [−0.03, +0.14]). PhoBERT also had ~52k
+older comments behind it, while the QLoRA runs saw only the 2k new ones.
 
 **Label quality.** An LLM (Claude) labeled the data and the author labeled 241 comments blind.
 Cohen's κ is 0.74 for toxic vs clean and 0.68 for the three classes
