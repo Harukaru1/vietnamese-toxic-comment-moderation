@@ -65,10 +65,20 @@ the decision a moderator actually makes.
 | Model | Precision | Recall | F1 |
 |---|---:|---:|---:|
 | PhoBERT v3: 52k older comments | 0.36 | 0.44 | 0.40 |
-| **PhoBERT v7** (deployed): v3 + 2k comments labeled under the final guideline | **0.62** | **0.49** | **0.55** |
+| PhoBERT v7: v3 + 2k YouTube comments labeled under the final guideline | **0.62** | 0.49 | 0.55 |
+| **PhoBERT v8** (deployed): v7 data + 1k comments from news, a forum and YouTube | 0.60 | **0.54** | **0.57** |
 
-The gain is +0.15 F1 with a 95% paired-bootstrap interval of [+0.07, +0.24]
+v7 gains +0.15 F1 over v3 with a 95% paired-bootstrap interval of [+0.07, +0.24]. v8 adds +0.02 over v7
+(CI [−0.03, +0.09]) and the same small gain shows on the author's own blind labels (F1 0.65 vs 0.62), so
+it was deployed for its higher recall; on 200 random news comments it flags 3, v7 none
 ([`reports/testset2_heldout.json`](reports/testset2_heldout.json)).
+
+**More sources.** The 1k comments of v8 come from ViCTSD (VnExpress news comments), the VOZ forum and more
+YouTube comments, cleaned of @user tags, emoji and very short comments. The source datasets' own labels were
+not used: ViCTSD marks 11% of its comments toxic, but under this guideline about 1% are, because it counts
+harsh criticism of wrongdoers. Gemini pre-labeled the candidates and every disagreement with PhoBERT, and
+every comment both called toxic, was checked by hand: 29% of the latter were clean profanity
+([`labels/extra_batch1.csv`](labels/extra_batch1.csv)).
 
 **LLM second opinion.** The app can send only the comments the classifier flags (about 6% of
 traffic) to an LLM that applies the same guideline. On 111 flagged comments labeled blind by the
@@ -76,7 +86,7 @@ author ([`reports/llm_second_stage.json`](reports/llm_second_stage.json)):
 
 | Flagged by | Human also says toxic | Toxic comments kept |
 |---|---:|---:|
-| PhoBERT alone | 46% | 100% |
+| PhoBERT v7 alone | 46% | 100% |
 | PhoBERT, confirmed by Gemini Flash-Lite | **69%** | 84% |
 
 This sample deliberately over-represents hard cases; read the two rows against each other.
@@ -87,6 +97,7 @@ the guideline in the prompt ([`reports/generative_vs_phobert.json`](reports/gene
 | Model | Precision | Recall | F1 | Runs on |
 |---|---:|---:|---:|---|
 | PhoBERT v7 (135M parameters, fine-tuned) | 0.62 | 0.49 | 0.55 | CPU, ~40 ms per comment |
+| PhoBERT v8 (deployed) | 0.60 | 0.54 | 0.57 | CPU, ~40 ms per comment |
 | Gemini Flash-Lite, zero-shot | 0.62 | **0.87** | **0.72** | paid API, rate-limited |
 | Qwen2.5-1.5B-Instruct, zero-shot | 0.19 | 0.16 | 0.17 | CPU, ~0.6 s per comment |
 | Qwen2.5-1.5B-Instruct + QLoRA on the ~2k v7 training comments | 0.69 | 0.23 | 0.35 | CPU, ~0.5 s per comment |
@@ -128,10 +139,11 @@ within noise of v3 (paired bootstrap) and were not deployed. Exact files are in 
 flowchart LR
     A[Thesis data + UIT-ViHSD<br/>52k comments] --> B[Leakage removal, cleanlab,<br/>label patches] --> M3[PhoBERT v3]
     Y[YouTube API 2026<br/>12k-comment pool] --> S[Stratified sample] --> L[LLM labels +<br/>blind human check]
-    L --> TR[1,968 training rows] --> M7[PhoBERT v7<br/>best of 3 seeds]
-    M3 --> M7
-    L --> TE[968 held-out rows] -.evaluates.-> M7
-    M7 --> H[Hugging Face Hub] --> APP[Streamlit app<br/>FastAPI + Docker]
+    L --> TR[1,968 training rows] --> M8[PhoBERT v8<br/>best of 3 seeds]
+    X[ViCTSD news, VOZ forum,<br/>more YouTube] --> C[Clean, Gemini pre-label,<br/>manual review] --> E[1,000 more rows] --> M8
+    M3 --> M8
+    L --> TE[968 held-out rows] -.evaluates.-> M8
+    M8 --> H[Hugging Face Hub] --> APP[Streamlit app<br/>FastAPI + Docker]
     APP --> G[LLM re-check of<br/>flagged comments]
     APP --> F[Anonymous feedback] -.future labels.-> L
 ```
@@ -139,7 +151,7 @@ flowchart LR
 | Component | Details | Code |
 |---|---|---|
 | Preprocessing | Unicode NFC, lowercase, URL/mention/emoji removal, squeezing repeated letters, pyvi word segmentation. Emoji-only comments skip the model. | [`preprocess.py`](src/toxic_moderation/preprocess.py) |
-| Classifier | `vinai/phobert-base-v2`. v3: lr 2e-5, up to 6 epochs. v7: continue v3 for 3 epochs at lr 1e-5 on the newly labeled comments, three seeds, keep the best on validation. | [`train_phobert.py`](scripts/train_phobert.py), [`notebooks/`](notebooks/) |
+| Classifier | `vinai/phobert-base-v2`. v3: lr 2e-5, up to 6 epochs. v7/v8: continue v3 for 3 epochs at lr 1e-5 on the newly labeled comments only, three seeds, keep the best on validation. | [`train_phobert.py`](scripts/train_phobert.py), [`notebooks/`](notebooks/) |
 | Decision bands | P(toxic) ≥ 0.8 → suggest hiding; 0.4–0.8 → needs review; below → leave. | [`streamlit_app.py`](streamlit_app/streamlit_app.py) |
 | LLM second stage | Gemini re-reads flagged comments with the guideline in the prompt; retries on rate limits and falls back to the classifier alone. | [`llm_check.py`](src/toxic_moderation/llm_check.py) |
 | Paragraphs | Split into sentences, classify each, take the most severe confident one. | [`segment.py`](src/toxic_moderation/segment.py) |
@@ -171,10 +183,13 @@ the measurement rather than the model.
    hit, because the older training labels treat harsh criticism as toxic. Continuing v3 on about
    2,000 comments labeled under the final guideline fixed more than relabeling inside the 52k older
    ones had.
+8. **Other sources and generative models.** 1,000 comments from news and a forum (v8) brought a small,
+   consistent gain. A zero-shot LLM beats every fine-tuned model on F1, which makes it the natural second
+   stage; a 1.5B open model fine-tuned with QLoRA does not reach PhoBERT on this amount of data.
 
 ## Limitations
 
-- **It prioritizes, it does not decide.** At precision 0.62 a person should confirm before anything
+- **It prioritizes, it does not decide.** At precision 0.60 a person should confirm before anything
   is hidden.
 - **One comment, no context.** "bạn mập quá đấy" can be teasing or body shaming.
 - **Offensive vs hate is a judgement of severity.** The model separates toxic from clean far better
@@ -187,7 +202,7 @@ the measurement rather than the model.
 ```
 src/toxic_moderation/   preprocessing, predictor, sentence splitting, LLM check, swear-word flag, feedback store, YouTube client
 scripts/                data pipeline, training, evaluation, annotation agreement, test-set sampling
-notebooks/              Kaggle GPU notebooks, one per model version (v1-v7)
+notebooks/              Kaggle GPU notebooks, one per model version (v1-v8) and the QLoRA runs
 streamlit_app/          Streamlit demo (deployed on Streamlit Community Cloud)
 app/                    FastAPI service + Gradio UI, Dockerfile at the repo root
 docs/                   annotation guidelines, screenshots
@@ -209,8 +224,8 @@ pytest
 ```python
 from toxic_moderation.predictor import Predictor
 
-clf = Predictor(revision="v7")   # downloads HaruKaru/phobert-vi-toxic-comment from the Hugging Face Hub
-clf.predict(["Video rất hay và bổ ích", "Mày ngu thế, nói mãi không hiểu à"])
+clf = Predictor(revision="v8")   # downloads HaruKaru/phobert-vi-toxic-comment from the Hugging Face Hub
+clf.predict(["Video rất hay và bổ ích", "Thằng này dở hơi à, nói mãi không hiểu"])
 # [{'label': 'clean', 'scores': {...}}, {'label': 'offensive', 'scores': {...}}]
 ```
 

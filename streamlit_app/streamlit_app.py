@@ -49,8 +49,8 @@ PARAGRAPH_EXAMPLE = ("Hôm qua mình xem trận chung kết, công nhận đội
                      "Còn thằng số 7 thì ngu như bò, đá như thế thì cút về quê đi. "
                      "Nói chung trận đấu vẫn đáng xem, mong mùa sau còn hay hơn.")
 # Shown in the sidebar; update together with the model on the Hub (see README "Results").
-MODEL_CARD = {"version": "PhoBERT v7", "precision_toxic": 0.62, "recall_toxic": 0.49}
-MODEL_REVISION = os.getenv("MODEL_REVISION") or "v7"  # Hub branch served by this demo; set to "v6" to roll back
+MODEL_CARD = {"version": "PhoBERT v8", "precision_toxic": 0.60, "recall_toxic": 0.54}
+MODEL_REVISION = os.getenv("MODEL_REVISION") or "v8"  # Hub branch served by this demo; set to "v7" to roll back
 GITHUB = "https://github.com/Harukaru1/vietnamese-toxic-comment-moderation"
 REVIEW_BELOW = 0.6  # below this confidence, suggest a human look
 # YouTube queues, on P(toxic) = 1 - P(clean). 0.8 was chosen on the validation split; on held-out comments
@@ -173,7 +173,7 @@ with st.sidebar:
         st.caption(i["hint"])
     st.divider()
     st.subheader("Về mô hình")
-    st.markdown(f"**{MODEL_CARD['version']}**, huấn luyện trên khoảng 54 nghìn bình luận tiếng Việt.")
+    st.markdown(f"**{MODEL_CARD['version']}**, huấn luyện trên khoảng 55 nghìn bình luận tiếng Việt.")
     m1, m2 = st.columns(2)
     m1.metric("Báo đúng", f"{MODEL_CARD['precision_toxic']:.0%}",
               help="Precision: trong các bình luận mô hình báo độc hại, bao nhiêu phần trăm độc hại thật.")

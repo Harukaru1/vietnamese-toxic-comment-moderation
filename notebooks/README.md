@@ -13,8 +13,8 @@ pushes the model to its own branch of
 | `train_phobert_v4_kaggle.ipynb` | v4 | v3 data + active-learning batch |
 | `train_phobert_v5_kaggle.ipynb` | v5 | v4 + guideline v3.1 relabels (790 rows) + `bad`→`đéo` text fix |
 | `train_phobert_v6_kaggle.ipynb` | v6 | starts from v3; 3 epochs on 1,739 comments labeled under guideline v3.2 |
-| `train_phobert_v7_kaggle.ipynb` | v7 (deployed) | same recipe on 1,968 comments under guideline v3.3 (+ hard examples); best of 3 seeds |
-| `train_phobert_v8_kaggle.ipynb` | v8 | v7 recipe on the v7 rows + 1,000 comments from news, forum and YouTube (`labels/extra_batch1.csv`) |
+| `train_phobert_v7_kaggle.ipynb` | v7 | same recipe on 1,968 comments under guideline v3.3 (+ hard examples); best of 3 seeds |
+| `train_phobert_v8_kaggle.ipynb` | v8 (deployed) | v7 recipe on the v7 rows + 1,000 comments from news, forum and YouTube (`labels/extra_batch1.csv`) |
 | `train_qwen_qlora_kaggle.ipynb` | Qwen2.5-1.5B + QLoRA | the v7 training data, as a generative classifier; run 1 on `qwen-vi-toxic-lora@main`, run 2 (toxic rows oversampled, tuned threshold) on `@v2`, run 3 (same, v8 data) on `@v3` |
 
 Kaggle setup: GPU T4 x2, Internet on, secret `HF_TOKEN`; inputs are private Kaggle datasets.
