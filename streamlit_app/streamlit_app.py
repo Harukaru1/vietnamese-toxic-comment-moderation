@@ -92,8 +92,8 @@ footer {visibility: hidden;}
 .result-card {border: 1px solid color-mix(in srgb, var(--c) 35%, transparent); border-left: 6px solid var(--c);
               background: color-mix(in srgb, var(--c) 7%, #fff); border-radius: 14px; padding: 16px 20px;
               margin: 10px 0 14px 0; box-shadow: 0 6px 18px -10px color-mix(in srgb, var(--c) 60%, transparent);}
-.result-card .title {font-size: 1.35rem; font-weight: 800; color: var(--c); margin-bottom: 4px;}
-.result-card .sub {opacity: .8; font-size: .92rem; margin-top: 2px;}
+.result-card .title {font-size: 1.35rem; font-weight: 800; color: var(--c);}
+.result-card .title .sub {font-size: 1rem; font-weight: 600; opacity: .7; margin-left: 6px;}
 .score {display: grid; grid-template-columns: 170px 1fr 54px; align-items: center; gap: 10px; margin: 7px 0; font-size: .92rem;}
 .score .track {height: 10px; background: #e6e8f2; border-radius: 999px; overflow: hidden;}
 .score .fill {height: 100%; border-radius: 999px; background: var(--c);}
@@ -137,19 +137,11 @@ def load_feedback_store() -> FeedbackStore:
         return FeedbackStore()
 
 
-def confidence_words(p: float) -> str:
-    if p >= 0.9:
-        return "Mô hình khá chắc chắn"
-    if p >= REVIEW_BELOW:
-        return "Mô hình tương đối chắc"
-    return "Mô hình còn phân vân, nên để người xem lại"
-
-
 def result_card(label: str, conf: float) -> None:
     i = INFO[label]
     st.markdown(
-        f'<div class="result-card" style="--c:{i["color"]}"><div class="title">{i["icon"]} {i["name"]}</div>'
-        f'<div>{i["say"]}</div><div class="sub">{confidence_words(conf)} ({conf:.0%}).</div></div>',
+        f'<div class="result-card" style="--c:{i["color"]}"><div class="title">{i["icon"]} {i["name"]}'
+        f' <span class="sub">{conf:.0%}</span></div></div>',
         unsafe_allow_html=True)
 
 
