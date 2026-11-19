@@ -14,6 +14,6 @@ pushes the model to its own branch of
 | `train_phobert_v5_kaggle.ipynb` | v5 | v4 + guideline v3.1 relabels (790 rows) + `bad`→`đéo` text fix |
 | `train_phobert_v6_kaggle.ipynb` | v6 | starts from v3; 3 epochs on 1,739 comments labeled under guideline v3.2 |
 | `train_phobert_v7_kaggle.ipynb` | v7 (deployed) | same recipe on 1,968 comments under guideline v3.3 (+ hard examples); best of 3 seeds |
-| `train_qwen_qlora_kaggle.ipynb` | Qwen2.5-1.5B + QLoRA | the v7 training data, as a generative classifier; adapter pushed to `qwen-vi-toxic-lora` |
+| `train_qwen_qlora_kaggle.ipynb` | Qwen2.5-1.5B + QLoRA | the v7 training data, as a generative classifier; run 1 on `qwen-vi-toxic-lora@main`, run 2 (toxic rows oversampled, tuned threshold) on `@v2` |
 
 Kaggle setup: GPU T4 x2, Internet on, secret `HF_TOKEN`; inputs are private Kaggle datasets.

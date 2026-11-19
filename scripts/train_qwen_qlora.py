@@ -6,7 +6,9 @@ The base model is loaded in 4-bit (NF4) and only LoRA adapters on the attention 
 Each example is the chat prompt from toxic_moderation.llm_local.build_messages (guideline + comment) followed by
 the label word; the loss is computed on the answer only. After every epoch the adapter is scored on the
 validation split by reading the label from the first answer token (as LocalLLMClassifier does) and the best
-epoch is kept. Needs a CUDA GPU (Kaggle T4 works). Writes reports/qwen_qlora_results.json.
+epoch is kept. Toxic rows are rare, so they are repeated (--oversample) and the P(clean) threshold for
+calling a comment toxic is tuned on validation and saved next to the adapter (classifier_config.json); the
+epoch is chosen by toxic-vs-clean F1 at that threshold. Needs a CUDA GPU (Kaggle T4 works). Writes reports/qwen_qlora_results.json.
 """
 
 from __future__ import annotations
@@ -53,14 +55,33 @@ def collate(batch: list[dict], pad_id: int) -> dict:
 
 
 @torch.inference_mode()
-def predict(model, tok, texts: list[str], label_ids: torch.Tensor, max_len: int, bs: int = 16) -> list[str]:
+def predict(model, tok, texts: list[str], label_ids: torch.Tensor, max_len: int, bs: int = 16) -> list[list[float]]:
+    """Probabilities of clean / offensive / hate (softmax over the three label words)."""
     model.eval()
     out = []
     for i in range(0, len(texts), bs):
         batch = collate([encode(tok, t, None, max_len) for t in texts[i:i + bs]], tok.pad_token_id)
         logits = model(**{k: v.to(model.device) for k, v in batch.items() if k != "labels"}).logits[:, -1]
-        out += [LABELS[j] for j in logits[:, label_ids.to(logits.device)].argmax(-1).tolist()]
+        out += torch.softmax(logits[:, label_ids.to(logits.device)].float(), -1).tolist()
     return out
+
+
+def decide(probs: list[list[float]], clean_threshold: float) -> list[str]:
+    """Toxic when P(clean) < threshold; then the more likely of offensive / hate."""
+    return ["clean" if p[0] >= clean_threshold else ("offensive" if p[1] >= p[2] else "hate") for p in probs]
+
+
+def tune_threshold(probs: list[list[float]], gold: list[str]) -> tuple[float, float]:
+    """The P(clean) threshold that maximizes toxic-vs-clean F1 on validation."""
+    y = [g != "clean" for g in gold]
+    best = (0.5, -1.0)
+    for t in [i / 100 for i in range(5, 100)]:
+        p = [lab != "clean" for lab in decide(probs, t)]
+        tp = sum(a and b for a, b in zip(p, y))
+        f1 = 2 * tp / (sum(p) + sum(y)) if sum(p) + sum(y) else 0.0
+        if f1 > best[1]:
+            best = (t, f1)
+    return best
 
 
 def main() -> None:
@@ -76,6 +97,9 @@ def main() -> None:
     ap.add_argument("--max-len", type=int, default=1024)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--push", default=None, help="Hub repo for the best adapter")
+    ap.add_argument("--revision", default="main", help="Hub branch to push to")
+    ap.add_argument("--oversample", nargs="*", default=["offensive=3", "hate=5"],
+                    help="repeat the training rows of a label, e.g. offensive=3 hate=5 (toxic rows are rare)")
     ap.add_argument("--max-train", type=int, default=None, help="use only the first N rows (smoke test)")
     ap.add_argument("--cpu-smoke-test", action="store_true", help="no 4-bit, no GPU: only checks the code runs")
     args = ap.parse_args()
@@ -105,7 +129,9 @@ def main() -> None:
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]))
     model.print_trainable_parameters()
 
-    data = [encode(tok, t, lab, args.max_len) for t, lab in zip(train["text"].astype(str), train["label"])]
+    repeat = {k: int(v) for k, v in (o.split("=") for o in args.oversample)}
+    data = [encode(tok, t, lab, args.max_len) for t, lab in zip(train["text"].astype(str), train["label"])
+            for _ in range(repeat.get(lab, 1))]
     steps = math.ceil(len(data) / (args.batch_size * args.grad_accum)) * args.epochs
     opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=args.lr)
     sched = get_cosine_schedule_with_warmup(opt, int(0.05 * steps), steps)
@@ -126,24 +152,31 @@ def main() -> None:
                 opt.zero_grad()
             if (k // args.batch_size) % 50 == 0:
                 print(f"epoch {epoch} step {k // args.batch_size} loss {loss.item() * args.grad_accum:.4f}", flush=True)
-        pred = predict(model, tok, val["text"].astype(str).tolist(), label_ids, args.max_len)
-        f1 = float(f1_score(val["label"], pred, labels=list(LABELS), average="macro", zero_division=0))
-        history.append({"epoch": epoch, "val_f1_macro": round(f1, 4)})
+        probs = predict(model, tok, val["text"].astype(str).tolist(), label_ids, args.max_len)
+        gold = val["label"].tolist()
+        macro = float(f1_score(gold, decide(probs, 0.5), labels=list(LABELS), average="macro", zero_division=0))
+        thr, f1 = tune_threshold(probs, gold)
+        history.append({"epoch": epoch, "val_f1_macro_argmax": round(macro, 4),
+                        "val_toxic_f1_tuned": round(f1, 4), "clean_threshold": thr})
         print(history[-1], flush=True)
-        if f1 > best:
+        if f1 > best:  # choose the epoch by the decision we actually use: toxic vs clean
             best = f1
             model.save_pretrained(args.output_dir / "best")
             tok.save_pretrained(args.output_dir / "best")
+            (args.output_dir / "best" / "classifier_config.json").write_text(
+                json.dumps({"labels": list(LABELS), "clean_threshold": thr}))
 
     rep = {"base": args.base, "config": {k: str(v) for k, v in vars(args).items()}, "epochs": history,
-           "best_val_f1_macro": round(best, 4), "train_rows": len(data), "minutes": round((time.time() - start) / 60, 1)}
+           "best_val_toxic_f1": round(best, 4), "train_rows": len(data), "minutes": round((time.time() - start) / 60, 1)}
     if args.push:
         from huggingface_hub import HfApi
         api = HfApi()
         api.create_repo(args.push, exist_ok=True)
-        api.upload_folder(folder_path=str(args.output_dir / "best"), repo_id=args.push,
+        if args.revision != "main":
+            api.create_branch(args.push, branch=args.revision, exist_ok=True)
+        api.upload_folder(folder_path=str(args.output_dir / "best"), repo_id=args.push, revision=args.revision,
                           commit_message=f"QLoRA adapter for {args.base} (best validation epoch)")
-        rep["pushed_to"] = args.push
+        rep["pushed_to"] = f"{args.push}@{args.revision}"
     (ROOT / "reports").mkdir(exist_ok=True)
     (ROOT / "reports" / "qwen_qlora_results.json").write_text(json.dumps(rep, indent=2))
     print(json.dumps(rep, indent=2))
