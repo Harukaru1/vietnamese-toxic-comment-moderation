@@ -102,6 +102,7 @@ the guideline in the prompt ([`reports/generative_vs_phobert.json`](reports/gene
 | Qwen2.5-1.5B-Instruct, zero-shot | 0.19 | 0.16 | 0.17 | CPU, ~0.6 s per comment |
 | Qwen2.5-1.5B-Instruct + QLoRA on the ~2k v7 training comments | 0.69 | 0.23 | 0.35 | CPU, ~0.5 s per comment |
 | same, toxic rows oversampled, 3 epochs, threshold tuned on validation | 0.41 | 0.40 | 0.41 | CPU, ~0.5 s per comment |
+| same recipe on the v8 data (+1k news, forum and YouTube comments) | 0.38 | 0.51 | 0.43 | CPU, ~0.5 s per comment |
 
 Gemini finds far more of the toxic comments than PhoBERT (+0.18 F1, 95% CI [+0.03, +0.31]). The reference
 labels were written by an LLM, which could favour LLMs, so the comparison was repeated on the 193 held-out
