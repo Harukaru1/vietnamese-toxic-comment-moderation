@@ -8,6 +8,7 @@ stored here (metrics, confusion matrices, counts); no comment text.
 | File | Content | Written by |
 |---|---|---|
 | `testset2_heldout.json` | **Main benchmark.** Held-out half of test set 2 (968 YouTube comments, 2026): weighted toxic precision/recall/F1 per model and paired-bootstrap intervals | `scripts/eval_heldout.py` |
+| `generative_vs_phobert.json` | Gemini and Qwen (zero-shot, later QLoRA) on the same held-out comments, alone and as a cascade after PhoBERT | `scripts/compare_generative.py` |
 | `llm_second_stage.json` | LLM re-check of the comments v7 flags, scored against the author's blind labels | `scripts/eval_llm_stage.py` |
 | `annotation_agreement_testset2.json` | Cohen's κ between the author's blind labels (two rounds, 241 comments) and the reference labels, before and after the guideline revision | `scripts/agreement_testset2.py` |
 | `phobert_results_v6.json`, `phobert_results_v7.json` | Kaggle training runs (v7: validation F1 of each seed and the selected one) | `notebooks/` |

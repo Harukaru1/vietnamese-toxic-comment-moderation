@@ -1,0 +1,107 @@
+{
+  "seconds_per_comment": {
+    "gemini-flash-lite-latest": 0.142,
+    "qwen1.5b_zeroshot": 0.573
+  },
+  "n": 968,
+  "share_flagged_weighted": {
+    "v7": 0.052,
+    "gemini-flash-lite-latest": 0.093,
+    "v7+gemini-flash-lite-latest cascade": 0.036,
+    "qwen1.5b_zeroshot": 0.055,
+    "v7+qwen1.5b_zeroshot cascade": 0.012
+  },
+  "toxic_weighted": {
+    "v7": {
+      "precision": 0.622,
+      "recall": 0.488,
+      "f1": 0.547
+    },
+    "gemini-flash-lite-latest": {
+      "precision": 0.615,
+      "recall": 0.868,
+      "f1": 0.72
+    },
+    "v7+gemini-flash-lite-latest cascade": {
+      "precision": 0.789,
+      "recall": 0.429,
+      "f1": 0.556
+    },
+    "qwen1.5b_zeroshot": {
+      "precision": 0.187,
+      "recall": 0.157,
+      "f1": 0.171
+    },
+    "v7+qwen1.5b_zeroshot cascade": {
+      "precision": 0.648,
+      "recall": 0.116,
+      "f1": 0.196
+    }
+  },
+  "vs_v7": {
+    "gemini-flash-lite-latest": {
+      "delta_f1": 0.175,
+      "ci95": [
+        0.028,
+        0.313
+      ]
+    },
+    "v7+gemini-flash-lite-latest cascade": {
+      "delta_f1": 0.01,
+      "ci95": [
+        -0.056,
+        0.061
+      ]
+    },
+    "qwen1.5b_zeroshot": {
+      "delta_f1": -0.374,
+      "ci95": [
+        -0.474,
+        -0.273
+      ]
+    },
+    "v7+qwen1.5b_zeroshot cascade": {
+      "delta_f1": -0.348,
+      "ci95": [
+        -0.449,
+        -0.249
+      ]
+    }
+  },
+  "author_blind_check": {
+    "n": 193,
+    "toxic_unweighted": {
+      "v7": {
+        "precision": 0.473,
+        "recall": 0.91,
+        "f1": 0.622
+      },
+      "gemini-flash-lite-latest": {
+        "precision": 0.579,
+        "recall": 0.925,
+        "f1": 0.713
+      },
+      "qwen1.5b_zeroshot": {
+        "precision": 0.404,
+        "recall": 0.284,
+        "f1": 0.333
+      }
+    },
+    "vs_v7": {
+      "gemini-flash-lite-latest": {
+        "delta_f1": 0.09,
+        "ci95": [
+          0.034,
+          0.149
+        ]
+      },
+      "qwen1.5b_zeroshot": {
+        "delta_f1": -0.289,
+        "ci95": [
+          -0.41,
+          -0.166
+        ]
+      }
+    }
+  }
+}
