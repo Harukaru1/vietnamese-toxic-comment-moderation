@@ -1,0 +1,26 @@
+{
+  "sent_to_gemini": 4245,
+  "per_source": {
+    "victsd": {
+      "selected": 500,
+      "disagreements": 137,
+      "gemini_toxic": 123
+    },
+    "voz": {
+      "selected": 300,
+      "disagreements": 135,
+      "gemini_toxic": 118
+    },
+    "youtube": {
+      "selected": 200,
+      "disagreements": 70,
+      "gemini_toxic": 69
+    }
+  },
+  "test_victsd": {
+    "n": 200,
+    "gemini_toxic": 2,
+    "v7_toxic": 0
+  },
+  "needs_review": 542
+}

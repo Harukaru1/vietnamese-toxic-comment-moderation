@@ -76,11 +76,15 @@ def review(texts: list[str], api_key: str | None = None, model: str = DEFAULT_MO
         batch = texts[i:i + batch_size]
         body = {"contents": [{"parts": [{"text": _prompt(batch)}]}], "generationConfig": {"temperature": 0}}
         for attempt in range(retries + 1):
-            r = http.post(API.format(model=model), headers=headers, json=body, timeout=timeout)
             try:
-                data = r.json()
-            except ValueError:  # a gateway in between answered with plain text (502/504)
-                data = {"error": {"code": getattr(r, "status_code", 502), "message": str(getattr(r, "text", ""))[:200]}}
+                r = http.post(API.format(model=model), headers=headers, json=body, timeout=timeout)
+            except (requests.Timeout, requests.ConnectionError) as e:  # no answer at all: retry like a 503
+                data = {"error": {"code": 503, "message": f"{type(e).__name__}: {e}"[:200]}}
+            else:
+                try:
+                    data = r.json()
+                except ValueError:  # a gateway in between answered with plain text (502/504)
+                    data = {"error": {"code": getattr(r, "status_code", 502), "message": str(getattr(r, "text", ""))[:200]}}
             busy = "error" in data and data["error"].get("code") in (429, 500, 502, 503, 504)
             if not busy or attempt == retries:
                 break

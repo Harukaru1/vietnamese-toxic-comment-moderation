@@ -55,3 +55,19 @@ def test_review_retries_when_the_model_is_busy():
     session = FakeSession([{"error": {"code": 503, "message": "busy"}}, answer('["clean"]')])
     assert review(["a b c"], api_key="k", session=session, backoff=0) == ["clean"]
     assert len(session.calls) == 2
+
+
+def test_review_retries_after_a_timeout():
+    import requests
+
+    class TimeoutOnce(FakeSession):
+        def post(self, url, headers=None, json=None, timeout=None):
+            self.calls.append((url, headers, json))
+            reply = self.replies.pop(0)
+            if reply is None:
+                raise requests.ReadTimeout("no answer")
+            return FakeResponse(reply)
+
+    session = TimeoutOnce([None, answer('["hate"]')])
+    assert review(["a b c"], api_key="k", session=session, backoff=0) == ["hate"]
+    assert len(session.calls) == 2

@@ -1,0 +1,26 @@
+{
+  "min_words": 4,
+  "voz_sample": 8000,
+  "counts": {
+    "raw": {
+      "victsd": 10000,
+      "youtube": 9015,
+      "voz": 8000
+    },
+    "after_clean_and_length": {
+      "victsd": 9778,
+      "youtube": 8211,
+      "voz": 7568
+    },
+    "after_dedup": {
+      "victsd": 9689,
+      "youtube": 8209,
+      "voz": 6706
+    },
+    "flagged_by_v7": {
+      "voz": 963,
+      "victsd": 80,
+      "youtube": 7
+    }
+  }
+}
