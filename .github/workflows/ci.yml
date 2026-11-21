@@ -18,3 +18,15 @@ jobs:
       - run: pip install pandas scikit-learn joblib emoji requests pytest httpx fastapi gradio
       - run: pip install --no-deps -e .
       - run: pytest -q
+
+  audit:
+    # Known-vulnerability scan of the app dependencies (torch is left out: it comes from the CPU index).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pip-audit
+      - run: grep -vE '^(torch|--)' streamlit_app/requirements.txt > /tmp/streamlit-reqs.txt
+      - run: pip-audit -r requirements-app.txt -r /tmp/streamlit-reqs.txt

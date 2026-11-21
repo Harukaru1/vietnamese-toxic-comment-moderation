@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from toxic_moderation.feedback_store import FeedbackStore, make_record  # noqa: E402
 from toxic_moderation.predictor import Predictor  # noqa: E402
 from toxic_moderation.profanity import find_profanity
+from toxic_moderation.safety import clip, csv_bytes, take_quota
 from toxic_moderation.segment import split_sentences, summarize  # noqa: E402
 
 LABELS = ["clean", "offensive", "hate"]
@@ -44,6 +45,7 @@ EXAMPLES = {
 }
 MAX_BATCH = 200
 MAX_VIDEOS_PER_SESSION, MAX_LLM_PER_SESSION = 10, 5  # protects the owner's YouTube and Gemini quotas
+MAX_FEEDBACK_PER_SESSION = 100  # keeps one visitor from flooding the feedback dataset
 MAX_PARAGRAPH_CHARS = 3000
 PARAGRAPH_EXAMPLE = ("Hôm qua mình xem trận chung kết, công nhận đội bạn đá hay vl. Hàng thủ chơi rất chắc, "
                      "thủ môn bắt quá đỉnh. Nhưng mà đm trọng tài thổi kiểu gì không hiểu nổi. "
@@ -146,22 +148,20 @@ def secret(name: str) -> str | None:
         return os.environ.get(name)
 
 
-def csv_bytes(df: pd.DataFrame) -> bytes:
-    """CSV for download. Cells starting with = + - @ are prefixed with ' so spreadsheet apps do not run them as
-    formulas (comment text comes from users and YouTube)."""
-    def safe(v):
-        return "'" + v if isinstance(v, str) and v[:1] in ("=", "+", "-", "@", "\t", "\r") else v
-    return df.map(safe).to_csv(index=False).encode("utf-8-sig")
-
-
 def within_limit(name: str, limit: int) -> bool:
-    """Per-session cap on actions that spend the owner's API quota (YouTube, Gemini)."""
-    used = ss.get(f"used_{name}", 0)
-    if used >= limit:
-        st.warning(f"Phiên này đã dùng hết {limit} lượt. Tải lại trang sau ít phút để dùng tiếp.")
-        return False
-    ss[f"used_{name}"] = used + 1
-    return True
+    """Per-session cap on actions that spend the owner's API quota (YouTube, Gemini) or write to the feedback log."""
+    if take_quota(ss, name, limit):
+        return True
+    st.warning(f"Phiên này đã dùng hết {limit} lượt cho thao tác này. Tải lại trang sau ít phút để dùng tiếp.")
+    return False
+
+
+def log_feedback(**fields) -> None:
+    """Store one anonymous feedback record, with the text clipped and a per-session cap against flooding."""
+    if not within_limit("feedback", MAX_FEEDBACK_PER_SESSION):
+        return
+    fields["text"] = clip(fields["text"])
+    store.add(make_record(**fields))
 
 
 @st.cache_resource
@@ -300,10 +300,10 @@ with single:
             state = (cur["feedback"], cur["correct"])
             if ss.share_ok and state != cur.get("logged", (None, None)):
                 try:
-                    store.add(make_record(session=ss.session_id, item=cur["id"], text=cur["text"],
+                    log_feedback(session=ss.session_id, item=cur["id"], text=cur["text"],
                                           model_label=cur["label"], scores=cur["scores"], feedback=cur["feedback"],
                                           correct=cur["correct"], model_revision=predictor.revision or "main",
-                                          model_sha=model_sha))
+                                          model_sha=model_sha)
                     cur["logged"] = state
                 except Exception as e:  # never break the demo because of logging
                     print("feedback not saved:", e)
@@ -378,10 +378,10 @@ with paragraph:
                 ss.history.append(item)   # also shows up in the history tab / CSV download
                 if store.enabled and ss.share_ok:
                     try:
-                        store.add(make_record(session=ss.session_id, item=item["id"], text=item["text"],
+                        log_feedback(session=ss.session_id, item=item["id"], text=item["text"],
                                               model_label=item["label"], scores=item["scores"], feedback="sai",
                                               correct=fix, model_revision=predictor.revision or "main",
-                                              model_sha=model_sha))
+                                              model_sha=model_sha)
                     except Exception as e:  # never break the demo because of logging
                         print("feedback not saved:", e)
             if res["fixed"].get(idx):
@@ -402,7 +402,7 @@ with batch:
                 st.error("File cần có một cột tên là `text`.")
             else:
                 src = src.dropna(subset=["text"]).head(MAX_BATCH).reset_index(drop=True)
-                texts = src["text"].astype(str).tolist()
+                texts = src["text"].map(clip).tolist()
                 bar = st.progress(0.0, text="Đang phân loại...")
                 preds = []
                 for k in range(0, len(texts), 32):
@@ -468,7 +468,7 @@ with video:
                     info, comments = fetch_video(extract_video_id(url), n_max, order, yt_key)
                 from toxic_moderation.preprocess import has_text
                 n_fetched = len(comments)
-                comments = [c for c in comments if has_text(str(c["text"]))]
+                comments = [dict(c, text=clip(c["text"])) for c in comments if has_text(str(c["text"]))]
                 ss.video_skipped = n_fetched - len(comments)
                 if not comments:
                     st.warning("Video này không có bình luận công khai (hoặc đã tắt bình luận).")
@@ -579,10 +579,10 @@ with video:
                                            feedback="sai" if correct != src["label"] else "đúng", correct=correct))
                     if store.enabled and ss.share_ok:
                         try:
-                            store.add(make_record(session=ss.session_id, item=ss.history[-1]["id"], text=src["text"],
+                            log_feedback(session=ss.session_id, item=ss.history[-1]["id"], text=src["text"],
                                                   model_label=src["label"], scores=scores,
                                                   feedback=ss.history[-1]["feedback"], correct=correct,
-                                                  model_revision=predictor.revision or "main", model_sha=model_sha))
+                                                  model_revision=predictor.revision or "main", model_sha=model_sha)
                         except Exception as e:  # never break the demo because of logging
                             print("feedback not saved:", e)
                     sent.add((info["video_id"], idx, correct))

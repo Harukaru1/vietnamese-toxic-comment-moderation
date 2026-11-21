@@ -64,12 +64,12 @@ v7 gains +0.15 F1 over v3 (95% paired-bootstrap interval [+0.07, +0.24]). v8 add
 | Model | Precision | Recall | F1 | Cost |
 |---|---:|---:|---:|---|
 | PhoBERT v8 (135M parameters) | 0.60 | 0.54 | 0.57 | CPU, ~40 ms per comment |
-| Gemini Flash-Lite, zero-shot | 0.62 | **0.87** | **0.72** | paid API, rate-limited |
+| Gemini Flash-Lite, zero-shot | 0.67 | **0.86** | **0.76** | paid API, rate-limited |
 | Qwen2.5-1.5B-Instruct, zero-shot | 0.19 | 0.16 | 0.17 | CPU, ~0.5 s per comment |
 | Qwen2.5-1.5B-Instruct + QLoRA (best of 3 runs) | 0.38 | 0.51 | 0.43 | CPU, ~0.5 s per comment |
 
-A large LLM finds far more toxic comments (+0.15 F1 over v8, CI [+0.02, +0.29]), and the lead holds on the
-author's own blind labels (+0.07, CI [+0.01, +0.12]), so the reference labels (written by an LLM) are not the reason. A small open model
+A large LLM finds far more toxic comments (+0.19 F1 over v8, CI [+0.07, +0.31]), and the lead holds on the
+author's own blind labels (F1 0.74 vs 0.65), so the reference labels (written by an LLM) are not the reason. A small open model
 fine-tuned with QLoRA on the same 2.6k comments stays below PhoBERT, which also had 52k older comments behind it.
 
 **LLM second opinion.** The app can send only the comments PhoBERT flags (about 6% of traffic) to Gemini. On
@@ -188,7 +188,8 @@ reports/                JSON results behind every number in this README
 The **code** is MIT-licensed; the licence does not cover any data. **No comment text is published**: only
 code, aggregate results and labels keyed by public ids or row indices. The thesis data is private; UIT-ViHSD
 (CC BY-NC-SA 4.0), ViCTSD and VOZ-HSD are research datasets; YouTube comments are collected through the
-official API and not redistributed, and author names are never stored. Because the training data is for
+official API and not redistributed, and author names are never stored. How the demo handles untrusted input,
+API quotas and dependencies is described in [`SECURITY.md`](SECURITY.md). Because the training data is for
 research use, the model weights are shared for research and non-commercial use.
 
 ## References
