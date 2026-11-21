@@ -54,7 +54,7 @@ MODEL_REVISION = os.getenv("MODEL_REVISION") or "v8"  # Hub branch served by thi
 GITHUB = "https://github.com/Harukaru1/vietnamese-toxic-comment-moderation"
 REVIEW_BELOW = 0.6  # below this confidence, suggest a human look
 # YouTube queues, on P(toxic) = 1 - P(clean). 0.8 was chosen on the validation split; on held-out comments
-# it gave precision 0.62 / recall 0.36 for v6 (reports/threshold_v6.json). Between the two a human should decide.
+# it gave precision 0.62 / recall 0.36 for v6 (reports/earlier/threshold_v6.json). Between the two a human should decide.
 HIDE_ABOVE, REVIEW_ABOVE = 0.8, 0.4
 PROFANITY_HELP = ("Bộ lọc riêng, dò theo danh sách từ (vl, đm, đéo...). Mô hình coi từ tục dùng để nhấn mạnh "
                   "(\"hay vcl\") là bình thường; bật mục này nếu kênh của bạn không chấp nhận từ tục dù với ý gì.")

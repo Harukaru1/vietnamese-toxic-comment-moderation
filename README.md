@@ -17,21 +17,13 @@
 
 <p align="center"><img src="docs/demo_youtube.png" width="760" alt="YouTube tab: share of toxic comments in a video and the moderation queues"></p>
 
-## Contents
-
-- [What it does](#what-it-does)
-- [Results](#results)
-- [How it works](#how-it-works)
-- [How the project got here](#how-the-project-got-here)
-- [Limitations](#limitations)
-- [Repository structure](#repository-structure)
-- [Quickstart](#quickstart)
-- [Data and licences](#data-and-licences)
+**Contents:** [What it does](#what-it-does) · [Results](#results) · [How it works](#how-it-works) ·
+[How the project got here](#how-the-project-got-here) · [Limitations](#limitations) ·
+[Quickstart](#quickstart) · [Data and licences](#data-and-licences) · [References](#references)
 
 ## What it does
 
-Every comment gets one of three labels, defined in a written
-[annotation guideline](docs/annotation_guidelines.md):
+Every comment gets one of three labels, defined in a written [annotation guideline](docs/annotation_guidelines.md):
 
 | Label | Meaning | Example |
 |---|---|---|
@@ -39,100 +31,54 @@ Every comment gets one of three labels, defined in a written
 | **offensive** | An insult at a person, a sweeping remark about a group, or swearing in anger. | "Mày ngu thế, nói mãi không hiểu à" |
 | **hate** | A severe attack: on who someone is, dehumanizing, or threatening. | "Bọn này ngu như chó, cút hết về nước đi" |
 
-The web app offers four ways to use the model:
-
-| Mode | What you get |
-|---|---|
-| **Single comment** | Label, confidence for each class, the text as the model sees it, and a 👍/👎 feedback button |
-| **Paragraph** | Each sentence classified and highlighted; the paragraph takes its most severe confident sentence |
-| **CSV file** | Upload a file with a `text` column, download it back with labels and confidence |
-| **YouTube video** | Paste a link: share of toxic comments and three queues (*suggest hiding*, *needs review*, *leave*), with an optional LLM re-check and per-comment corrections |
+The web app has four modes: a **single comment** (label and per-class confidence), a **paragraph** (each
+sentence highlighted), a **CSV file** (upload a `text` column, download it labeled) and a **YouTube video**
+(paste a link, get the share of toxic comments and three queues: *suggest hiding*, *needs review*, *leave*,
+with an optional LLM re-check and per-comment corrections). It is built to **prioritize a human
+moderator's work**, not to remove comments on its own.
 
 <p align="center">
   <img src="docs/demo_single.png" width="49%" alt="Single-comment mode with per-class confidence">
   <img src="docs/demo_paragraph.png" width="49%" alt="Paragraph mode: toxic sentences highlighted">
 </p>
 
-It is built to **prioritize a human moderator's work**, not to remove comments on its own.
-
 ## Results
 
-The main benchmark is a set of **968 YouTube comments from 2026** that were never used for training
-or tuning. It is a stratified sample of a 12k-comment pool, so the scores are weighted back to the
-pool and describe real traffic, where about 1 comment in 20 is toxic. The metric is toxic vs clean,
-the decision a moderator actually makes.
+The benchmark is **968 YouTube comments from 2026** that were never used for training or tuning. They are a
+stratified sample of a 12k-comment pool, so scores are weighted back to the pool and describe real traffic,
+where about 1 comment in 20 is toxic. The metric is toxic vs clean, the decision a moderator makes.
 
 | Model | Precision | Recall | F1 |
 |---|---:|---:|---:|
-| PhoBERT v3: 52k older comments | 0.36 | 0.44 | 0.40 |
+| PhoBERT v3: ~52k older comments | 0.36 | 0.44 | 0.40 |
 | PhoBERT v7: v3 + 2k YouTube comments labeled under the final guideline | **0.62** | 0.49 | 0.55 |
-| **PhoBERT v8** (deployed): v7 data + 1k comments from news, a forum and YouTube | 0.60 | **0.54** | **0.57** |
+| **PhoBERT v8** (deployed): v7 data + 1k news, forum and YouTube comments | 0.60 | **0.54** | **0.57** |
 
-v7 gains +0.15 F1 over v3 with a 95% paired-bootstrap interval of [+0.07, +0.24]. v8 adds +0.02 over v7
-(CI [−0.03, +0.09]) and the same small gain shows on the author's own blind labels (F1 0.65 vs 0.62), so
-it was deployed for its higher recall; on 200 random news comments it flags 3, v7 none
+v7 gains +0.15 F1 over v3 (95% paired-bootstrap interval [+0.07, +0.24]). v8 adds a small +0.02 over v7
+(CI [−0.03, +0.09]) that also shows on the author's blind labels, mostly as higher recall
 ([`reports/testset2_heldout.json`](reports/testset2_heldout.json)).
 
-**More sources.** The 1k comments of v8 come from ViCTSD (VnExpress news comments), the VOZ forum and more
-YouTube comments, cleaned of @user tags, emoji and very short comments. The source datasets' own labels were
-not used: ViCTSD marks 11% of its comments toxic, but under this guideline about 1% are, because it counts
-harsh criticism of wrongdoers. Gemini pre-labeled the candidates and every disagreement with PhoBERT, and
-every comment both called toxic, was checked by hand: 29% of the latter were clean profanity
-([`labels/extra_batch1.csv`](labels/extra_batch1.csv)).
+**Generative models** on the same comments, with the guideline in the prompt
+([`reports/generative_vs_phobert.json`](reports/generative_vs_phobert.json)):
 
-**LLM second opinion.** The app can send only the comments the classifier flags (about 6% of
-traffic) to an LLM that applies the same guideline. On 111 flagged comments labeled blind by the
-author ([`reports/llm_second_stage.json`](reports/llm_second_stage.json)):
-
-| Flagged by | Human also says toxic | Toxic comments kept |
-|---|---:|---:|
-| PhoBERT v7 alone | 46% | 100% |
-| PhoBERT, confirmed by Gemini Flash-Lite | **69%** | 84% |
-
-This sample deliberately over-represents hard cases; read the two rows against each other.
-
-**Generative models on the same benchmark.** The same 968 held-out comments, labeled by LLMs that are given
-the guideline in the prompt ([`reports/generative_vs_phobert.json`](reports/generative_vs_phobert.json)):
-
-| Model | Precision | Recall | F1 | Runs on |
+| Model | Precision | Recall | F1 | Cost |
 |---|---:|---:|---:|---|
-| PhoBERT v7 (135M parameters, fine-tuned) | 0.62 | 0.49 | 0.55 | CPU, ~40 ms per comment |
-| PhoBERT v8 (deployed) | 0.60 | 0.54 | 0.57 | CPU, ~40 ms per comment |
+| PhoBERT v8 (135M parameters) | 0.60 | 0.54 | 0.57 | CPU, ~40 ms per comment |
 | Gemini Flash-Lite, zero-shot | 0.62 | **0.87** | **0.72** | paid API, rate-limited |
-| Qwen2.5-1.5B-Instruct, zero-shot | 0.19 | 0.16 | 0.17 | CPU, ~0.6 s per comment |
-| Qwen2.5-1.5B-Instruct + QLoRA on the ~2k v7 training comments | 0.69 | 0.23 | 0.35 | CPU, ~0.5 s per comment |
-| same, toxic rows oversampled, 3 epochs, threshold tuned on validation | 0.41 | 0.40 | 0.41 | CPU, ~0.5 s per comment |
-| same recipe on the v8 data (+1k news, forum and YouTube comments) | 0.38 | 0.51 | 0.43 | CPU, ~0.5 s per comment |
+| Qwen2.5-1.5B-Instruct, zero-shot | 0.19 | 0.16 | 0.17 | CPU, ~0.5 s per comment |
+| Qwen2.5-1.5B-Instruct + QLoRA (best of 3 runs) | 0.38 | 0.51 | 0.43 | CPU, ~0.5 s per comment |
 
-Gemini finds far more of the toxic comments than PhoBERT (+0.18 F1, 95% CI [+0.03, +0.31]). The reference
-labels were written by an LLM, which could favour LLMs, so the comparison was repeated on the 193 held-out
-comments the author labeled blind: Gemini still leads (F1 0.71 vs 0.62, CI [+0.03, +0.15]). A small open
-model without fine-tuning is not usable. Fine-tuning it with QLoRA (4-bit base, LoRA rank 16, 2 epochs on a T4,
-[`notebooks/train_qwen_qlora_kaggle.ipynb`](notebooks/train_qwen_qlora_kaggle.ipynb)) doubles its F1 and makes
-it precise, but it misses most toxic comments. A second run that repeats the rare toxic rows and tunes the
-decision threshold finds more of them (F1 0.41) but still stays below PhoBERT (−0.14, CI [−0.25, −0.03]); on
-the author's blind labels the two are within noise (0.68 vs 0.62, CI [−0.03, +0.14]). PhoBERT also had ~52k
-older comments behind it, while the QLoRA runs saw only the 2k new ones.
+A large LLM finds far more toxic comments (+0.15 F1 over v8, CI [+0.02, +0.29]), and the lead holds on the
+author's own blind labels (+0.07, CI [+0.01, +0.12]), so the reference labels (written by an LLM) are not the reason. A small open model
+fine-tuned with QLoRA on the same 2.6k comments stays below PhoBERT, which also had 52k older comments behind it.
 
-**Label quality.** An LLM (Claude) labeled the data and the author labeled 241 comments blind.
-Cohen's κ is 0.74 for toxic vs clean and 0.68 for the three classes
+**LLM second opinion.** The app can send only the comments PhoBERT flags (about 6% of traffic) to Gemini. On
+111 flagged comments labeled blind by the author, the share that is really toxic rises from **46% to 69%**
+while 84% of the toxic ones are kept ([`reports/llm_second_stage.json`](reports/llm_second_stage.json)).
+
+**Label quality.** An LLM (Claude) labeled the data; the author labeled 241 test comments blind: Cohen's κ
+0.74 for toxic vs clean, 0.68 for three classes
 ([`reports/annotation_agreement_testset2.json`](reports/annotation_agreement_testset2.json)).
-
-<details>
-<summary><b>Earlier benchmarks</b> (older label definitions, three-class F1-macro)</summary>
-
-| Model | In-domain test | 2026 set 1 | ViHSD test | Training data |
-|---|---:|---:|---:|---|
-| TF-IDF + Linear SVM | 0.799 | – | 0.616 | classic baseline |
-| PhoBERT v1 | 0.780 | – | 0.643 | original thesis data |
-| PhoBERT v2 | 0.801 | 0.556 | 0.690 | + leakage removal, label-noise pruning, UIT-ViHSD |
-| PhoBERT v3 | 0.815 | 0.647 | 0.674 | + guideline v3, 772 labels fixed |
-| PhoBERT v4 | 0.804 | 0.641 | 0.683 | + 821 active-learning comments |
-| PhoBERT v5 | 0.781 | 0.635 | 0.673 | + 163 labels fixed, text-artifact fix |
-
-In-domain, TF-IDF and PhoBERT are tied; PhoBERT only pulls ahead on unseen sources. v4 and v5 were
-within noise of v3 (paired bootstrap) and were not deployed. Exact files are in [`reports/earlier/`](reports/earlier/).
-</details>
 
 ## How it works
 
@@ -140,8 +86,8 @@ within noise of v3 (paired bootstrap) and were not deployed. Exact files are in 
 flowchart LR
     A[Thesis data + UIT-ViHSD<br/>52k comments] --> B[Leakage removal, cleanlab,<br/>label patches] --> M3[PhoBERT v3]
     Y[YouTube API 2026<br/>12k-comment pool] --> S[Stratified sample] --> L[LLM labels +<br/>blind human check]
-    L --> TR[1,968 training rows] --> M8[PhoBERT v8<br/>best of 3 seeds]
-    X[ViCTSD news, VOZ forum,<br/>more YouTube] --> C[Clean, Gemini pre-label,<br/>manual review] --> E[1,000 more rows] --> M8
+    X[ViCTSD news, VOZ forum] --> C[Clean, LLM pre-label,<br/>manual review] --> TR
+    L --> TR[2.6k training rows] --> M8[PhoBERT v8<br/>best of 3 seeds]
     M3 --> M8
     L --> TE[968 held-out rows] -.evaluates.-> M8
     M8 --> H[Hugging Face Hub] --> APP[Streamlit app<br/>FastAPI + Docker]
@@ -151,66 +97,56 @@ flowchart LR
 
 | Component | Details | Code |
 |---|---|---|
-| Preprocessing | Unicode NFC, lowercase, URL/mention/emoji removal, squeezing repeated letters, pyvi word segmentation. Emoji-only comments skip the model. | [`preprocess.py`](src/toxic_moderation/preprocess.py) |
-| Classifier | `vinai/phobert-base-v2`. v3: lr 2e-5, up to 6 epochs. v7/v8: continue v3 for 3 epochs at lr 1e-5 on the newly labeled comments only, three seeds, keep the best on validation. | [`train_phobert.py`](scripts/train_phobert.py), [`notebooks/`](notebooks/) |
-| Decision bands | P(toxic) ≥ 0.8 → suggest hiding; 0.4–0.8 → needs review; below → leave. | [`streamlit_app.py`](streamlit_app/streamlit_app.py) |
-| LLM second stage | Gemini re-reads flagged comments with the guideline in the prompt; retries on rate limits and falls back to the classifier alone. | [`llm_check.py`](src/toxic_moderation/llm_check.py) |
-| Paragraphs | Split into sentences, classify each, take the most severe confident one. | [`segment.py`](src/toxic_moderation/segment.py) |
-| Swear-word flag | A separate word list, off by default: under the guideline most comments with a swear word are clean, so it is kept apart from the toxicity label. | [`profanity.py`](src/toxic_moderation/profanity.py) |
-| Feedback loop | Votes and corrections are stored anonymously (no name or IP, opt-out) in a private Hugging Face dataset. | [`feedback_store.py`](src/toxic_moderation/feedback_store.py) |
-| Evaluation | Inverse-probability weights for the stratified sample, paired bootstrap for every comparison, Cohen's κ for every annotation round. | [`eval_heldout.py`](scripts/eval_heldout.py), [`agreement_testset2.py`](scripts/agreement_testset2.py) |
+| Preprocessing | Unicode NFC, lowercase, URL/mention/emoji removal, repeated-letter squeezing, pyvi word segmentation | [`preprocess.py`](src/toxic_moderation/preprocess.py) |
+| Classifier | `vinai/phobert-base-v2`; v8 continues v3 for 3 epochs at lr 1e-5 on the new labels only, best of 3 seeds | [`train_phobert.py`](scripts/train_phobert.py), [`notebooks/`](notebooks/) |
+| Decision bands | P(toxic) ≥ 0.8 → suggest hiding; 0.4–0.8 → needs review; below → leave | [`streamlit_app.py`](streamlit_app/streamlit_app.py) |
+| LLM stage | Gemini re-reads flagged comments with the guideline; retries on rate limits and timeouts | [`llm_check.py`](src/toxic_moderation/llm_check.py) |
+| Local LLM | Qwen2.5 as a classifier (label-token scoring, cached prompt prefix) and its QLoRA fine-tune | [`llm_local.py`](src/toxic_moderation/llm_local.py), [`train_qwen_qlora.py`](scripts/train_qwen_qlora.py) |
+| Swear-word flag | A separate word list, kept apart from the toxicity label (most comments with a swear word are clean) | [`profanity.py`](src/toxic_moderation/profanity.py) |
+| Feedback | Votes and corrections stored anonymously (no name or IP, opt-out) in a private Hugging Face dataset | [`feedback_store.py`](src/toxic_moderation/feedback_store.py) |
+| Evaluation | Inverse-probability weights, paired bootstrap for every comparison, Cohen's κ for every annotation round | [`eval_heldout.py`](scripts/eval_heldout.py) |
 
 ## How the project got here
 
-The project started from a graduation-thesis prototype. Most of the work went into the data and
-the measurement rather than the model.
+The project started from a graduation-thesis prototype. Most of the work went into the data and the
+measurement rather than the model.
 
-1. **Leakage.** 4.7% of the test set also appeared in train, inflating F1 by about 0.03. Removed.
-2. **Label noise.** [cleanlab](https://github.com/cleanlab/cleanlab) flagged 5.5% of the labels; a
-   manual review of 120 found a third clearly wrong. They were pruned from train only.
-3. **A fresh test set.** A model scoring 0.80 in-domain scored 0.59 on 1,000 comments collected in
-   2026 (YouTube Data API and the VOZ forum).
-4. **One root cause for the weak *offensive* class.** Comments containing the intensifier "vl" were
-   labeled 52% clean, 25% offensive and 23% hate. A written guideline fixed the rule and 772 labels
-   were corrected through a public patch that stores only row indices ([`relabels/`](relabels/)).
-   F1 on the 2026 set rose from 0.59 to 0.68.
-5. **Two retraining rounds that did not help.** An active-learning batch (v4), then more label fixes
-   and a text-artifact fix (v5): both within noise of v3, so neither was deployed. The 2026 set was
-   too small to resolve differences that size.
-6. **A larger test set and a blind check.** 12k new YouTube comments, 2,000 sampled and labeled. The
-   author's blind labels showed where the guideline and human judgement diverged; the guideline was
-   revised and then frozen ([v3.3](docs/annotation_guidelines.md)).
-7. **What worked.** On the new set every earlier version raised about two false alarms per real
-   hit, because the older training labels treat harsh criticism as toxic. Continuing v3 on about
-   2,000 comments labeled under the final guideline fixed more than relabeling inside the 52k older
-   ones had.
-8. **Other sources and generative models.** 1,000 comments from news and a forum (v8) brought a small,
-   consistent gain. A zero-shot LLM beats every fine-tuned model on F1, which makes it the natural second
-   stage; a 1.5B open model fine-tuned with QLoRA does not reach PhoBERT on this amount of data.
+1. **Leakage and label noise.** 4.7% of the test set also appeared in train (≈0.03 F1 of inflation);
+   cleanlab flagged 5.5% of the labels, a third of a manual sample clearly wrong. Both fixed.
+2. **A fresh test set.** A model at 0.80 F1 in-domain scored 0.59 on 1,000 comments collected in 2026.
+3. **One root cause for the weak *offensive* class.** Comments with the intensifier "vl" were labeled
+   52% clean, 25% offensive, 23% hate. A written guideline and a 772-label patch ([`relabels/`](relabels/))
+   raised F1 on the 2026 set from 0.59 to 0.68 (v3).
+4. **Negative results.** An active-learning batch (v4) and more label fixes (v5) stayed within noise of v3.
+5. **A larger test set and blind checks.** 12k new YouTube comments, 2,000 labeled; three blind rounds by the
+   author shaped and then froze the guideline ([v3.3](docs/annotation_guidelines.md)).
+6. **What worked.** Older labels treat harsh criticism as toxic, so every earlier model raised two false
+   alarms per real hit. Continuing v3 on ~2k comments labeled under the final guideline (v7), then on 1k
+   more from news and a forum (v8), helped more than relabeling the 52k older ones.
+7. **Generative models.** A zero-shot LLM beats every fine-tuned model on F1 and works best as a second
+   stage; a 1.5B model fine-tuned with QLoRA does not reach PhoBERT on this amount of data.
+
+<details>
+<summary>Earlier benchmarks (older label definitions, three-class F1-macro)</summary>
+
+| Model | In-domain test | 2026 set 1 | ViHSD test |
+|---|---:|---:|---:|
+| TF-IDF + Linear SVM | 0.799 | – | 0.616 |
+| PhoBERT v1 (thesis data) | 0.780 | – | 0.643 |
+| PhoBERT v2 (+ leakage removal, cleanlab, UIT-ViHSD) | 0.801 | 0.556 | 0.690 |
+| PhoBERT v3 (+ guideline v3 patch) | 0.815 | 0.647 | 0.674 |
+
+In-domain, TF-IDF and PhoBERT are tied; PhoBERT pulls ahead on unseen sources. Files: [`reports/earlier/`](reports/earlier/).
+</details>
 
 ## Limitations
 
-- **It prioritizes, it does not decide.** At precision 0.60 a person should confirm before anything
-  is hidden.
+- **It prioritizes, it does not decide.** At precision 0.60 a person should confirm before anything is hidden.
 - **One comment, no context.** "bạn mập quá đấy" can be teasing or body shaming.
-- **Offensive vs hate is a judgement of severity.** The model separates toxic from clean far better
-  than it separates the two toxic classes; the app shows that split as an indication only.
+- **Offensive vs hate is a judgement of severity.** The model separates toxic from clean far better than it
+  separates the two toxic classes; the app shows that split as an indication only.
 - **Subjective labels.** One LLM and one human, with measured agreement.
 - **The LLM stage depends on an external API** and its rate limits.
-
-## Repository structure
-
-```
-src/toxic_moderation/   preprocessing, predictor, sentence splitting, LLM check, swear-word flag, feedback store, YouTube client
-scripts/                data pipeline, training, evaluation, annotation agreement, test-set sampling
-notebooks/              Kaggle GPU notebooks, one per model version (v1-v8) and the QLoRA runs
-streamlit_app/          Streamlit demo (deployed on Streamlit Community Cloud)
-app/                    FastAPI service + Gradio UI, Dockerfile at the repo root
-docs/                   annotation guidelines, screenshots
-relabels/, labels/      label patches and test-set labels (ids + labels only, no text)
-reports/                JSON results behind every number in this README (older experiments in earlier/)
-tests/                  pytest suite, run by GitHub Actions on every push
-```
 
 ## Quickstart
 
@@ -220,8 +156,6 @@ pip install -r requirements.txt -r requirements-app.txt && pip install -e .
 pytest
 ```
 
-**Use the model**
-
 ```python
 from toxic_moderation.predictor import Predictor
 
@@ -230,54 +164,43 @@ clf.predict(["Video rất hay và bổ ích", "Thằng này dở hơi à, nói m
 # [{'label': 'clean', 'scores': {...}}, {'label': 'offensive', 'scores': {...}}]
 ```
 
-**Run the demo or the API**
-
 ```bash
-streamlit run streamlit_app/streamlit_app.py
-uvicorn app.main:app --port 7860          # API docs at http://localhost:7860/docs
-docker build -t toxic-mod . && docker run -p 7860:7860 toxic-mod
+streamlit run streamlit_app/streamlit_app.py                      # web app
+uvicorn app.main:app --port 7860                                  # REST API, docs at /docs
+docker build -t toxic-mod . && docker run -p 7860:7860 toxic-mod  # same API in Docker
 ```
 
-```bash
-curl -X POST localhost:7860/predict -H "Content-Type: application/json" \
-     -d '{"texts": ["Video rất hay và bổ ích"]}'
+Optional keys (Streamlit secrets or environment variables; the app works without them): `YOUTUBE_API_KEY`
+for the YouTube tab, `GEMINI_API_KEY` for the LLM re-check, `HF_TOKEN` to save anonymous feedback.
+Training runs on Kaggle GPUs with the notebooks in [`notebooks/`](notebooks/).
+
 ```
-
-On CPU a single comment takes about 40 ms.
-
-**Optional keys** (Streamlit secrets or environment variables; the app works without any of them):
-
-| Name | Enables |
-|---|---|
-| `YOUTUBE_API_KEY` | the YouTube tab |
-| `GEMINI_API_KEY` | the LLM re-check button |
-| `HF_TOKEN` | saving anonymous feedback to a private dataset |
-
-**Reproduce the data pipeline** (needs the private thesis splits in `data/raw/`, see
-[`data/README.md`](data/README.md)):
-
-```bash
-python scripts/find_label_issues.py
-python scripts/make_clean_splits.py --prune
-python scripts/add_vihsd.py
-python scripts/apply_relabels.py --src data/clean_vihsd --dst data/clean_vihsd_v3
-python scripts/train_baseline.py --data-dir data/clean_vihsd_v3
+src/toxic_moderation/   preprocessing, predictor, LLM check, local LLM, swear-word flag, feedback, YouTube client
+scripts/                data pipeline, training, evaluation, annotation agreement, sampling
+notebooks/              Kaggle notebooks (PhoBERT v3, v8, QLoRA)
+streamlit_app/, app/    Streamlit demo; FastAPI service + Gradio UI (Dockerfile at the root)
+docs/, labels/, relabels/   annotation guideline, screenshots; labels and label patches (ids only, no text)
+reports/                JSON results behind every number in this README
 ```
-
-PhoBERT training runs on Kaggle with the notebooks in `notebooks/`.
 
 ## Data and licences
 
-The **code** is released under the [MIT License](LICENSE). The licence does not cover any data.
-No comment text is published in this repository. The thesis data is private; UIT-ViHSD is
-CC BY-NC-SA 4.0 and VOZ-HSD is for research use; YouTube comments are collected through the
-official API and are not redistributed (author names are never stored). Only code, aggregate
-results and label patches (row indices) are committed.
+The **code** is MIT-licensed; the licence does not cover any data. **No comment text is published**: only
+code, aggregate results and labels keyed by public ids or row indices. The thesis data is private; UIT-ViHSD
+(CC BY-NC-SA 4.0), ViCTSD and VOZ-HSD are research datasets; YouTube comments are collected through the
+official API and not redistributed, and author names are never stored. Because the training data is for
+research use, the model weights are shared for research and non-commercial use.
 
 ## References
 
-- Nguyen & Nguyen (2020). *PhoBERT: Pre-trained language models for Vietnamese.* Findings of EMNLP.
-- Luu et al. (2021). *A Large-scale Dataset for Hate Speech Detection on Vietnamese Social Media Texts* (UIT-ViHSD).
-- Northcutt et al. (2021). *Confident Learning: Estimating Uncertainty in Dataset Labels.* JAIR.
-- Vu et al. (2020). *HSD Shared Task in VLSP Campaign 2019.*
-- Zampieri et al. (2019). *Predicting the Type and Target of Offensive Posts in Social Media* (OLID).
+- D. Q. Nguyen and A. T. Nguyen. *PhoBERT: Pre-trained language models for Vietnamese.* Findings of EMNLP, 2020.
+- S. T. Luu, K. V. Nguyen and N. L.-T. Nguyen. *A Large-scale Dataset for Hate Speech Detection on Vietnamese Social Media Texts* (UIT-ViHSD). IEA/AIE, 2021.
+- L. T. Nguyen, K. V. Nguyen and N. L.-T. Nguyen. *Constructive and Toxic Speech Detection for Open-domain Social Media Comments in Vietnamese* (ViCTSD). IEA/AIE, 2021.
+- L. T. Nguyen. *ViHateT5: Enhancing Hate Speech Detection in Vietnamese with a Unified Text-to-Text Transformer Model* (VOZ-HSD). Findings of ACL, 2024.
+- C. G. Northcutt, L. Jiang and I. L. Chuang. *Confident Learning: Estimating Uncertainty in Dataset Labels.* JAIR, 2021.
+- E. J. Hu et al. *LoRA: Low-Rank Adaptation of Large Language Models.* ICLR, 2022.
+- T. Dettmers et al. *QLoRA: Efficient Finetuning of Quantized LLMs.* NeurIPS, 2023.
+- Qwen Team. *Qwen2.5 Technical Report.* arXiv:2412.15115, 2024.
+- M. Zampieri et al. *Predicting the Type and Target of Offensive Posts in Social Media* (OLID). NAACL, 2019.
+- P. Koehn. *Statistical Significance Tests for Machine Translation Evaluation* (paired bootstrap). EMNLP, 2004.
+- J. Cohen. *A Coefficient of Agreement for Nominal Scales.* Educational and Psychological Measurement, 1960.

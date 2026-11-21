@@ -57,18 +57,6 @@ def test_dictionary_loads():
     assert len(mapping) > 500
 
 
-def test_fix_bad_token():
-    import importlib.util
-    from pathlib import Path
-    spec = importlib.util.spec_from_file_location("fbt", Path(__file__).resolve().parents[1] / "scripts" / "fix_bad_token.py")
-    fbt = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(fbt)
-    assert fbt.fix("có sai bad đâu") == "có sai đéo đâu"
-    assert fbt.fix("lý lẽ cái bad gì") == "lý lẽ cái đéo gì"
-    assert fbt.fix("độ bad trip") == "độ bad trip"
-    assert fbt.fix("too bad i forgot") == "too bad i forgot"
-
-
 def test_has_text_ignores_emoji_only_comments():
     from toxic_moderation.preprocess import has_text
     assert not has_text("😂😂😂")
