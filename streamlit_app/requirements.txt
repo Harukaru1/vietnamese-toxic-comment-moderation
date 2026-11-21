@@ -6,5 +6,5 @@ pyvi>=0.1.1
 emoji>=2.8
 pandas>=2.0
 streamlit>=1.40
-huggingface_hub>=0.25
+huggingface_hub>=2.4.0
 pillow>=13.0.0          # 12.x has known CVEs (pip-audit, Nov 2026)
