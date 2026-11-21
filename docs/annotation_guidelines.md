@@ -54,6 +54,10 @@ settle cases the rules above left open; no label of the held-out test half had t
   the sentence is mainly a put-down.
 - **Intensifiers ("méo", "éo") and common condemnation words ("côn đồ") are weighed by the whole sentence**,
   as before: clean in a neutral or joking sentence, offensive when the sentence is an attack.
+- **Song lyrics, poems and quotations** are *clean* when they are shared or sung along, even with crude words
+  ("to vãi loz", "kệ mẹ mày" in a rap verse), because no real person in the conversation is attacked. A parody or
+  "diss" written to attack a real person or group is judged like any other comment: the insult is what counts,
+  not the song form ("chế lời" mocking a named player, a region or a commenter keeps its offensive/hate label).
 
 Agreement with the author over both blind rounds (241 comments, `reports/annotation_agreement_testset2.json`): three-class kappa 0.55 under v3.2 -> 0.68
 under v3.3; toxic-vs-clean kappa 0.73 -> 0.74. The hate/offensive boundary is a judgement of severity and two
