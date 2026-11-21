@@ -43,6 +43,7 @@ EXAMPLES = {
     "Miệt thị": "Bọn này ngu như chó, cút hết về nước đi",
 }
 MAX_BATCH = 200
+MAX_VIDEOS_PER_SESSION, MAX_LLM_PER_SESSION = 10, 5  # protects the owner's YouTube and Gemini quotas
 MAX_PARAGRAPH_CHARS = 3000
 PARAGRAPH_EXAMPLE = ("Hôm qua mình xem trận chung kết, công nhận đội bạn đá hay vl. Hàng thủ chơi rất chắc, "
                      "thủ môn bắt quá đỉnh. Nhưng mà đm trọng tài thổi kiểu gì không hiểu nổi. "
@@ -143,6 +144,24 @@ def secret(name: str) -> str | None:
         return st.secrets.get(name) or os.environ.get(name)
     except Exception:  # no secrets file at all
         return os.environ.get(name)
+
+
+def csv_bytes(df: pd.DataFrame) -> bytes:
+    """CSV for download. Cells starting with = + - @ are prefixed with ' so spreadsheet apps do not run them as
+    formulas (comment text comes from users and YouTube)."""
+    def safe(v):
+        return "'" + v if isinstance(v, str) and v[:1] in ("=", "+", "-", "@", "\t", "\r") else v
+    return df.map(safe).to_csv(index=False).encode("utf-8-sig")
+
+
+def within_limit(name: str, limit: int) -> bool:
+    """Per-session cap on actions that spend the owner's API quota (YouTube, Gemini)."""
+    used = ss.get(f"used_{name}", 0)
+    if used >= limit:
+        st.warning(f"Phiên này đã dùng hết {limit} lượt. Tải lại trang sau ít phút để dùng tiếp.")
+        return False
+    ss[f"used_{name}"] = used + 1
+    return True
 
 
 @st.cache_resource
@@ -398,8 +417,8 @@ with batch:
                 out["needs_review"] = out["confidence"] < REVIEW_BELOW
                 out["profanity"] = [", ".join(find_profanity(t)) for t in texts]
                 ss.batch = dict(name=upload.name.rsplit(".", 1)[0], df=out)
-        except Exception as e:
-            st.error(f"Không đọc được file CSV: {e}")
+        except Exception:
+            st.error("Không đọc được file CSV. Hãy kiểm tra file có đúng định dạng CSV (UTF-8) và có cột `text`.")
 
     if isinstance(ss.get("batch"), dict):
         df = ss.batch["df"]
@@ -410,7 +429,7 @@ with batch:
             col.metric(f'{INFO[lab]["icon"]} {INFO[lab]["name"]}', f"{n} ({n / len(df):.0%})")
         cols[3].metric("🤔 Cần xem lại", int(df["needs_review"].sum()),
                        help=f"Độ tin cậy dưới {REVIEW_BELOW:.0%}: nên để người kiểm duyệt xem lại.")
-        st.download_button("Tải file đã gán nhãn (CSV)", df.to_csv(index=False).encode("utf-8-sig"), icon=":material/download:",
+        st.download_button("Tải file đã gán nhãn (CSV)", csv_bytes(df), icon=":material/download:",
                            file_name=f'{ss.batch["name"]}_labeled.csv', mime="text/csv", type="primary")
         st.caption("Các cột được thêm: `label`, `confidence`, `p_clean`, `p_offensive`, `p_hate`, `needs_review` "
                    "và `profanity` (từ tục tìm thấy theo danh sách từ, tách riêng với nhãn của mô hình).")
@@ -441,7 +460,8 @@ with video:
                                  help="Mô hình chạy trên CPU miễn phí nên 100 bình luận mất khoảng 20-30 giây.")
         order = c2.radio("Lấy bình luận", ["relevance", "time"], horizontal=True,
                          format_func=lambda o: "Nổi bật nhất" if o == "relevance" else "Mới nhất")
-        if st.button("Phân tích video", icon=":material/smart_display:", type="primary", disabled=not url.strip()):
+        if (st.button("Phân tích video", icon=":material/smart_display:", type="primary", disabled=not url.strip())
+                and within_limit("video", MAX_VIDEOS_PER_SESSION)):
             try:
                 from toxic_moderation.youtube import extract_video_id
                 with st.spinner("Đang lấy bình luận từ YouTube..."):
@@ -470,7 +490,7 @@ with video:
             except ValueError as e:
                 st.error(str(e) if "Không tìm thấy" in str(e) else "Link không hợp lệ. Hãy dán link dạng youtube.com/watch?v=... hoặc youtu.be/...")
             except Exception as e:  # quota exceeded, comments disabled, network
-                st.error(f"Không lấy được bình luận: {e}")
+                st.error("Không lấy được bình luận lúc này (video có thể đã tắt bình luận, hoặc hết hạn mức API). Hãy thử lại sau.")
 
         if "video" in ss:
             info, df = ss.video["info"], ss.video["df"]
@@ -487,7 +507,8 @@ with video:
             if llm_key and flagged.any():
                 if "llm" not in df and st.button(f"Nhờ LLM xem lại {int(flagged.sum())} câu bị báo", icon=":material/auto_awesome:", key="yt_llm",
                                                  help="Chỉ gửi nội dung các câu bị báo (không có tên người viết) tới Gemini. "
-                                                      "Trong thử nghiệm trên nhãn do người gán, bước này nâng tỉ lệ báo đúng từ 46% lên 69%."):
+                                                      "Trong thử nghiệm trên nhãn do người gán, bước này nâng tỉ lệ báo đúng từ 46% lên 69%.") \
+                        and within_limit("llm", MAX_LLM_PER_SESSION):
                     try:
                         from toxic_moderation.llm_check import review as llm_review
                         with st.spinner("LLM đang đọc lại các câu bị báo..."):
@@ -496,7 +517,7 @@ with video:
                         df.loc[flagged, "llm"] = verdict
                         ss.video["df"] = df
                     except Exception as e:  # quota, network, malformed answer: keep the classifier-only view
-                        st.warning(f"Chưa dùng được LLM lúc này ({e}). Kết quả bên dưới chỉ dựa trên mô hình PhoBERT.")
+                        st.warning("Chưa dùng được LLM lúc này. Kết quả bên dưới chỉ dựa trên mô hình PhoBERT.")
             if "llm" in df:
                 confirmed = df["llm"].isin(["offensive", "hate"])
                 hide, review = flagged & confirmed, flagged & ~confirmed & (p_toxic >= HIDE_ABOVE)
@@ -568,7 +589,7 @@ with video:
                     n_new += 1
                 st.success(f"Đã ghi nhận góp ý cho {n_new} bình luận. Cảm ơn bạn!"
                            + ("" if store.enabled and ss.share_ok else " (chỉ lưu trong trình duyệt của bạn.)"))
-            st.download_button("Tải kết quả (CSV)", df.to_csv(index=False).encode("utf-8-sig"), icon=":material/download:",
+            st.download_button("Tải kết quả (CSV)", csv_bytes(df), icon=":material/download:",
                                file_name=f'youtube_{info["video_id"]}_moderation.csv', mime="text/csv")
             st.caption("Chỉ lấy nội dung bình luận công khai, không lấy tên người viết. Mô hình có thể sai: "
                        "đây là công cụ gợi ý cho người kiểm duyệt, không tự động ẩn gì trên YouTube.")
@@ -594,7 +615,7 @@ with history:
                            "label": "Mô hình đoán", "feedback": "Góp ý", "correct": "Nhãn đúng (theo bạn)"})
         out = h.assign(model_label=h["label"])[["time", "text", "model_label", "feedback", "correct"]]
         c1, c2 = st.columns(2)
-        c1.download_button("Tải lịch sử & góp ý (CSV)", out.to_csv(index=False).encode("utf-8-sig"), icon=":material/download:",
+        c1.download_button("Tải lịch sử & góp ý (CSV)", csv_bytes(out), icon=":material/download:",
                            file_name="feedback.csv", mime="text/csv", width="stretch")
         if c2.button("🗑️ Xoá lịch sử", width="stretch"):
             ss.history, ss.current = [], None

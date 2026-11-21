@@ -11,5 +11,13 @@ font = "'Be Vietnam Pro':https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro
 [theme.sidebar]
 backgroundColor = "#f6f7fb"
 
+[server]
+maxUploadSize = 2           # MB; the CSV tab reads at most 200 rows
+enableXsrfProtection = true
+
+[client]
+showErrorDetails = "none"   # never show tracebacks to visitors
+toolbarMode = "viewer"
+
 [browser]
 gatherUsageStats = false

@@ -13,6 +13,7 @@ __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
 .env
+.streamlit/secrets.toml
 *.egg-info/
 
 # local notes
