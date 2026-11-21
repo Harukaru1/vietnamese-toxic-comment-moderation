@@ -62,50 +62,68 @@ PROFANITY_HELP = ("Bộ lọc riêng, dò theo danh sách từ (vl, đm, đéo..
 st.set_page_config(page_title="Kiểm tra bình luận tiếng Việt", page_icon="💬", layout="centered")
 st.markdown("""
 <style>
+:root {--ink: #111827; --muted: #6b7280; --line: #e5e7eb; --soft: #f6f7fb; --brand: #4f46e5;}
 /* layout */
-.block-container {max-width: 880px; padding-top: 4.2rem; padding-bottom: 3rem;}
+.block-container {max-width: 900px; padding-top: 3.6rem; padding-bottom: 3rem;}
 footer {visibility: hidden;}
-[data-testid="stSidebar"] {border-right: 1px solid #e3e6f0;}
+[data-testid="stSidebar"] {border-right: 1px solid var(--line);}
+[data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {font-size: 1.02rem; font-weight: 700; letter-spacing: .01em;}
+h3 {font-weight: 700; letter-spacing: -.01em;}
 /* hero */
-.hero {background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%); border: 1px solid #e0e7ff;
-       border-radius: 18px; padding: 24px 24px 20px; text-align: center; margin-bottom: 14px;}
-.hero h1 {color: #312e81; font-size: 1.9rem; font-weight: 800; letter-spacing: -.01em; margin: 0 0 6px; padding: 0;}
-.hero p {margin: 0; color: #4b5563; font-size: 1rem;}
-@media (max-width: 640px) {
-  .hero {padding: 16px 14px;} .hero h1 {font-size: 1.4rem;} .hero p {font-size: .9rem;}
-  .score {grid-template-columns: 130px 1fr 48px;}
-}
-/* tabs as pills */
-[data-baseweb="tab-list"] {gap: 6px; background: #e9ebf5; padding: 5px; border-radius: 14px;}
-[data-baseweb="tab"] {border-radius: 10px; padding: 6px 14px; height: auto; background: transparent;}
-[data-baseweb="tab"][aria-selected="true"] {background: #fff; box-shadow: 0 1px 4px rgba(17,24,39,.12);}
-[data-baseweb="tab-highlight"], [data-baseweb="tab-border"] {display: none;}
+.hero {position: relative; background: #fff; border: 1px solid var(--line); border-radius: 20px;
+       padding: 26px 24px 22px; text-align: center; margin-bottom: 18px; overflow: hidden;
+       box-shadow: 0 10px 30px -18px rgba(79,70,229,.45);}
+.hero:before {content: ""; position: absolute; inset: 0 0 auto 0; height: 4px;
+              background: linear-gradient(90deg, #4f46e5, #7c3aed, #db2777);}
+.hero .mark {display: inline-flex; width: 44px; height: 44px; border-radius: 12px; align-items: center;
+             justify-content: center; background: #eef2ff; color: var(--brand); font-size: 22px; margin-bottom: 8px;}
+.hero h1 {color: var(--ink); font-size: 1.85rem; font-weight: 800; letter-spacing: -.02em; margin: 0 0 6px; padding: 0;}
+.hero p {margin: 0 auto; color: var(--muted); font-size: .98rem; max-width: 560px;}
+/* tabs: segmented control */
+[data-testid="stTabs"] [role="tablist"] {gap: 4px; background: var(--soft); border: 1px solid var(--line);
+  padding: 4px; border-radius: 14px; overflow-x: auto; scrollbar-width: none;}
+[data-testid="stTab"] {border-radius: 10px; padding: 7px 14px; white-space: nowrap; color: var(--muted);}
+[data-testid="stTab"] p {font-weight: 600; font-size: .92rem;}
+[data-testid="stTab"][aria-selected="true"] {background: #fff; color: var(--brand);
+  box-shadow: 0 1px 3px rgba(17,24,39,.12);}
+[data-testid="stTabs"] .react-aria-SelectionIndicator {display: none;}
+[data-testid="stTabs"] [role="tablist"] {box-shadow: none !important; margin-bottom: 6px;}
 /* controls */
-.stButton > button, .stDownloadButton > button {border-radius: 12px; font-weight: 600; padding: .5rem 1.1rem;}
+.stButton > button, .stDownloadButton > button {border-radius: 12px; font-weight: 600; padding: .55rem 1.15rem;}
+.stButton > button[kind="primary"] {box-shadow: 0 6px 16px -8px rgba(79,70,229,.8);}
 .stTextArea textarea, .stTextInput input {border-radius: 12px;}
-[data-testid="stMetric"] {background: #fff; border: 1px solid #e3e6f0; border-radius: 14px; padding: 12px 14px;
-                          box-shadow: 0 1px 3px rgba(17,24,39,.05);}
-[data-testid="stSidebar"] [data-testid="stMetric"] {padding: 8px 12px;}
-[data-testid="stExpander"] {border-radius: 12px; border-color: #e3e6f0; background: #fff;}
-[data-testid="stFileUploaderDropzone"] {border-radius: 14px; background: #fff;}
-/* result */
-.result-card {border: 1px solid color-mix(in srgb, var(--c) 35%, transparent); border-left: 6px solid var(--c);
-              background: color-mix(in srgb, var(--c) 7%, #fff); border-radius: 14px; padding: 16px 20px;
-              margin: 10px 0 14px 0; box-shadow: 0 6px 18px -10px color-mix(in srgb, var(--c) 60%, transparent);}
-.result-card .title {font-size: 1.35rem; font-weight: 800; color: var(--c);}
-.result-card .title .sub {font-size: 1rem; font-weight: 600; opacity: .7; margin-left: 6px;}
-.score {display: grid; grid-template-columns: 170px 1fr 54px; align-items: center; gap: 10px; margin: 7px 0; font-size: .92rem;}
-.score .track {height: 10px; background: #e6e8f2; border-radius: 999px; overflow: hidden;}
+[data-testid="stMetric"] {background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px;}
+[data-testid="stMetricValue"] {font-weight: 700;}
+[data-testid="stSidebar"] [data-testid="stMetric"] {padding: 8px 10px;}
+[data-testid="stSidebar"] [data-testid="stMetricValue"] {font-size: 1.6rem;}
+[data-testid="stSidebar"] [data-testid="stMetricLabel"] p {font-size: .8rem;}
+[data-testid="stExpander"] details {border-radius: 12px; border-color: var(--line); background: #fff;}
+[data-testid="stFileUploaderDropzone"] {border-radius: 14px; background: var(--soft);}
+@media (max-width: 640px) {
+  .block-container {padding-top: 3rem;}
+  .hero {padding: 18px 14px 16px;} .hero h1 {font-size: 1.35rem;} .hero p {font-size: .88rem;}
+  .score {grid-template-columns: 128px 1fr 48px;}
+}
+/* labels */
+.dot {display: inline-block; width: .62em; height: .62em; border-radius: 50%; background: var(--c);
+      margin-right: .45em; vertical-align: .08em; box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 18%, transparent);}
+.result-card {border: 1px solid color-mix(in srgb, var(--c) 30%, transparent); border-left: 5px solid var(--c);
+              background: color-mix(in srgb, var(--c) 6%, #fff); border-radius: 14px; padding: 16px 20px;
+              margin: 12px 0 14px 0;}
+.result-card .title {font-size: 1.3rem; font-weight: 800; color: var(--c); display: flex; align-items: center;}
+.result-card .title .sub {font-size: .95rem; font-weight: 600; color: var(--muted); margin-left: auto;}
+.score {display: grid; grid-template-columns: 170px 1fr 54px; align-items: center; gap: 10px; margin: 8px 0; font-size: .92rem;}
+.score .track {height: 8px; background: #eceef5; border-radius: 999px; overflow: hidden;}
 .score .fill {height: 100%; border-radius: 999px; background: var(--c);}
-.score .pct {text-align: right; font-variant-numeric: tabular-nums; color: #4b5563;}
+.score .pct {text-align: right; font-variant-numeric: tabular-nums; color: var(--muted);}
 .sent {padding: 2px 4px; border-radius: 5px; line-height: 2.0;
        background: color-mix(in srgb, var(--c) var(--a), transparent); border-bottom: 2px solid var(--c);}
 .sent.unsure {border-bottom-style: dashed;}
-.para-box {border: 1px solid #e3e6f0; background: #fff; border-radius: 14px; padding: 16px 18px;}
-.label-chip {display:inline-block; padding: 2px 11px; border-radius: 999px; font-size: .85rem;
-             background: color-mix(in srgb, var(--c) 13%, #fff); color: var(--c); font-weight: 700;
-             border: 1px solid color-mix(in srgb, var(--c) 30%, transparent);}
-.foot {text-align: center; color: #6b7280; font-size: .85rem;}
+.para-box {border: 1px solid var(--line); background: #fff; border-radius: 14px; padding: 16px 18px;}
+.label-chip {display: inline-flex; align-items: center; padding: 3px 12px; border-radius: 999px; font-size: .85rem;
+             background: color-mix(in srgb, var(--c) 10%, #fff); color: var(--c); font-weight: 700;
+             border: 1px solid color-mix(in srgb, var(--c) 28%, transparent);}
+.foot {text-align: center; color: var(--muted); font-size: .82rem; margin-top: 8px;}
 </style>""", unsafe_allow_html=True)
 
 
@@ -140,8 +158,8 @@ def load_feedback_store() -> FeedbackStore:
 def result_card(label: str, conf: float) -> None:
     i = INFO[label]
     st.markdown(
-        f'<div class="result-card" style="--c:{i["color"]}"><div class="title">{i["icon"]} {i["name"]}'
-        f' <span class="sub">{conf:.0%}</span></div></div>',
+        f'<div class="result-card" style="--c:{i["color"]}"><div class="title"><span class="dot"></span>{i["name"]}'
+        f'<span class="sub">{conf:.0%}</span></div></div>',
         unsafe_allow_html=True)
 
 
@@ -160,7 +178,7 @@ with st.sidebar:
     st.header("Ba nhãn nghĩa là gì?")
     for lab in LABELS:
         i = INFO[lab]
-        st.markdown(f'<span class="label-chip" style="--c:{i["color"]}">{i["icon"]} {i["name"]}</span>',
+        st.markdown(f'<span class="label-chip" style="--c:{i["color"]}"><span class="dot"></span>{i["name"]}</span>',
                     unsafe_allow_html=True)
         st.caption(i["hint"])
     st.divider()
@@ -190,11 +208,12 @@ with st.sidebar:
 
 # ---------------------------------------------------------------- header
 st.markdown(
-    '<div class="hero"><h1>Kiểm tra bình luận tiếng Việt</h1>'
+    '<div class="hero"><div class="mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M9 12l2 2 4-4"/></svg></div><h1>Kiểm tra bình luận tiếng Việt</h1>'
     '<p>Phát hiện bình luận công kích và thù ghét, gợi ý cho người kiểm duyệt câu nào cần xem trước.</p></div>',
     unsafe_allow_html=True)
 
-single, paragraph, batch, video, history = st.tabs(["💬 Một bình luận", "📝 Đoạn văn", "📋 Nhiều bình luận", "📺 Video YouTube", "🕘 Lịch sử & góp ý"])
+single, paragraph, batch, video, history = st.tabs([":material/chat_bubble: Một bình luận", ":material/article: Đoạn văn", ":material/table_view: Nhiều bình luận",
+                                                   ":material/smart_display: Video YouTube", ":material/history: Lịch sử & góp ý"])
 
 # ---------------------------------------------------------------- single comment
 with single:
@@ -212,8 +231,8 @@ with single:
         ss.text, ss.current = "", None
 
     c1, c2, _ = st.columns([1.3, 1, 3])
-    check = c1.button("🔍 Kiểm tra", type="primary", width="stretch")
-    c2.button("🧹 Xoá", on_click=clear, width="stretch")
+    check = c1.button("Kiểm tra", icon=":material/search:", type="primary", width="stretch")
+    c2.button("Xoá", icon=":material/backspace:", on_click=clear, width="stretch")
 
     if check and not ss.text.strip():
         st.warning("Bạn nhập một bình luận trước nhé.")
@@ -228,7 +247,7 @@ with single:
         conf = cur["scores"][cur["label"]]
         result_card(cur["label"], conf)
         st.markdown("".join(
-            f'<div class="score" style="--c:{INFO[lab]["color"]}"><span>{INFO[lab]["icon"]} {INFO[lab]["name"]}</span>'
+            f'<div class="score" style="--c:{INFO[lab]["color"]}"><span><span class="dot"></span>{INFO[lab]["name"]}</span>'
             f'<span class="track"><span class="fill" style="width:{cur["scores"][lab]:.1%};display:block"></span></span>'
             f'<span class="pct">{cur["scores"][lab]:.1%}</span></div>'
             for lab in sorted(LABELS, key=lambda lab: -cur["scores"][lab])), unsafe_allow_html=True)
@@ -282,8 +301,8 @@ with paragraph:
     para_text = st.text_area("Đoạn văn", key="para_text", height=170, max_chars=MAX_PARAGRAPH_CHARS,
                              placeholder="Ví dụ: một bài đăng vài câu, mỗi câu kết thúc bằng dấu chấm hoặc xuống dòng...")
     c1, c2 = st.columns([1, 1])
-    run_para = c1.button("🔍 Phân tích đoạn văn", type="primary", width="stretch")
-    c2.button("✨ Dùng ví dụ mẫu", on_click=use_para_example, width="stretch")
+    run_para = c1.button("Phân tích đoạn văn", icon=":material/search:", type="primary", width="stretch")
+    c2.button("Dùng ví dụ mẫu", icon=":material/lightbulb:", on_click=use_para_example, width="stretch")
 
     if run_para and not para_text.strip():
         st.warning("Bạn nhập một đoạn văn trước nhé.")
@@ -299,7 +318,7 @@ with paragraph:
         detail = (f"{n_toxic} trên {len(sents)} câu có vấn đề." if n_toxic else f"Cả {len(sents)} câu đều ổn.")
         if summary["needs_review"]:
             detail += " Có câu mô hình chưa chắc (gạch chân nét đứt), nên có người xem lại."
-        st.markdown(f'<div class="result-card" style="--c:{i["color"]}"><div class="title">{i["icon"]} {i["name"]}</div>'
+        st.markdown(f'<div class="result-card" style="--c:{i["color"]}"><div class="title"><span class="dot"></span>{i["name"]}</div>'
                     f'<div>Nhãn của đoạn văn lấy theo câu nặng nhất mà mô hình đủ chắc chắn.</div>'
                     f'<div class="sub">{detail}</div></div>', unsafe_allow_html=True)
         spans = []
@@ -357,7 +376,7 @@ with batch:
     st.markdown(f"Tải lên một file CSV có cột `text` (tối đa {MAX_BATCH} dòng). Bạn nhận lại chính file đó, "
                 "thêm cột nhãn và độ tin cậy.")
     upload = st.file_uploader("File CSV", type="csv")
-    if upload is not None and st.button("🔍 Gán nhãn file này", type="primary"):
+    if upload is not None and st.button("Gán nhãn file này", icon=":material/label:", type="primary"):
         try:
             src = pd.read_csv(upload)
             if "text" not in src.columns:
@@ -391,7 +410,7 @@ with batch:
             col.metric(f'{INFO[lab]["icon"]} {INFO[lab]["name"]}', f"{n} ({n / len(df):.0%})")
         cols[3].metric("🤔 Cần xem lại", int(df["needs_review"].sum()),
                        help=f"Độ tin cậy dưới {REVIEW_BELOW:.0%}: nên để người kiểm duyệt xem lại.")
-        st.download_button("⬇️ Tải file đã gán nhãn (CSV)", df.to_csv(index=False).encode("utf-8-sig"),
+        st.download_button("Tải file đã gán nhãn (CSV)", df.to_csv(index=False).encode("utf-8-sig"), icon=":material/download:",
                            file_name=f'{ss.batch["name"]}_labeled.csv', mime="text/csv", type="primary")
         st.caption("Các cột được thêm: `label`, `confidence`, `p_clean`, `p_offensive`, `p_hate`, `needs_review` "
                    "và `profanity` (từ tục tìm thấy theo danh sách từ, tách riêng với nhãn của mô hình).")
@@ -422,7 +441,7 @@ with video:
                                  help="Mô hình chạy trên CPU miễn phí nên 100 bình luận mất khoảng 20-30 giây.")
         order = c2.radio("Lấy bình luận", ["relevance", "time"], horizontal=True,
                          format_func=lambda o: "Nổi bật nhất" if o == "relevance" else "Mới nhất")
-        if st.button("📺 Phân tích video", type="primary", disabled=not url.strip()):
+        if st.button("Phân tích video", icon=":material/smart_display:", type="primary", disabled=not url.strip()):
             try:
                 from toxic_moderation.youtube import extract_video_id
                 with st.spinner("Đang lấy bình luận từ YouTube..."):
@@ -466,7 +485,7 @@ with video:
             llm_key = secret("GEMINI_API_KEY")
             flagged = p_toxic >= REVIEW_ABOVE
             if llm_key and flagged.any():
-                if "llm" not in df and st.button(f"🤖 Nhờ LLM xem lại {int(flagged.sum())} câu bị báo", key="yt_llm",
+                if "llm" not in df and st.button(f"Nhờ LLM xem lại {int(flagged.sum())} câu bị báo", icon=":material/auto_awesome:", key="yt_llm",
                                                  help="Chỉ gửi nội dung các câu bị báo (không có tên người viết) tới Gemini. "
                                                       "Trong thử nghiệm trên nhãn do người gán, bước này nâng tỉ lệ báo đúng từ 46% lên 69%."):
                     try:
@@ -525,7 +544,7 @@ with video:
                     "llm": st.column_config.TextColumn("LLM"),
                     "profanity": st.column_config.TextColumn("Từ tục")})
             fixes = edited[edited["correct"].notna()]
-            if len(fixes) and st.button(f"📨 Gửi góp ý cho {len(fixes)} bình luận", key="yt_send"):
+            if len(fixes) and st.button(f"Gửi góp ý cho {len(fixes)} bình luận", icon=":material/send:", key="yt_send"):
                 sent = ss.setdefault("yt_sent", set())
                 n_new = 0
                 for idx, row in fixes.iterrows():
@@ -549,7 +568,7 @@ with video:
                     n_new += 1
                 st.success(f"Đã ghi nhận góp ý cho {n_new} bình luận. Cảm ơn bạn!"
                            + ("" if store.enabled and ss.share_ok else " (chỉ lưu trong trình duyệt của bạn.)"))
-            st.download_button("⬇️ Tải kết quả (CSV)", df.to_csv(index=False).encode("utf-8-sig"),
+            st.download_button("Tải kết quả (CSV)", df.to_csv(index=False).encode("utf-8-sig"), icon=":material/download:",
                                file_name=f'youtube_{info["video_id"]}_moderation.csv', mime="text/csv")
             st.caption("Chỉ lấy nội dung bình luận công khai, không lấy tên người viết. Mô hình có thể sai: "
                        "đây là công cụ gợi ý cho người kiểm duyệt, không tự động ẩn gì trên YouTube.")
@@ -575,7 +594,7 @@ with history:
                            "label": "Mô hình đoán", "feedback": "Góp ý", "correct": "Nhãn đúng (theo bạn)"})
         out = h.assign(model_label=h["label"])[["time", "text", "model_label", "feedback", "correct"]]
         c1, c2 = st.columns(2)
-        c1.download_button("⬇️ Tải lịch sử & góp ý (CSV)", out.to_csv(index=False).encode("utf-8-sig"),
+        c1.download_button("Tải lịch sử & góp ý (CSV)", out.to_csv(index=False).encode("utf-8-sig"), icon=":material/download:",
                            file_name="feedback.csv", mime="text/csv", width="stretch")
         if c2.button("🗑️ Xoá lịch sử", width="stretch"):
             ss.history, ss.current = [], None

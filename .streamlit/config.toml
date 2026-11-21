@@ -2,9 +2,14 @@
 base = "light"
 primaryColor = "#4f46e5"
 backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f4f5fa"
+secondaryBackgroundColor = "#f6f7fb"
 textColor = "#1f2937"
-font = "sans serif"
+borderColor = "#e5e7eb"
+baseRadius = "0.75rem"
+font = "'Be Vietnam Pro':https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
+
+[theme.sidebar]
+backgroundColor = "#f6f7fb"
 
 [browser]
 gatherUsageStats = false
